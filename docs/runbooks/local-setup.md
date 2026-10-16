@@ -29,7 +29,7 @@ cp .env.example .env          # Git Bash / macOS / Linux
 copy .env.example .env        # Windows PowerShell or cmd
 ```
 
-The defaults already match the Docker services, so you do not need to edit anything. `.env` is private to your machine and is never committed.
+The defaults already match the Docker services, so you do not need to edit anything. Note the two database addresses: `DATABASE_URL` (the powerful owner, for migrations and seeds) and `APP_DATABASE_URL` (the restricted role the API runs as). See `database-and-seeding.md`. `.env` is private to your machine and is never committed.
 
 ## 4. Start the supporting services
 
@@ -49,8 +49,8 @@ You should see three services: `postgres` (healthy), `redis`, `mailpit` (healthy
 ## 5. Create the tables and load starter data
 
 ```bash
-pnpm db:migrate
-pnpm db:seed
+pnpm db:migrate     # creates the restricted database role, then the tables
+pnpm db:seed        # loads plans, GST states and starter categories
 ```
 
 Details and what each command does: `database-and-seeding.md`.

@@ -6,6 +6,34 @@
 - **Migration** (`prisma/migrations/*`): a saved, ordered step that changes the database (create a table, add a column). Migrations are committed to git so everyone, and later the live server, gets the exact same structure.
 - **Seed**: starter data loaded into the database after the tables exist.
 
+## Database users (roles) and tenant protection
+
+The database has two users on purpose:
+
+| User | Setting | Used for | Power |
+|---|---|---|---|
+| Owner (`dumbbill` in dev) | `DATABASE_URL` | migrations, seeds, role setup | creates and changes tables |
+| App (`dumbbill_app`) | `APP_DATABASE_URL` | the running API | reads and writes rows only. Cannot change structure, cannot read Prisma's migration table, and **cannot bypass row-level security** |
+
+Row-level security (RLS) is a PostgreSQL feature that hides rows from queries unless they belong to the business the request is for. It means that even a coding mistake cannot show one shop another shop's data. How it works, in one paragraph: every request runs inside a transaction that starts by telling PostgreSQL the business id (`app.tenant_id`); each tenant table has a policy saying "only rows whose `tenant_id` equals that id". If no id was set, no rows are visible. Code uses `TenantTx` to do this automatically. Full explanation: `docs/adr/002-prisma-rls.md`.
+
+`pnpm db:roles` creates or refreshes the app user (safe to repeat). `pnpm db:migrate` and `pnpm db:deploy` run it first, so you normally never call it yourself.
+
+In development the owner is a database superuser, which ignores RLS. That is why the API and all security tests connect as the app role.
+
+### Adding a table that holds business data
+
+1. In `schema.prisma` add `tenantId String @map("tenant_id") @db.Uuid`, an index that starts with `tenant_id`, and `@default(uuid(7))` on the id.
+2. `pnpm db:migrate --name add_<thing>`.
+3. Open the new `migration.sql` and add at the bottom:
+   ```sql
+   SELECT enable_tenant_rls('<table>');
+   SELECT app_grant_defaults();
+   ```
+4. `pnpm test:sec`. If you forgot a step, the test fails and names the table and the missing piece.
+
+A table that is shared by everyone (like `plans`) is the exception: it must be added to `GLOBAL_TABLES` in `test/support/rls-audit.ts` on purpose.
+
 ## Everyday commands
 
 | Command | When to use it |

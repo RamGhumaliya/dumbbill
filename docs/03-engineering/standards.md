@@ -46,7 +46,7 @@
 Tools: Lighthouse CI, `size-limit`, k6 load tests (target 200 concurrent POS terminals, 50 bills/s burst), Flutter DevTools profile builds, `pg_stat_statements`.
 
 ## 6. Quality gates (CI blocks merge)
-Typecheck • lint • unit coverage ≥ 85% on domain, ≥ 70% overall • integration (Testcontainers pg with RLS on) • Swagger completeness test + OpenAPI snapshot diff • RLS & permission-matrix tests • cashier-leak test • a11y • bundle budgets • Semgrep/CodeQL • dependency audit • secret scan • migration lint.
+Typecheck • lint • unit coverage ≥ 85% on domain, ≥ 70% overall • integration (real Postgres with RLS on, throwaway database per test file) • Swagger completeness test + OpenAPI snapshot diff • RLS & permission-matrix tests • cashier-leak test • a11y • bundle budgets • Semgrep/CodeQL • dependency audit • secret scan • migration lint.
 
 ## 7. Code-review checklist (Review Agent + human)
 Tenant scoped? permission declared? DTO audience correct? money in paise? idempotent? audited? logged without PII? errors typed? tests for failure paths? N+1? migration safe? i18n keys? tokens only? a11y? bundle impact?

@@ -6,6 +6,7 @@ import { validateEnv } from './config/env.validation';
 import { HealthModule } from './modules/health/health.module';
 import { PrismaModule } from './modules/prisma/prisma.module';
 import { StorageModule } from './modules/storage/storage.module';
+import { TenancyModule } from './modules/tenancy/tenancy.module';
 
 /**
  * Root of the application. Every feature module is listed here.
@@ -27,7 +28,8 @@ import { StorageModule } from './modules/storage/storage.module';
         ),
     }),
 
-    PrismaModule, // database access
+    PrismaModule, // low-level database client (restricted app role)
+    TenancyModule, // TenantTx: tenant-locked transactions, the way business code reads/writes data
     StorageModule, // uploaded files (server disk today)
     HealthModule, // /healthz and /readyz
   ],

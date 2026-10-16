@@ -8,7 +8,7 @@ Update after each prompt. Gate = all items ✅ and reviewer + security-auditor s
 |---|---|---|---|---|
 | P0-1 | Backend repo scaffold | Claude | ✅ | 16 Oct 2026: NestJS 11, Prisma 6, TS 5.9; lint/typecheck/build/5 tests green; /healthz, /readyz (real Postgres), /docs verified |
 | P0-1b | Pre-P0-2 extras: local disk storage service, seed system + reference data (plans, GST states, categories), code comments, run-the-project docs | Claude | ✅ | 16 Oct 2026: 33 unit + 3 integration tests green; seed verified idempotent on real Postgres; from-scratch flow verified on a throwaway DB; `pnpm db:reset` not run by AI (Prisma requires user consent) |
-| P0-2 | Backend DB foundations + RLS harness (Prisma) | | ⬜ | |
+| P0-2 | Backend DB foundations + RLS harness (Prisma) | Claude | ✅ | 16 Oct 2026: tenants+users tables, restricted app role, TenantTx, lint guard, RLS coverage audit, ADR 002. 68 tests green (36 unit, 23 integration, 9 security); sabotage check (RLS off on users) made 12 of 20 isolation tests fail, proving they detect a leak; API verified connecting as dumbbill_app |
 | P0-3 | Backend observability + error contract + Swagger completeness test | | ⬜ | |
 | P0-4 | Web repo scaffold | | ⬜ | |
 | P0-5 | Design tokens JSON + web UI kit (dark/light) | | ⬜ | direction decided: A dark + B light |

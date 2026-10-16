@@ -14,12 +14,12 @@
     "format": "prettier --write \"{src,test,prisma}/**/*.ts\"",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "jest --selectProjects unit",
-    "test:int": "jest --selectProjects integration",
-    "test:sec": "jest --selectProjects security",
-    "test:all": "jest",
+    "test:int": "jest --selectProjects integration --runInBand",
+    "test:sec": "jest --selectProjects security --runInBand",
+    "test:all": "jest --runInBand",
     "db:generate": "prisma generate",
-    "db:migrate": "prisma migrate dev",
-    "db:deploy": "prisma migrate deploy",
+    "db:migrate": "node scripts/setup-db-roles.mjs && prisma migrate dev",
+    "db:deploy": "node scripts/setup-db-roles.mjs && prisma migrate deploy",
     "db:status": "prisma migrate status",
     "db:seed": "prisma db seed",
     "db:seed:demo": "prisma db seed -- --group demo",
@@ -27,7 +27,8 @@
     "db:reset": "node scripts/assert-not-production.mjs && prisma migrate reset --force",
     "db:studio": "prisma studio",
     "postinstall": "prisma generate",
-    "prepare": "cd .. && husky dumbbill-backend/.husky"
+    "prepare": "cd .. && husky dumbbill-backend/.husky",
+    "db:roles": "node scripts/setup-db-roles.mjs"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

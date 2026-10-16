@@ -56,9 +56,20 @@ export class EnvironmentVariables {
   @IsEnum(LogLevel)
   LOG_LEVEL: LogLevel = LogLevel.Info;
 
-  /** PostgreSQL connection string. */
+  /**
+   * Connection the running API uses. It must be the restricted app role (NOBYPASSRLS), never the owner,
+   * so row-level security always applies to requests.
+   */
   @IsString()
-  DATABASE_URL!: string;
+  APP_DATABASE_URL!: string;
+
+  /**
+   * Owner connection, used only by tooling (migrations, seeds, role setup). The running API does not
+   * need it, so production servers may leave it unset.
+   */
+  @IsOptional()
+  @IsString()
+  DATABASE_URL?: string;
 
   /** Redis connection string (used for queues, caching and rate limits). */
   @IsUrl({ protocols: ['redis', 'rediss'], require_tld: false })

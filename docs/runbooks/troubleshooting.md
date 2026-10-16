@@ -18,6 +18,13 @@ Find your message, apply the fix.
 | `Refusing to run: this command deletes all data ...` | `pnpm db:reset` safety check | Working as intended: the environment is production or the database is not local |
 | `Refusing to seed "demo" data` | Demo seed safety check | Same: demo data is local-only |
 | `Prisma Migrate detected that it was invoked by Claude Code` | Prisma blocks AI tools from destructive resets | Run `pnpm db:reset` yourself in a terminal |
+| Queries return nothing / `new row violates row-level security policy` | The query ran without a tenant, or tried to write into another business | Business code must use `tenantTx.run(...)` (inside an authenticated request) or `runAs({ tenantId }, ...)` (jobs, tests). This protection is working as designed |
+| `TenantTx.run() called outside a tenant context` | Code ran before the request was authenticated, or in a background job | Authenticate first, or use `runAs({ tenantId }, ...)` in jobs |
+| `permission denied for table ...` when running the API | The table has no grants for the app role | Add `SELECT app_grant_defaults();` to that table's migration (run `pnpm db:roles` once for existing databases); `pnpm test:sec` catches this |
+| `password authentication failed for user "dumbbill_app"` | The app role does not exist or its password differs from `APP_DATABASE_URL` | Run `pnpm db:roles` |
+| `APP_DATABASE_URL ... must use a different user than DATABASE_URL` | The app was pointed at the owner | Use the `dumbbill_app` user in `APP_DATABASE_URL` |
+| ESLint: `Do not use PrismaService in business code` | A module imports the raw database client | Inject `TenantTx` and use `tenantTx.run(tx => ...)` |
+| Integration/security tests fail to start with `connect ECONNREFUSED` | PostgreSQL is not running | `docker compose up -d` |
 | Uploaded file rejected with `CONTENT_MISMATCH` | File bytes do not match its type | Check the file is a real image or PDF, not renamed |
 | Emails not arriving | Development emails are not delivered anywhere | Open http://localhost:8025 (Mailpit) |
 

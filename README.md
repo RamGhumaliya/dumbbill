@@ -23,7 +23,8 @@ protein_retail_saas_product/
 | P0-1 Backend scaffold | Done |
 | Local disk file storage | Done (service only; HTTP upload endpoint arrives with login in Phase 1) |
 | Seed system + reference data | Done |
-| P0-2 Row-level security foundation | Next |
+| P0-2 Row-level security foundation | Done (see `docs/adr/002-prisma-rls.md`) |
+| P0-3 Logging, error format, Swagger completeness test | Next |
 | Web and mobile repos | Not started |
 
 The live checklist is `docs/06-tracking/progress-tracker.md`.

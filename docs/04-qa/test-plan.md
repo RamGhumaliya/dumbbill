@@ -4,7 +4,7 @@
 | Layer | Tooling | Scope | Gate |
 |---|---|---|---|
 | Unit | Jest / flutter_test | Pure domain: tax, discount allocation, WAC, loyalty rules, permissions | ≥ 85% domain coverage; property tests (fast-check) |
-| Integration | Jest + Supertest + Testcontainers (Postgres w/ RLS, Redis) | Services + DB, transactions, concurrency | Every module |
+| Integration | Jest + Supertest against real PostgreSQL from docker compose (throwaway database per test file, real role script and migrations) | Services + DB, transactions, concurrency | Every module |
 | Contract | Swagger completeness test + OpenAPI snapshot diff | Every route documented with success/error examples; breaking-change detection | No undocumented route |
 | Security | Custom suites + ZAP + Semgrep | IDOR sweep, RBAC matrix, cashier-leak, rate limits | **Blocking** |
 | E2E web | Playwright (Chromium, WebKit) | POS flows, onboarding, refunds, offline | Critical paths green |

@@ -5,7 +5,7 @@ Gate to start: Phase 0 all ticked, design direction chosen.
 ## P1-1 Auth, sessions, tenancy  (backend-dev, then R1+R2)
 ```
 Stories: US-AUTH-01..03, US-SEC-01, US-SEC-02. Read security.md §2, architecture §4, §9, api-docs-standard.md. Work in dumbbill-backend (web screens in dumbbill-web).
-Implement tenant signup (creates tenant + owner), email verification, login, refresh rotation with reuse detection, logout, password reset, Argon2id hashing with breached-password check, lockout/backoff, session list/revoke, TOTP optional for owner. Emails via SES adapter (Mailpit locally). Separate staff and customer identity pools (customer pool arrives in P3, but design the audience claim now).
+Implement tenant signup (creates tenant + owner), email verification, login, refresh rotation with reuse detection, logout, password reset, Argon2id hashing with breached-password check, lockout/backoff, session list/revoke, TOTP optional for owner. Emails via SES adapter (Mailpit locally). Login by email happens before the tenant is known: implement it with a narrow SECURITY DEFINER function (see ADR 002 section 3), and never give the app role a general cross-tenant read. Separate staff and customer identity pools (customer pool arrives in P3, but design the audience claim now).
 Tests: token lifecycle and reuse detection, rate limiting, enumeration-safe errors, RLS isolation, e2e signup→verify→login.
 ```
 

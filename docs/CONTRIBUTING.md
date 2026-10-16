@@ -32,7 +32,7 @@ Examples: `feat: add branch list endpoint`, `fix: round discount on bill level`.
 
 ## Database changes
 
-Edit `prisma/schema.prisma`, run `pnpm db:migrate`, commit the migration folder with the code. Never edit an old migration. See `docs/runbooks/database-and-seeding.md`.
+Edit `prisma/schema.prisma`, run `pnpm db:migrate`, commit the migration folder with the code. Never edit an old migration. A new table that holds business data also needs `SELECT enable_tenant_rls('<table>'); SELECT app_grant_defaults();` at the bottom of its migration (checklist in the runbook); `pnpm test:sec` fails if you forget. See `docs/runbooks/database-and-seeding.md`.
 
 ## Definition of done
 

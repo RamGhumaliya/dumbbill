@@ -27,6 +27,8 @@ The contract between repos is the backend's **Swagger/OpenAPI** (see `api-docs-s
 Rules: modules talk via service interfaces, never reach into another module's tables; cross-module writes go through domain services in one DB transaction.
 
 ## 4. Multi-tenancy & RLS
+**Implemented in P0-2. The authoritative description, caveats and the add-a-table checklist are in `docs/adr/002-prisma-rls.md`.** The notes below are the original design; where they differ (policy uses `app_current_tenant_id()` and fails closed; the helper is the SQL function `enable_tenant_rls`; the app role is `dumbbill_app`), the ADR wins.
+
 - Every tenant table has `tenant_id uuid not null`; composite indexes lead with `tenant_id`.
 - Request pipeline: JWT → `TenantContext` → per-request transaction `BEGIN; SET LOCAL app.tenant_id = $1; SET LOCAL app.user_id = $2;`.
 - Policy template:

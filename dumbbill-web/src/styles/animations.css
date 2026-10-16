@@ -1,0 +1,86 @@
+/*
+ * Motion. Hand-written, but every duration, curve and distance comes from the design tokens
+ * (docs/02-design/tokens/tokens.json): nothing here is a raw number of pixels or milliseconds.
+ *
+ * Principles (design guide section 5): motion explains a change and never blocks work. Overlays enter
+ * slowly and leave quickly. Only opacity and transform are animated, so it stays smooth.
+ * People who ask their device for reduced motion get (almost) instant changes: see the rule at the end
+ * of globals.css, which shortens every animation.
+ *
+ * Utilities created below: animate-overlay-in/out, animate-rise-in/out, animate-toast-in/out, animate-skeleton.
+ * Overlay components attach them with data-[state=open] / data-[state=closed].
+ */
+
+@theme inline {
+  --animate-overlay-in: dbl-fade-in var(--duration-base) var(--ease-enter);
+  --animate-overlay-out: dbl-fade-out var(--duration-micro) var(--ease-exit) forwards;
+  --animate-rise-in: dbl-rise-in var(--duration-base) var(--ease-enter);
+  --animate-rise-out: dbl-rise-out var(--duration-micro) var(--ease-exit) forwards;
+  --animate-toast-in: dbl-toast-in var(--duration-large) var(--ease-enter);
+  --animate-toast-out: dbl-toast-out var(--duration-base) var(--ease-exit) forwards;
+  /* A slow, gentle pulse for loading placeholders: four times the page duration per cycle. */
+  --animate-skeleton: dbl-skeleton calc(var(--duration-page) * 4) ease-in-out infinite;
+}
+
+@keyframes dbl-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes dbl-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+/* Dialogs and popovers: fade in while rising a few pixels and settling to full size. */
+@keyframes dbl-rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--motion-shift)) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes dbl-rise-out {
+  to {
+    opacity: 0;
+    transform: translateY(var(--motion-shift)) scale(0.98);
+  }
+}
+
+/* Toasts slide in from the right edge. */
+@keyframes dbl-toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(calc(100% + var(--motion-shift)));
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes dbl-toast-out {
+  to {
+    opacity: 0;
+    transform: translateX(calc(100% + var(--motion-shift)));
+  }
+}
+
+@keyframes dbl-skeleton {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}

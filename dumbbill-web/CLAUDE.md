@@ -11,6 +11,15 @@ Read `../CLAUDE.md`, `../docs/02-design/design-guide.md`, `../docs/03-engineerin
 
 Only `dev` and `prod`: `.env.development` and `.env.production` (templates committed as `.example` files, real values never).
 
+## Design system rules (P0-5)
+
+- Build screens ONLY from `src/components/ui` (import from `@/components/ui`). Need something new? Add it there, show it in `src/components/design/gallery.tsx`, test it in `tests/e2e/design-system.spec.ts`. Never style one-off lookalikes inside a screen.
+- **No raw colours or pixel sizes in code or hand-written CSS** (`#fff`, `w-[13px]`, `12px`). Use token classes (`bg-surface`, `text-muted`, `border-line`, `rounded-card`, `text-small`, `min-h-(--size-control-md)`). The lint rule and `tests/unit/design-rules.spec.ts` fail otherwise.
+- Colours, type, radius and motion come from `../docs/02-design/tokens/tokens.json`. Edit it, run `pnpm tokens`, never edit the generated files (`src/styles/tokens.css`, `src/styles/tailwind-theme.css`, `src/lib/design/token-names.ts`). Every colour pair must pass WCAG contrast in BOTH themes.
+- Money is always `<MoneyText paise={...} />` (never format by hand). Icons come from `@/components/ui/icons`. Show money with Indian grouping.
+- Every interactive component: Radix primitive where one exists, all states (hover, focus, disabled, loading, invalid, empty, error), keyboard operable, both themes. Meaning is never carried by colour alone.
+- Review each new screen with the checklist in `../docs/runbooks/design-system.md` (squint, swap, real data, anti-AI-look).
+
 ## Rules
 
 - API layer: one typed function per endpoint, zod-validate responses at the boundary, central error handling for problem+json (show `requestId` to user on errors). Tokens in memory; refresh via httpOnly cookie.

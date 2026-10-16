@@ -89,6 +89,19 @@ test.describe('environment settings', () => {
     expect(env.NEXT_PUBLIC_SENTRY_DSN).toBeUndefined();
   });
 
+  test('the design gallery is OFF unless explicitly switched on, so it answers "not found" on the live site', () => {
+    expect(parseEnv(valid).NEXT_PUBLIC_DESIGN_GALLERY).toBe(false);
+    expect(
+      parseEnv({ ...valid, NEXT_PUBLIC_DESIGN_GALLERY: 'false' }).NEXT_PUBLIC_DESIGN_GALLERY,
+    ).toBe(false);
+    expect(
+      parseEnv({ ...valid, NEXT_PUBLIC_DESIGN_GALLERY: 'true' }).NEXT_PUBLIC_DESIGN_GALLERY,
+    ).toBe(true);
+    expect(() => parseEnv({ ...valid, NEXT_PUBLIC_DESIGN_GALLERY: 'yes' })).toThrow(
+      /NEXT_PUBLIC_DESIGN_GALLERY/,
+    );
+  });
+
   test('fails with a readable message when a setting is missing or malformed', () => {
     expect(() => parseEnv({ ...valid, NEXT_PUBLIC_API_BASE_URL: 'not a url' })).toThrow(
       /NEXT_PUBLIC_API_BASE_URL/,

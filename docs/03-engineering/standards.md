@@ -23,7 +23,7 @@
 - App Router, Server Components for data-heavy read screens, client components for POS. Route groups: `(owner)`, `(pos)`, `(admin)`.
 - Data: hand-written typed API layer (one function per endpoint, zod-validated responses) + TanStack Query (stale-while-revalidate, optimistic updates only for safe ops, never for money).
 - State: URL for filters; Zustand for POS cart; forms via react-hook-form + zod (shared schemas).
-- Styling: Tailwind with **our** token preset + CSS variables; component primitives from Radix/React-Aria wrapped in our design system (`src/components/ui`); no inline hex/px magic numbers.
+- Styling (P0-5, implemented): tokens come from `docs/02-design/tokens/tokens.json`, generated into CSS by `pnpm tokens` (fails on insufficient WCAG contrast); a lint rule and tests reject raw colours and pixel sizes; screens use only `src/components/ui`. Runbook: `docs/runbooks/design-system.md`. Original rule: Tailwind with **our** token preset + CSS variables; component primitives from Radix/React-Aria wrapped in our design system (`src/components/ui`); no inline hex/px magic numbers.
 - i18n: `next-intl`, all copy keys; number/currency/date via `Intl` with `en-IN`.
 - Security: strict CSP, no third-party scripts on /pos, `sanitize` rich text, `rel=noopener`. **Implemented in P0-4:** `src/proxy.ts` sets a per-request nonce CSP built by `src/lib/security/csp.ts` (production is nonce-only; development additionally allows `unsafe-eval`/`unsafe-inline` styles for hot reload), plus Permissions-Policy (USB/serial on `/pos` only) and the static headers in `next.config.ts`. Browser tests assert them against the production build.
 - Accessibility lint (`eslint-plugin-jsx-a11y`) + axe in Playwright.

@@ -1,70 +1,27 @@
 /*
  * Global styles: Tailwind CSS 4 wired to the design tokens.
  *
- * Tailwind 4 is configured here, in CSS, not in a JavaScript file.
- * The most important choice below: Tailwind's built-in colours, sizes and radii are REMOVED
- * (`initial`) and replaced with ours. That means a developer cannot write `bg-blue-500` or
- * `rounded-3xl`: only the design system's values exist. This is how we keep the product from
- * looking like a default template (see docs/02-design/design-guide.md).
+ * The tokens come from docs/02-design/tokens/tokens.json and are turned into the three imported files by
+ * `pnpm tokens`:
+ *   tokens.css          the colours of both themes (as CSS variables), plus sizes and motion values
+ *   tailwind-theme.css  tells Tailwind which colours, sizes and fonts exist. Everything else is REMOVED, so a
+ *                       developer cannot write `bg-blue-500` or `rounded-3xl`
+ *   animations.css      shared animations (hand-written, built from the motion tokens)
+ *
+ * Rule for this file and every other style: no raw colours and no raw pixel values here. Use the tokens.
+ * (A test enforces it; see tests/unit/design-rules.spec.ts.)
  */
 @import 'tailwindcss';
 @import '../styles/tokens.css';
-
-@theme {
-  /* --- Colours: only our semantic ones (values come from tokens.css) --- */
-  --color-*: initial;
-  --color-base: var(--bg-base);
-  --color-surface: var(--bg-surface);
-  --color-side: var(--bg-side);
-  --color-line: var(--border);
-  --color-rule: var(--border-strong);
-  --color-ink: var(--text);
-  --color-muted: var(--text-muted);
-  --color-accent: var(--accent);
-  --color-on-accent: var(--on-accent);
-  --color-tag: var(--tag-bg);
-  --color-on-tag: var(--tag-text);
-  --color-success: var(--success);
-  --color-danger: var(--danger);
-  --color-transparent: transparent;
-  --color-current: currentColor;
-
-  /* --- Corners: two radii only (controls and cards) --- */
-  --radius-*: initial;
-  --radius-control: 4px;
-  --radius-card: 8px;
-
-  /* --- Type scale from the design guide: 11 / 12 / 14 / 16 / 20 / 28 / 40 / 64 --- */
-  --text-*: initial;
-  --text-micro: 11px;
-  --text-caption: 12px;
-  --text-small: 14px;
-  --text-body: 16px;
-  --text-title: 20px;
-  --text-heading: 28px;
-  --text-display: 40px;
-  --text-hero: 64px;
-
-  /* --- Shadows: none. The design uses borders instead of shadows. --- */
-  --shadow-*: initial;
-
-  /* --- Fonts (loaded in src/app/layout.tsx) --- */
-  --font-sans: var(--font-ui), system-ui, sans-serif; /* Inter Tight: interface text */
-  --font-display:
-    var(--font-numerals), 'Arial Narrow', sans-serif; /* Barlow Condensed: totals and headings */
-  --font-mono:
-    var(--font-code), ui-monospace, monospace; /* JetBrains Mono: prices, SKUs, barcodes */
-}
+@import '../styles/tailwind-theme.css';
+@import '../styles/animations.css';
 
 @layer base {
   html {
     background-color: var(--bg-base);
     color: var(--text);
-    font-family: var(--font-ui), system-ui, sans-serif;
-    font-size: 16px;
-    /* Numbers line up in columns (prices, quantities, totals). */
-    font-variant-numeric: tabular-nums;
-    -webkit-font-smoothing: antialiased;
+    /* Interface text in Inter Tight at the body size, with numbers that line up in columns. */
+    @apply font-sans text-body tabular-nums antialiased;
   }
 
   body {
@@ -73,8 +30,8 @@
 
   /* A visible focus ring on everything keyboard users can reach. Never removed, only restyled. */
   :focus-visible {
-    outline: 2px solid var(--focus-ring);
-    outline-offset: 2px;
+    outline: var(--focus-ring-width) solid var(--focus-ring);
+    outline-offset: var(--focus-ring-offset);
   }
 
   /* Respect people who ask their device for less motion. */

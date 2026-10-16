@@ -43,6 +43,44 @@ export default defineConfig([
     },
   },
 
+  /*
+   * DESIGN-TOKEN RULE: no raw colours and no raw pixel sizes in application code.
+   * Colours and sizes live in ONE place (docs/02-design/tokens/tokens.json). Code uses the Tailwind classes
+   * built from them (bg-surface, text-muted, rounded-card, text-small ...). A hard-coded "#fff" or
+   * "w-[13px]" is how a product drifts away from its design, so it fails the lint. CSS files are checked
+   * by tests/unit/design-rules.spec.ts. (The rule itself is tested in that file too.)
+   */
+  {
+    files: ['src/**/*.{ts,tsx}'],
+    ignores: ['src/lib/design/token-names.ts'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        // The same three checks run on plain strings (Literal) and on template strings (TemplateElement).
+        ...[
+          ['Literal', 'value'],
+          ['TemplateElement', 'value.raw'],
+        ].flatMap(([node, path]) => [
+          {
+            selector: String.raw`${node}[${path}=/(^|[^\w&])#[0-9a-fA-F]{3,8}($|[^\w-])/]`,
+            message:
+              'Raw colour. Use a design token class (bg-surface, text-muted, border-line ...). Colours are defined in docs/02-design/tokens/tokens.json.',
+          },
+          {
+            selector: String.raw`${node}[${path}=/\[-?[0-9]*\.?[0-9]+(px|rem|em)\]/]`,
+            message:
+              'Arbitrary Tailwind size such as w-[13px]. Use the spacing scale or a size token, for example min-h-(--size-control-md).',
+          },
+          {
+            selector: String.raw`${node}[${path}=/(^|[\s:])-?[0-9]*\.?[0-9]+px($|[\s;,)])/]`,
+            message:
+              'Raw pixel value. Use a design token (spacing scale, size or font-size token).',
+          },
+        ]),
+      ],
+    },
+  },
+
   // Tests may print to the console while debugging.
   { files: ['tests/**/*.ts'], rules: { 'no-console': 'off' } },
 

@@ -19,6 +19,14 @@ const schema = z.object({
   NEXT_PUBLIC_API_BASE_URL: z.url(),
   /** Release name written on error reports. */
   NEXT_PUBLIC_APP_VERSION: z.string().min(1),
+  /**
+   * Shows the design-system gallery at /design (a live page with every component and state, used to review
+   * the design). "true" in development, "false" (or unset) on the live site.
+   */
+  NEXT_PUBLIC_DESIGN_GALLERY: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((value) => value === 'true'),
   /** Sentry project address. Empty or missing switches error tracking off. */
   NEXT_PUBLIC_SENTRY_DSN: z.url().optional(),
 });

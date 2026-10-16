@@ -1,7 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 import { Suspense } from 'react';
 import { ServerStatus } from '@/components/owner/server-status';
-import { formatPaise } from '@/lib/format/money';
+import { Badge, MoneyText } from '@/components/ui';
 
 /*
  * SAMPLE figures that exist only to show the layout of the future dashboard. They are labelled
@@ -19,10 +19,22 @@ export default async function OwnerHomePage() {
   const t = await getTranslations('Owner');
 
   const kpis = [
-    { label: t('sample.sales'), value: formatPaise(SAMPLE.salesPaise, { trimZeroPaise: true }) },
-    { label: t('sample.bills'), value: String(SAMPLE.bills) },
-    { label: t('sample.profit'), value: formatPaise(SAMPLE.profitPaise, { trimZeroPaise: true }) },
-    { label: t('sample.lowStock'), value: String(SAMPLE.lowStock) },
+    {
+      label: t('sample.sales'),
+      value: <MoneyText paise={SAMPLE.salesPaise} size="total" trimZeroPaise />,
+    },
+    {
+      label: t('sample.bills'),
+      value: <span className="font-display text-heading font-semibold">{SAMPLE.bills}</span>,
+    },
+    {
+      label: t('sample.profit'),
+      value: <MoneyText paise={SAMPLE.profitPaise} size="total" trimZeroPaise />,
+    },
+    {
+      label: t('sample.lowStock'),
+      value: <span className="font-display text-heading font-semibold">{SAMPLE.lowStock}</span>,
+    },
   ];
 
   return (
@@ -42,9 +54,7 @@ export default async function OwnerHomePage() {
           >
             {t('sample.heading')}
           </h2>
-          <span className="rounded-control bg-tag px-2 py-0.5 text-micro font-medium text-on-tag">
-            {t('sample.notice')}
-          </span>
+          <Badge variant="warning">{t('sample.notice')}</Badge>
         </div>
         <dl className="grid grid-cols-2 border-t-2 border-rule lg:grid-cols-4">
           {kpis.map((kpi) => (
@@ -53,7 +63,7 @@ export default async function OwnerHomePage() {
               className="border-b border-line py-4 pr-4 lg:border-r lg:pl-4 lg:first:pl-0 lg:last:border-r-0"
             >
               <dt className="text-caption text-muted">{kpi.label}</dt>
-              <dd className="mt-1 font-display text-heading font-semibold">{kpi.value}</dd>
+              <dd className="mt-1">{kpi.value}</dd>
             </div>
           ))}
         </dl>

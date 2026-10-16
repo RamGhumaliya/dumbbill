@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
+import { EmptyState } from '@/components/ui';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('Admin');
@@ -26,10 +27,11 @@ export default async function AdminPage() {
         >
           {t('retailers.heading')}
         </h2>
-        <div className="rounded-card border border-dashed border-line px-4 py-12 text-center">
-          <p className="text-body font-medium">{t('retailers.empty')}</p>
-          <p className="mt-1 text-small text-muted">{t('retailers.emptyHint')}</p>
-        </div>
+        <EmptyState
+          title={t('retailers.empty')}
+          description={t('retailers.emptyHint')}
+          headingLevel={3}
+        />
       </section>
     </div>
   );

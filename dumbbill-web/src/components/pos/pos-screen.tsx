@@ -1,7 +1,8 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { formatPaise } from '@/lib/format/money';
+import { Button, EmptyState, IconButton, Input, MoneyText } from '@/components/ui';
+import { CloseIcon, MinusIcon } from '@/components/ui/icons';
 import {
   linePreviewPaise,
   previewSubtotalPaise,
@@ -31,6 +32,7 @@ const SAMPLE_PRODUCTS: readonly CartProduct[] = [
  * The till screen: the bill on the left, the totals on the right.
  * This is the layout skeleton with a working in-memory bill; scanning, discounts, GST, payment and
  * printing are added in Phase 2. The subtotal shown is a PREVIEW; the server calculates the real bill.
+ * Built from the design system (src/components/ui): buttons are at least 48 px where they matter at a counter.
  */
 export function PosScreen() {
   const t = useTranslations('Pos');
@@ -55,23 +57,10 @@ export function PosScreen() {
         </div>
 
         {/* Real search and barcode scanning arrive in Phase 2. Shown disabled so the layout is honest. */}
-        <div>
-          <label htmlFor="pos-search" className="sr-only">
-            {t('searchHint')}
-          </label>
-          <input
-            id="pos-search"
-            type="search"
-            disabled
-            placeholder={t('searchHint')}
-            className="w-full rounded-control border border-line bg-surface px-3 py-2.5 text-small disabled:opacity-70"
-          />
-        </div>
+        <Input type="search" disabled placeholder={t('searchHint')} aria-label={t('searchHint')} />
 
         {lines.length === 0 ? (
-          <p className="rounded-card border border-dashed border-line px-4 py-10 text-center text-small text-muted">
-            {t('empty')}
-          </p>
+          <EmptyState title={t('empty')} headingLevel={2} />
         ) : (
           <table className="w-full text-small">
             <caption className="sr-only">{t('totals.heading')}</caption>
@@ -89,7 +78,7 @@ export function PosScreen() {
                 <th scope="col" className="py-2 pl-2 text-right font-medium">
                   {t('columns.amount')}
                 </th>
-                <th scope="col" className="w-10">
+                <th scope="col" className="w-12">
                   <span className="sr-only">{t('columns.remove')}</span>
                 </th>
               </tr>
@@ -101,43 +90,42 @@ export function PosScreen() {
                     {line.name}
                   </th>
                   <td className="px-2 py-3">
-                    <div className="mx-auto flex w-fit items-center rounded-control border border-line">
-                      <button
-                        type="button"
-                        className="size-8 text-body"
-                        aria-label={t('actions.decrease', { name: line.name })}
+                    <div className="mx-auto flex w-fit items-center rounded-control border border-control">
+                      <IconButton
+                        size="sm"
+                        label={t('actions.decrease', { name: line.name })}
                         onClick={() => setQuantity(line.productId, line.quantity - 1)}
                       >
-                        −
-                      </button>
+                        <MinusIcon className="size-4" />
+                      </IconButton>
                       <span className="min-w-8 text-center font-mono" aria-live="polite">
                         {line.quantity}
                       </span>
-                      <button
-                        type="button"
-                        className="size-8 text-body"
-                        aria-label={t('actions.increase', { name: line.name })}
+                      <IconButton
+                        size="sm"
+                        label={t('actions.increase', { name: line.name })}
                         onClick={() => setQuantity(line.productId, line.quantity + 1)}
                       >
-                        +
-                      </button>
+                        <span aria-hidden className="text-body leading-none">
+                          +
+                        </span>
+                      </IconButton>
                     </div>
                   </td>
-                  <td className="px-2 py-3 text-right font-mono">
-                    {formatPaise(line.unitPricePaise)}
+                  <td className="px-2 py-3 text-right">
+                    <MoneyText paise={line.unitPricePaise} />
                   </td>
-                  <td className="py-3 pl-2 text-right font-mono">
-                    {formatPaise(linePreviewPaise(line))}
+                  <td className="py-3 pl-2 text-right">
+                    <MoneyText paise={linePreviewPaise(line)} />
                   </td>
                   <td className="py-3 text-right">
-                    <button
-                      type="button"
-                      className="size-8 text-muted hover:text-danger"
-                      aria-label={t('actions.remove', { name: line.name })}
+                    <IconButton
+                      size="sm"
+                      label={t('actions.remove', { name: line.name })}
                       onClick={() => removeItem(line.productId)}
                     >
-                      ×
-                    </button>
+                      <CloseIcon className="size-4" />
+                    </IconButton>
                   </td>
                 </tr>
               ))}
@@ -152,17 +140,11 @@ export function PosScreen() {
           <ul className="flex flex-wrap gap-2">
             {SAMPLE_PRODUCTS.map((product) => (
               <li key={product.productId}>
-                <button
-                  type="button"
-                  onClick={() => addItem(product)}
-                  className="rounded-control border border-line bg-surface px-3 py-2 text-left text-small hover:border-rule"
-                >
+                <Button variant="secondary" onClick={() => addItem(product)}>
                   <span className="sr-only">{t('quickAdd.add', { name: product.name })}</span>
                   <span aria-hidden>{product.name.split(',')[0]}</span>
-                  <span aria-hidden className="ml-2 font-mono text-muted">
-                    {formatPaise(product.unitPricePaise, { trimZeroPaise: true })}
-                  </span>
-                </button>
+                  <MoneyText paise={product.unitPricePaise} tone="muted" trimZeroPaise />
+                </Button>
               </li>
             ))}
           </ul>
@@ -179,31 +161,27 @@ export function PosScreen() {
         </h2>
         <div className="flex items-baseline justify-between text-small text-muted">
           <span>{t('totals.subtotal')}</span>
-          <span className="font-mono text-ink">{formatPaise(subtotal)}</span>
+          <MoneyText paise={subtotal} className="text-ink" />
         </div>
-        <p className="font-display text-hero leading-none font-bold" aria-live="polite">
-          {formatPaise(subtotal, { trimZeroPaise: true })}
+        <p aria-live="polite">
+          <MoneyText paise={subtotal} size="hero" trimZeroPaise />
         </p>
         <p className="text-caption text-muted">{t('totals.previewNote')}</p>
 
         <div className="mt-auto flex flex-col gap-2">
-          <button
-            type="button"
+          <Button
+            variant="primary"
+            size="lg"
             disabled
             title={t('totals.payDisabled')}
-            className="rounded-control bg-accent px-4 py-4 font-display text-title font-bold tracking-wider text-on-accent uppercase disabled:opacity-50"
+            className="font-display text-title font-bold tracking-wider uppercase"
           >
             {t('totals.pay')}
-          </button>
+          </Button>
           <p className="text-caption text-muted">{t('totals.payDisabled')}</p>
-          <button
-            type="button"
-            onClick={clear}
-            disabled={lines.length === 0}
-            className="rounded-control border border-line px-4 py-2.5 text-small disabled:opacity-50"
-          >
+          <Button variant="secondary" onClick={clear} disabled={lines.length === 0}>
             {t('actions.clear')}
-          </button>
+          </Button>
         </div>
       </section>
     </div>

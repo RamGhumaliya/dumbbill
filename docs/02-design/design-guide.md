@@ -17,6 +17,14 @@ Interactive preview: `directions/index.html`. Both themes are token sets over th
 **Unified (same in both themes):** type = Inter Tight (UI), Barlow Condensed (totals, KPI numerals, headings), JetBrains Mono (SKUs, barcodes, prices in tables); radius 4 px controls / 8 px cards; table header has the 2 px strong rule; 4 px spacing grid; same motion. Quiet Ledger's serif is **not** used, so the two themes cannot drift into two brands.
 Rules: components reference semantic tokens only; verify contrast of every pairing (volt on dark and teal on light both ≥ 4.5:1 for text); never use volt on a light surface. Theme switch: `data-theme="dark|light"` on web, `ThemeExtension` on Flutter; default follows system, POS remembers per terminal.
 
+### Status of the tokens (P0-5, 16 Oct 2026)
+The values above are now the machine-readable file `docs/02-design/tokens/tokens.json` (single source for web and mobile; see `docs/runbooks/design-system.md`). Three refinements were made while measuring contrast, all small and all in the same spirit:
+- light `text.muted` darkened to `#5F646A` (was `#6B7075`, 4.4:1 on the side panel; needs 4.5:1)
+- light `border.strong` set to `#8A857A` so the hard 2 px table-header rule is actually visible in light mode (the old `#CFCABE` measured 1.6:1)
+- a new role `border.control` (`#858A90` light / `#6B7075` dark) for the edges of inputs, selects and checkboxes: WCAG 1.4.11 needs 3:1 against the background, and the decorative hairline `border` colour is far fainter
+New roles added for the component kit: `bg.hover`, `accent.hover`, `success.on`, `danger.hover`, `danger.on`, `overlay`.
+**Rupee sign:** Barlow Condensed and JetBrains Mono contain no rupee glyph, so their font stacks fall back to Inter Tight for `₹` (a designed fallback instead of a random system font).
+
 ## 1. Original three directions (kept for reference)
 
 ### Direction A – "Iron Ledger" (bold fitness-retail)

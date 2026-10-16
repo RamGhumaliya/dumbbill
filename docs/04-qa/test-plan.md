@@ -11,7 +11,8 @@
 | Mobile | `flutter_test` (providers, repositories, widgets) + manual runs on Android emulator / iOS simulator | Checklist in `docs/04-qa/mobile-manual-checklist.md` | Checklist signed per release |
 | Visual | Playwright snapshots / Chromatic | Design-system components & hero screens | Review diffs |
 | Performance | k6, Lighthouse CI, Flutter profile | Budgets in `standards.md` | Budget breaks fail CI |
-| Accessibility | axe-playwright, manual SR pass | WCAG 2.2 AA | No serious/critical |
+| Accessibility | axe-playwright (every page and the design gallery in both themes, also with a dialog, select and popover open), manual SR pass | WCAG 2.2 AA | No serious/critical |
+| Design tokens | Unit tests of `tokens.json` (54 contrast checks in both themes, completeness, generated files up to date) and design-rule scans (no raw colours or pixel sizes) | WCAG contrast, design consistency | Any failure blocks |
 | Hardware | Manual matrix | Barcode scanners, 58/80 mm printers, tablets | Sign-off before launch |
 
 ## 2. Non-negotiable automated suites

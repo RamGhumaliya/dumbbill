@@ -35,6 +35,12 @@ Find your message, apply the fix.
 | Web: console says "violates the following Content Security Policy" | Something loads a script or style the strict policy does not allow | Do not loosen the policy. Fix the code (no inline scripts, no third-party scripts). The policy is built in `src/lib/security/csp.ts` |
 | Web: `pnpm test:e2e` cannot find a browser | Chromium for tests is not installed | `pnpm exec playwright install chromium` |
 | Web: accessibility test fails with `color-contrast` | A colour pair is below the 4.5:1 minimum | Adjust the token in `src/styles/tokens.css` (and the design guide), not the test |
+| Web: `pnpm tokens` says "Design tokens are not valid" | A colour pair in `tokens.json` is below its WCAG contrast minimum, a role is missing in a theme, or a new role has no contrast check | Read the listed line (it names the pair and the ratio) and fix the colour. Do not lower the minimum |
+| Web: test says a generated file "is out of date" | `tokens.json` was edited without regenerating | `pnpm tokens`, then commit the generated files |
+| Web: lint says "Raw colour" or "Arbitrary Tailwind size" | Code uses `#hex`, `w-[13px]` or `12px` | Use a token class (`bg-surface`, `p-3`, `min-h-(--size-control-md)`). Add a token only through `tokens.json` |
+| Web: `/design` shows "Page not found" | The gallery is off | Set `NEXT_PUBLIC_DESIGN_GALLERY=true` in `.env.development` and restart `pnpm dev` |
+| Web: a rupee sign looks different from the digits next to it | A font stack lost its Inter Tight fallback (only Inter Tight has the rupee glyph) | Regenerate with `pnpm tokens`; do not hand-edit `tailwind-theme.css` |
+| Web: `addStyleTag` or an injected `<style>` is blocked in a test | The strict Content-Security-Policy refuses inline `<style>` tags (working as designed) | Set styles through the DOM (`element.style...`) or a class instead |
 | Web: port 3001 already in use | Another dev server is running | Stop it, or run `pnpm dev -p 3002` |
 | Uploaded file rejected with `CONTENT_MISMATCH` | File bytes do not match its type | Check the file is a real image or PDF, not renamed |
 | Emails not arriving | Development emails are not delivered anywhere | Open http://localhost:8025 (Mailpit) |

@@ -17,11 +17,12 @@ pnpm dev                                         # http://localhost:3001
 
 Pages:
 
-| Address  | What it is                                                                                              |
-| -------- | ------------------------------------------------------------------------------------------------------- |
-| `/`      | Owner dashboard (a layout preview with clearly labelled sample figures, and a live server-status check) |
-| `/pos`   | Point of sale: layout skeleton with a working in-memory bill (payment arrives in Phase 2)               |
-| `/admin` | Super admin placeholder                                                                                 |
+| Address   | What it is                                                                                                            |
+| --------- | --------------------------------------------------------------------------------------------------------------------- |
+| `/`       | Owner dashboard (a layout preview with clearly labelled sample figures, and a live server-status check)               |
+| `/pos`    | Point of sale: layout skeleton with a working in-memory bill (payment arrives in Phase 2)                             |
+| `/admin`  | Super admin placeholder                                                                                               |
+| `/design` | The design-system gallery: every component and state, in both themes (development only; "not found" on the live site) |
 
 Port **3001** is used because the API already uses 3000.
 
@@ -70,6 +71,9 @@ src/
   proxy.ts                  adds the per-request Content-Security-Policy (nonce) and Permissions-Policy
   instrumentation*.ts       Sentry start-up (server and browser); off without a DSN
   components/
+    ui/                     THE DESIGN SYSTEM: Button, Field, Input, Select, Checkbox, DataTable, Dialog, Popover, Toast,
+                            Tabs, Badge, Kbd, MoneyText, EmptyState, Skeleton, icons (import from '@/components/ui')
+    design/                 the /design gallery
     layout/                 SiteHeader
     theme/                  ThemeToggle (System / Dark / Light)
     providers/              TanStack Query provider
@@ -82,7 +86,9 @@ src/
     env.ts, env-schema.ts   validated settings
     theme*.ts               theme cookie helpers
   stores/pos-cart.ts        the bill being built (Zustand, preview only)
-  styles/tokens.css         colours of both themes (generated from tokens JSON in P0-5)
+  styles/                   tokens.css and tailwind-theme.css (GENERATED from tokens.json), animations.css (hand-written, from motion tokens)
+  fonts/                    self-hosted font files (Latin and Latin-extended) and their licences
+  lib/cn.ts                 class-name helper that understands our token names
   i18n/                     next-intl setup and typed message keys
 messages/en.json            every user-visible text
 tests/unit, tests/e2e       Playwright tests
@@ -91,7 +97,9 @@ tests/unit, tests/e2e       Playwright tests
 ## How things work (short version)
 
 - **Themes.** Dark is "Iron Ledger", light is "Quiet Ledger", one shared type system. The choice (System / Dark / Light) is a cookie, so the server renders the right theme on the first paint without a flash. With no choice, the device setting decides.
-- **Design tokens only.** Tailwind's built-in colours, sizes and radii are removed. You can write `bg-surface`, `text-muted`, `rounded-card`, but not `bg-blue-500`. Add or change values in `src/styles/tokens.css`.
+- **Design tokens only.** Colours, type, shape and motion are defined once in `../docs/02-design/tokens/tokens.json` and generated into CSS by `pnpm tokens` (which refuses a colour pair that is too faint to read). Tailwind's built-in colours, sizes and radii are removed, so you can write `bg-surface`, `text-muted`, `rounded-card`, but not `bg-blue-500` or `w-[13px]`: a lint rule and tests enforce it. How to change things: `../docs/runbooks/design-system.md`.
+- **Components.** Screens are built from `src/components/ui`. Every component works in both themes, with the keyboard, in every state, and passes the accessibility scan. See them all at `/design`.
+- **Fonts** are self-hosted (no request to Google). Only Inter Tight has the rupee sign, so the numerals and code stacks fall back to it for `₹`.
 - **Translations.** No user-visible text inside components; use `useTranslations`/`getTranslations` with keys from `messages/en.json`. Keys are type-checked.
 - **API calls.** One function per endpoint in `src/lib/api/endpoints`, named like the operationId in the backend's Swagger (`http://localhost:3000/docs`). Responses are checked with zod. Every failure becomes an `ApiError` carrying a `code` and the `requestId` to show the user. The access token lives in memory only; refresh is a stub until login exists (P1-1).
 - **Money** is whole paise everywhere; only `formatPaise` turns it into text. The POS cart shows a **preview**; the server calculates the real bill.
@@ -101,6 +109,5 @@ tests/unit, tests/e2e       Playwright tests
 ## Good to know
 
 - Next.js 16 calls the old "middleware" file `proxy`; that is `src/proxy.ts`.
-- Next.js and the fonts: `next/font` downloads Inter Tight, Barlow Condensed and JetBrains Mono during the build and serves them from our own address. The first build needs internet access.
 - The browser cannot call the API yet from a different address: CORS is added on the backend with login (P1-1). Until then only server-side calls (like the status check) work.
 - Git hooks are installed by the backend project (`husky`) at the repository root. Commits are formatted and linted automatically.

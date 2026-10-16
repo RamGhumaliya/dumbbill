@@ -44,7 +44,7 @@ VERIFY: no raw hex/px outside tokens (lint rule); axe clean; contrast checked fo
 ## P0-6 Mobile repo scaffold  (ROLE: mobile-dev)
 ```
 Read dumbbill-mobile/CLAUDE.md and docs/03-engineering/standards.md (Mobile).
-Create the Flutter project with two entrypoints (main_owner.dart, main_customer.dart) and build flavors dev and prod only; folder layout core/ + features/ (data/domain/presentation); Riverpod 3 + riverpod_generator, dio + retrofit, freezed + json_serializable, go_router, flutter_secure_storage, drift, intl ARB, sentry_flutter (disabled without DSN), very_good_analysis lints. Theme: generate Dart ThemeExtension from tokens.json for dark and light (script in tool/). Network layer: dio with auth interceptor (refresh once on 401), problem+json error mapping.
+Create the Flutter project with two entrypoints (main_owner.dart, main_customer.dart) and build flavors dev and prod only; folder layout core/ + features/ (data/domain/presentation); Riverpod 3 + riverpod_generator, dio + retrofit, freezed + json_serializable, go_router, flutter_secure_storage, drift, intl ARB, sentry_flutter (disabled without DSN), very_good_analysis lints. Theme: generate Dart ThemeExtension from docs/02-design/tokens/tokens.json for dark and light (script in tool/, same validation and contrast check as dumbbill-web/scripts/lib/tokens.ts; see docs/runbooks/design-system.md). Only Inter Tight has the rupee sign: give the numerals and code TextStyles a fontFamilyFallback of Inter Tight. Network layer: dio with auth interceptor (refresh once on 401), problem+json error mapping.
 VERIFY: flutter analyze clean, flutter test passes, app launches on Android emulator in both themes with a placeholder screen.
 ```
 

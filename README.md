@@ -26,7 +26,8 @@ protein_retail_saas_product/
 | P0-2 Row-level security foundation | Done (see `docs/adr/002-prisma-rls.md`) |
 | P0-3 Logging, error format, Swagger completeness test | Done (see `docs/runbooks/logging-and-errors.md`) |
 | P0-4 Web app scaffold (Next.js) | Done (see `dumbbill-web/README.md`) |
-| P0-5 Design tokens JSON and UI kit | Next |
+| P0-5 Design tokens JSON and UI kit | Done (see `docs/runbooks/design-system.md`; gallery at `/design`) |
+| P0-6 Mobile app scaffold (Flutter) | Next |
 | Web and mobile repos | Not started |
 
 The live checklist is `docs/06-tracking/progress-tracker.md`.
@@ -72,6 +73,7 @@ Full instructions, every setting explained, and fixes for common problems: `docs
 | Set up my machine | `docs/runbooks/local-setup.md` |
 | Understand the database, migrations and seed data | `docs/runbooks/database-and-seeding.md` |
 | Understand how uploaded files are stored | `docs/runbooks/file-storage.md` |
+| Change a colour, add a component, review a screen | `docs/runbooks/design-system.md` |
 | Fix something that is not working | `docs/runbooks/troubleshooting.md` |
 | Know how to contribute code | `docs/CONTRIBUTING.md` |
 | Understand the product | `docs/01-product/PRD.md` |

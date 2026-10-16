@@ -33,6 +33,8 @@ export default defineConfig({
       ? `pnpm exec next dev -p ${PORT}`
       : `pnpm build && pnpm exec next start -p ${PORT}`,
     url: `http://localhost:${PORT}`,
+    // The gallery page is part of what the tests check, so it is switched on for the test build.
+    env: { NEXT_PUBLIC_DESIGN_GALLERY: 'true' },
     reuseExistingServer: true,
     timeout: 300_000, // a production build takes a while the first time
   },

@@ -3,6 +3,7 @@
 import * as Sentry from '@sentry/nextjs';
 import { useTranslations } from 'next-intl';
 import { useEffect } from 'react';
+import { Button } from '@/components/ui';
 import { ApiError } from '@/lib/api';
 
 /**
@@ -40,13 +41,9 @@ export default function ErrorPage({
         <p className="font-mono text-small">{t('Common.reference', { code: reference })}</p>
       )}
       <div>
-        <button
-          type="button"
-          onClick={reset}
-          className="rounded-control bg-accent px-4 py-2.5 text-small font-medium text-on-accent"
-        >
+        <Button variant="primary" onClick={reset}>
           {t('Common.tryAgain')}
-        </button>
+        </Button>
       </div>
     </main>
   );

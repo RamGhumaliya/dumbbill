@@ -21,8 +21,15 @@ Layers: controller (HTTP only) → service (use case) → domain (pure functions
 - Separate response DTO classes per audience (`ProductCashierDto` vs `ProductAdminDto`). Never return Prisma entities.
 - Every endpoint: `@ApiTags`, `@ApiOperation` (summary + description), `@ApiBearerAuth`, all request examples, `@ApiResponse` for every success and error code with example bodies, permission noted. Errors follow RFC 9457 problem+json with stable `code`.
 
+## Errors, logging and tracing (details: `../docs/runbooks/logging-and-errors.md`)
+- Throw `DomainError('<CODE>', 'helpful detail')` for problems the caller can fix; codes live in `src/common/errors/error-codes.ts` (add a line there, then `pnpm docs:errors` and commit `docs/api/error-codes.md`). Let real bugs throw normally: the global filter turns them into a safe 500, logs the stack and reports to Sentry.
+- Never put secrets or customer data in an error message: messages are logged unscrubbed.
+- Log with the injected nestjs-pino `Logger`, putting the message INSIDE the object: `this.logger.log({ msg: 'Invoice created', invoiceId })`. Never `console.log`. Do not log request bodies. Redaction is a safety net, not permission.
+- Every endpoint documents its errors with `@ApiProblemResponse('<CODE>', ...)`; `test/integration/swagger-completeness.spec.ts` fails if any route lacks tags, a unique operationId, summary, a `Permission:` line in the description, a success response, or the errors required for its kind.
+- Response header `X-Request-Id` and body `requestId` are set automatically; do not invent other ids.
+
 ## Must-have tests
-IDOR sweep over all routes, RBAC matrix, cashier-leak scanner, idempotency, stock concurrency, loyalty race, money property tests, log redaction.
+IDOR sweep over all routes, RBAC matrix, cashier-leak scanner, idempotency, stock concurrency, loyalty race, money property tests. Already in place: log redaction, error contract, Swagger completeness, RLS coverage, tenant isolation.
 
 ## Comments (mandatory)
 Follow the "Comments" section of `../CLAUDE.md`: file purpose, a doc comment on every exported symbol, and the *why* behind business rules, security choices and non-obvious code, in plain English.

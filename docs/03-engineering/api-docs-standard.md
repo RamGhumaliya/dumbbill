@@ -30,7 +30,10 @@ A central **error-code catalogue** (`docs/api/error-codes.md`, generated) lists 
 ## 4. Integration guides (written in Swagger description or `docs/api/`)
 Auth & refresh flow • Checkout sequence (quote → approval → create invoice → print/share) • Offline sync protocol • Loyalty join and redeem • Pagination & filtering • File upload (presigned) • Webhooks (Razorpay, internal) • Versioning and breaking-change policy.
 
-## 5. Enforcement
+## 5. Enforcement (implemented in P0-3)
+Document errors with `@ApiProblemResponse('<CODE>', { detail, errors })` (`src/common/swagger/api-problem-response.decorator.ts`); codes come from `src/common/errors/error-codes.ts`, and `docs/api/error-codes.md` is generated from it with `pnpm docs:errors`. `test/integration/swagger-completeness.spec.ts` runs the audit in `test/support/swagger-audit.ts` over the real API and fails, naming the route, when a rule below is broken. Operation ids are the controller method names unless set in `@ApiOperation`.
+
+### Rules checked automatically
 - CI test fails if any route lacks `@ApiOperation`, `@ApiTags`, a success `@ApiResponse`, documented error responses, or a permission annotation.
 - Snapshot of `openapi.json` committed; a diff check flags breaking changes (removed field, narrowed enum, new required field) for review.
 - Examples are validated against their schemas in a test.

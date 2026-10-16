@@ -25,6 +25,11 @@ Find your message, apply the fix.
 | `APP_DATABASE_URL ... must use a different user than DATABASE_URL` | The app was pointed at the owner | Use the `dumbbill_app` user in `APP_DATABASE_URL` |
 | ESLint: `Do not use PrismaService in business code` | A module imports the raw database client | Inject `TenantTx` and use `tenantTx.run(tx => ...)` |
 | Integration/security tests fail to start with `connect ECONNREFUSED` | PostgreSQL is not running | `docker compose up -d` |
+| Swagger completeness test fails naming a route | The route is missing tags, an operationId, a `Permission:` line, a success response or documented errors | Read the message (it lists each missing piece) and fix with `@ApiTags`, `@ApiOperation`, `@ApiOkResponse`, `@ApiProblemResponse`. See `docs/03-engineering/api-docs-standard.md` |
+| `error-codes.md is up to date` test fails | An error code was added or changed without regenerating the doc | `pnpm docs:errors`, then commit `docs/api/error-codes.md` |
+| My log message shows as `context` / the message is missing | The Nest logger treats a trailing text argument as a context | Put the message in the object: `logger.log({ msg: 'text', ...fields })` |
+| A field is shown as `[redacted]` in logs | Its name matches the secret list (password, token, pin, cost, profit ...) | Working as designed. Log a different field name if you really need the value, but never secrets |
+| Want to see why a request is slow | Tracing is off by default | Set `OTEL_EXPORTER=console` in `.env`, restart, repeat the request |
 | Uploaded file rejected with `CONTENT_MISMATCH` | File bytes do not match its type | Check the file is a real image or PDF, not renamed |
 | Emails not arriving | Development emails are not delivered anywhere | Open http://localhost:8025 (Mailpit) |
 

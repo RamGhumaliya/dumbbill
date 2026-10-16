@@ -46,6 +46,7 @@ The first time, make sure a `.env` file exists: copy `.env.example` (`cp .env.ex
 | `pnpm db:seed:list` | List the available seeders |
 | `pnpm db:reset` | **Delete everything** in the local database, re-migrate and re-seed |
 | `pnpm db:studio` | Browse the database in a web page |
+| `pnpm docs:errors` | Regenerate `docs/api/error-codes.md` from the error catalogue (run after adding an error code) |
 
 ## Settings (`.env`)
 
@@ -59,6 +60,8 @@ The first time, make sure a `.env` file exists: copy `.env.example` (`cp .env.ex
 | `DATABASE_URL` | none (tooling only) | The owner connection used for migrations, seeds and role setup. The running API does not need it, so production servers can leave it unset |
 | `REDIS_URL` | none (required) | Redis connection string |
 | `SENTRY_DSN` | empty | Error tracking address. Empty turns it off |
+| `APP_VERSION` | `dev` | Written on every log line and Sentry report. Set it to the release when deploying |
+| `OTEL_EXPORTER` | `none` | Tracing: `none` or `console` (print every step of a request to the terminal) |
 | `STORAGE_DRIVER` | `local` | Where uploads go. Only `local` (server disk) exists today |
 | `STORAGE_LOCAL_DIR` | `./storage` | Upload folder. Back it up with the database |
 | `STORAGE_MAX_FILE_MB` | `5` | Largest accepted upload |
@@ -71,7 +74,11 @@ If a setting is wrong the app refuses to start and lists every problem.
 src/
   main.ts, app.module.ts, app.setup.ts, swagger.ts     start-up and global setup
   config/env.validation.ts                             typed, validated settings
-  common/logging/                                      logger setup
+  common/logging/                                      logger setup and secret redaction
+  common/request-context/                              request ids (X-Request-Id) and per-request context
+  common/errors/                                       error catalogue, DomainError, standard error body, global filter
+  common/swagger/                                      @ApiProblemResponse and the error body schema
+  observability/                                       Sentry and OpenTelemetry tracing
   modules/
     health/                                            /healthz, /readyz
     prisma/                                            database client (restricted app role)
@@ -91,6 +98,7 @@ Each feature module will follow `controller -> service -> domain -> repository` 
 
 - **Versions are pinned for compatibility.** NestJS 11 (v12 is ESM-only and breaks Jest on Node 22) and TypeScript 5.9 (typescript-eslint and ts-jest do not support TypeScript 7 yet). Do not upgrade them without checking.
 - **The Prisma `package.json#prisma` warning** is expected on Prisma 6; it will move to `prisma.config.ts` when upgrading to Prisma 7.
+- **Every response has an `X-Request-Id` header; every error has a `requestId`.** Quote it when asking for help; it finds the full story in the logs. Guide: `../docs/runbooks/logging-and-errors.md`.
 - **Tenant data is protected by the database itself.** Business code must use `TenantTx`, never `PrismaService` (a lint rule enforces this). Why and how: `../docs/adr/002-prisma-rls.md`.
 - **Uploads have no HTTP endpoint yet.** Storage is built and tested; the upload and download routes are added in Phase 1 together with login and permissions, because an upload route without authentication would be a security hole.
 - **Commits** must follow Conventional Commits (`feat: add branch list`). A hook checks this.

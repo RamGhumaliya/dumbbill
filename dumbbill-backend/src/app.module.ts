@@ -1,7 +1,8 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LoggerModule } from 'nestjs-pino';
 import { buildLoggerParams } from './common/logging/logger.config';
+import { RequestContextMiddleware } from './common/request-context/request-context.middleware';
 import { validateEnv } from './config/env.validation';
 import { HealthModule } from './modules/health/health.module';
 import { PrismaModule } from './modules/prisma/prisma.module';
@@ -22,10 +23,12 @@ import { TenancyModule } from './modules/tenancy/tenancy.module';
     LoggerModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) =>
-        buildLoggerParams(
-          config.getOrThrow<string>('LOG_LEVEL'),
-          config.getOrThrow<string>('NODE_ENV') === 'production',
-        ),
+        buildLoggerParams({
+          level: config.getOrThrow<string>('LOG_LEVEL'),
+          isProduction: config.getOrThrow<string>('NODE_ENV') === 'production',
+          environment: config.getOrThrow<string>('NODE_ENV'),
+          version: config.getOrThrow<string>('APP_VERSION'),
+        }),
     }),
 
     PrismaModule, // low-level database client (restricted app role)
@@ -34,4 +37,11 @@ import { TenancyModule } from './modules/tenancy/tenancy.module';
     HealthModule, // /healthz and /readyz
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  /** Give every request an id (and make it available everywhere) before anything else runs. */
+  configure(consumer: MiddlewareConsumer): void {
+    consumer
+      .apply(RequestContextMiddleware)
+      .forRoutes({ path: '{*splat}', method: RequestMethod.ALL });
+  }
+}

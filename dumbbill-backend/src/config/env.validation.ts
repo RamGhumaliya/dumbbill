@@ -27,6 +27,12 @@ export enum LogLevel {
   Debug = 'debug',
 }
 
+/** Where tracing data goes. `none` = tracing off; `console` = print spans to the terminal. */
+export enum OtelExporter {
+  None = 'none',
+  Console = 'console',
+}
+
 /** Where uploaded files are kept. Only "local" (server disk) exists today; "s3" can be added later. */
 export enum StorageDriver {
   Local = 'local',
@@ -79,6 +85,14 @@ export class EnvironmentVariables {
   @IsOptional()
   @IsString()
   SENTRY_DSN?: string;
+
+  /** Version written on every log line and Sentry report. Set it in the deployment (for example the git tag). */
+  @IsString()
+  APP_VERSION: string = 'dev';
+
+  /** Tracing output: `none` (default) or `console` (print spans, for debugging). Read by observability/tracing.ts. */
+  @IsEnum(OtelExporter)
+  OTEL_EXPORTER: OtelExporter = OtelExporter.None;
 
   @IsEnum(StorageDriver)
   STORAGE_DRIVER: StorageDriver = StorageDriver.Local;

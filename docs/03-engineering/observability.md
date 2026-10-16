@@ -1,5 +1,7 @@
 # Logging, Error Tracking & Observability
 
+> **Status (16 Oct 2026): the baseline is implemented in P0-3.** How to use it day to day: `docs/runbooks/logging-and-errors.md`. Built: request ids, redacted structured logs, the RFC 9457 error contract, Sentry (off without a DSN), OpenTelemetry tracing (off by default), and the Swagger completeness audit. Still to come: metrics and alerts (when deployed), Sentry for web and mobile, dashboards.
+
 ## 1. Principles
 - Every request is traceable end-to-end by `requestId` (also returned to the user in error toasts: "Ref: 8f3a…").
 - Logs are structured JSON, safe by default, and queryable by tenant/branch/user.

@@ -1,5 +1,5 @@
 import { INestApplication } from '@nestjs/common';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { DocumentBuilder, OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
 
 /**
  * Sections shown in the Swagger UI, in this order. Every controller must use one of these
@@ -46,8 +46,13 @@ Dumbbill API: multi-tenant backend for protein and supplement retailers in India
 - **Rate limits**: 429 with \`Retry-After\`.
 `;
 
-/** Publishes the interactive docs at /docs and the raw OpenAPI file at /docs-json. */
-export function setupSwagger(app: INestApplication): void {
+/**
+ * Builds the OpenAPI document for the whole API.
+ * Operation ids are the controller method names (for example `getReadiness`), so every method
+ * must have a unique, descriptive name: apps use them as function names when integrating.
+ * Split out from setupSwagger so tests can inspect the exact same document.
+ */
+export function createApiDocument(app: INestApplication): OpenAPIObject {
   const builder = new DocumentBuilder()
     .setTitle('Dumbbill API')
     .setDescription(DESCRIPTION)
@@ -57,6 +62,12 @@ export function setupSwagger(app: INestApplication): void {
     .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }, 'staff-bearer')
     .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }, 'customer-bearer');
   API_TAGS.forEach((tag) => builder.addTag(tag));
-  const document = SwaggerModule.createDocument(app, builder.build());
-  SwaggerModule.setup('docs', app, document, { jsonDocumentUrl: 'docs-json' });
+  return SwaggerModule.createDocument(app, builder.build(), {
+    operationIdFactory: (_controllerKey, methodKey) => methodKey,
+  });
+}
+
+/** Publishes the interactive docs at /docs and the raw OpenAPI file at /docs-json. */
+export function setupSwagger(app: INestApplication): void {
+  SwaggerModule.setup('docs', app, createApiDocument(app), { jsonDocumentUrl: 'docs-json' });
 }

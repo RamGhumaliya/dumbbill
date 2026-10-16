@@ -45,11 +45,17 @@ next-env.d.ts
 .env.*
 !.env.example
 !.env.production.example
+!.env.development.example
 *.pem
 *.key
 
 # --- Uploaded files (local disk storage) ---
 /dumbbill-backend/storage/
+
+# --- Test output (Playwright screenshots, traces, reports) ---
+test-results/
+playwright-report/
+blob-report/
 
 # --- Logs ---
 *.log

@@ -1,0 +1,101 @@
+/*
+ * Design tokens: the colours of both themes.
+ *
+ * Source of truth: docs/02-design/design-guide.md section 0.
+ *   DARK  theme = "Iron Ledger"  (ink + volt-lime)
+ *   LIGHT theme = "Quiet Ledger" (warm white + deep teal)
+ * Both themes share one type system and shape language; only colours differ.
+ *
+ * Components never use raw colours. They use the semantic names below through Tailwind classes
+ * (bg-surface, text-ink, border-line, bg-accent ...). Changing a theme means changing it here only.
+ *
+ * NOTE: this file is written by hand in P0-4. In P0-5 it is GENERATED from docs/02-design/tokens/tokens.json,
+ * so edit the JSON then (the generator will overwrite this file).
+ *
+ * How a theme is chosen:
+ *   1. If the user picked one, the page has data-theme="dark" or data-theme="light" (stored in a cookie
+ *      so the server renders the right theme on the first paint, with no flash).
+ *   2. Otherwise the device setting decides (prefers-color-scheme).
+ * The dark values therefore appear twice below: once for "device is dark and user chose nothing" and
+ * once for "user chose dark". CSS cannot share a block between a media query and an attribute selector.
+ */
+
+/* ---------- Light: Quiet Ledger (default when the device is light) ---------- */
+:root {
+  color-scheme: light;
+
+  --bg-base: #fbfaf8; /* page background */
+  --bg-surface: #ffffff; /* cards, inputs, tables */
+  --bg-side: #f4f2ed; /* side panels, totals column */
+
+  --border: #e3dfd6; /* hairlines between rows and around controls */
+  --border-strong: #cfcabe; /* table header rule, emphasis */
+
+  --text: #1b1f23;
+  --text-muted: #5f646a; /* darkened from #6b7075: that failed 4.5:1 contrast on --bg-side */
+
+  --accent: #0f5c5c; /* primary actions and the one thing to look at: deep teal */
+  --on-accent: #ffffff; /* text on top of the accent colour */
+
+  --tag-bg: #fdf0d9; /* "expiring soon" style tags */
+  --tag-text: #8a5a10;
+
+  --success: #1d7a4f;
+  --danger: #b4402b;
+
+  --focus-ring: #0f5c5c;
+}
+
+/* ---------- Dark: Iron Ledger, chosen by the device when the user picked nothing ---------- */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+
+    --bg-base: #0e0f11;
+    --bg-surface: #16181b;
+    --bg-side: #121316;
+
+    --border: #2a2d31;
+    --border-strong: #eceae4;
+
+    --text: #eceae4;
+    --text-muted: #8d9096;
+
+    --accent: #c6f432; /* volt */
+    --on-accent: #0e0f11;
+
+    --tag-bg: #2a2d31;
+    --tag-text: #c6f432;
+
+    --success: #4ddc8e;
+    --danger: #ff6a45;
+
+    --focus-ring: #c6f432;
+  }
+}
+
+/* ---------- Dark: Iron Ledger, chosen explicitly by the user ---------- */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --bg-base: #0e0f11;
+  --bg-surface: #16181b;
+  --bg-side: #121316;
+
+  --border: #2a2d31;
+  --border-strong: #eceae4;
+
+  --text: #eceae4;
+  --text-muted: #8d9096;
+
+  --accent: #c6f432;
+  --on-accent: #0e0f11;
+
+  --tag-bg: #2a2d31;
+  --tag-text: #c6f432;
+
+  --success: #4ddc8e;
+  --danger: #ff6a45;
+
+  --focus-ring: #c6f432;
+}

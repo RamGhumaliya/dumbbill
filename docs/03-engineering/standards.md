@@ -25,7 +25,7 @@
 - State: URL for filters; Zustand for POS cart; forms via react-hook-form + zod (shared schemas).
 - Styling: Tailwind with **our** token preset + CSS variables; component primitives from Radix/React-Aria wrapped in our design system (`src/components/ui`); no inline hex/px magic numbers.
 - i18n: `next-intl`, all copy keys; number/currency/date via `Intl` with `en-IN`.
-- Security: strict CSP, no third-party scripts on /pos, `sanitize` rich text, `rel=noopener`.
+- Security: strict CSP, no third-party scripts on /pos, `sanitize` rich text, `rel=noopener`. **Implemented in P0-4:** `src/proxy.ts` sets a per-request nonce CSP built by `src/lib/security/csp.ts` (production is nonce-only; development additionally allows `unsafe-eval`/`unsafe-inline` styles for hot reload), plus Permissions-Policy (USB/serial on `/pos` only) and the static headers in `next.config.ts`. Browser tests assert them against the production build.
 - Accessibility lint (`eslint-plugin-jsx-a11y`) + axe in Playwright.
 
 ## 4. Mobile (Flutter)

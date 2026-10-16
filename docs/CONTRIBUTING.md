@@ -7,7 +7,7 @@ Applies to everyone and to the AI assistant. The hard rules are in `CLAUDE.md` (
 1. Pick a step from `docs/06-tracking/progress-tracker.md` and its prompt in `docs/05-ai-kit/prompts/`.
 2. Create a branch from `main`: `feat/short-name`, `fix/short-name`, `docs/short-name`.
 3. Make small, focused changes. Aim for a pull request under 400 lines.
-4. Before pushing, run in the repo: `pnpm lint && pnpm typecheck && pnpm test && pnpm test:int`.
+4. Before pushing, run in the app folder you changed. Backend: `pnpm lint && pnpm typecheck && pnpm test && pnpm test:int && pnpm test:sec`. Web: `pnpm lint && pnpm typecheck && pnpm test && pnpm test:e2e`.
 5. Open a pull request. Describe what changed and why, and link the story IDs (for example `US-POS-02`).
 6. Get a review (the `reviewer` agent, plus `security-auditor` for login, permissions, tenancy, money or file changes).
 7. Squash-merge. Tick the tracker.

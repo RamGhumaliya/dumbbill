@@ -7,7 +7,7 @@
 | Integration | Jest + Supertest against real PostgreSQL from docker compose (throwaway database per test file, real role script and migrations) | Services + DB, transactions, concurrency | Every module |
 | Contract | Swagger completeness test + OpenAPI snapshot diff | Every route documented with success/error examples; breaking-change detection | No undocumented route |
 | Security | Custom suites + ZAP + Semgrep | IDOR sweep, RBAC matrix, cashier-leak, rate limits | **Blocking** |
-| E2E web | Playwright (Chromium, WebKit) | POS flows, onboarding, refunds, offline | Critical paths green |
+| E2E web | Playwright (Chromium; WebKit later), run against the production build; plus Playwright-runner unit tests for pure logic | Both themes, axe accessibility, security headers/CSP, POS flows (from P0-4); onboarding, refunds, offline later | Critical paths green |
 | Mobile | `flutter_test` (providers, repositories, widgets) + manual runs on Android emulator / iOS simulator | Checklist in `docs/04-qa/mobile-manual-checklist.md` | Checklist signed per release |
 | Visual | Playwright snapshots / Chromatic | Design-system components & hero screens | Review diffs |
 | Performance | k6, Lighthouse CI, Flutter profile | Budgets in `standards.md` | Budget breaks fail CI |

@@ -1,0 +1,91 @@
+{
+  "Brand": {
+    "name": "Dumbbill"
+  },
+  "Common": {
+    "skipToContent": "Skip to main content",
+    "loading": "Loading",
+    "tryAgain": "Try again",
+    "reference": "Reference: {code}"
+  },
+  "Theme": {
+    "label": "Colour theme",
+    "system": "System",
+    "dark": "Dark",
+    "light": "Light"
+  },
+  "Owner": {
+    "title": "Owner dashboard",
+    "subtitle": "Sales, stock and profit across your branches will appear here.",
+    "status": {
+      "heading": "System status",
+      "checking": "Checking the server",
+      "ready": "Server is ready",
+      "databaseUp": "Database connected",
+      "unreachable": "Cannot reach the server",
+      "unreachableHint": "Start the API (see the dumbbill-backend README) and reload this page.",
+      "problem": "The server answered with a problem",
+      "api": "API address",
+      "databaseDown": "Database not reachable"
+    },
+    "sample": {
+      "heading": "Preview of the dashboard",
+      "notice": "Sample figures for layout only. Not real data.",
+      "sales": "Sales today",
+      "bills": "Bills",
+      "profit": "Gross profit",
+      "lowStock": "Low stock"
+    }
+  },
+  "Pos": {
+    "title": "Point of sale",
+    "branch": "Andheri West, counter 1",
+    "searchHint": "Scan a barcode or search by name",
+    "empty": "Nothing in the bill yet. Scan or pick an item.",
+    "columns": {
+      "item": "Item",
+      "quantity": "Qty",
+      "price": "Price",
+      "amount": "Amount",
+      "remove": "Remove"
+    },
+    "totals": {
+      "heading": "Bill",
+      "subtotal": "Subtotal",
+      "previewNote": "Preview only. The server calculates the final bill, discounts and GST.",
+      "pay": "Take payment",
+      "payDisabled": "Payment arrives in Phase 2"
+    },
+    "quickAdd": {
+      "heading": "Sample items",
+      "add": "Add {name}"
+    },
+    "actions": {
+      "clear": "Clear bill",
+      "remove": "Remove {name}",
+      "increase": "One more {name}",
+      "decrease": "One less {name}"
+    }
+  },
+  "Admin": {
+    "title": "Platform admin",
+    "subtitle": "Retailers, plans and platform usage.",
+    "retailers": {
+      "heading": "Retailers",
+      "empty": "No retailers yet.",
+      "emptyHint": "Businesses appear here once they sign up."
+    }
+  },
+  "Errors": {
+    "pageTitle": "Something went wrong",
+    "pageBody": "We could not show this page. Try again. If it keeps happening, tell support the reference below.",
+    "notFoundTitle": "Page not found",
+    "notFoundBody": "This page does not exist or you do not have access to it.",
+    "goHome": "Back to the dashboard"
+  },
+  "Nav": {
+    "main": "Main navigation",
+    "dashboard": "Dashboard",
+    "pos": "Point of sale"
+  }
+}

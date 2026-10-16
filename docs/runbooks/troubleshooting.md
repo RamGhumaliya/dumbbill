@@ -30,6 +30,12 @@ Find your message, apply the fix.
 | My log message shows as `context` / the message is missing | The Nest logger treats a trailing text argument as a context | Put the message in the object: `logger.log({ msg: 'text', ...fields })` |
 | A field is shown as `[redacted]` in logs | Its name matches the secret list (password, token, pin, cost, profit ...) | Working as designed. Log a different field name if you really need the value, but never secrets |
 | Want to see why a request is slow | Tracing is off by default | Set `OTEL_EXPORTER=console` in `.env`, restart, repeat the request |
+| Web: `Invalid environment configuration ... NEXT_PUBLIC_API_BASE_URL` on dev, build or start | The web app has no `.env.development` / `.env.production` | Copy the matching `.example` file (see `dumbbill-web/README.md`). `pnpm build` reads `.env.production` |
+| Web: owner dashboard says "Cannot reach the server" | The API is not running, or `NEXT_PUBLIC_API_BASE_URL` points elsewhere | Start the API (`docker compose up -d`, `pnpm dev` in dumbbill-backend), then reload. The reference shown matches the request in the API logs |
+| Web: console says "violates the following Content Security Policy" | Something loads a script or style the strict policy does not allow | Do not loosen the policy. Fix the code (no inline scripts, no third-party scripts). The policy is built in `src/lib/security/csp.ts` |
+| Web: `pnpm test:e2e` cannot find a browser | Chromium for tests is not installed | `pnpm exec playwright install chromium` |
+| Web: accessibility test fails with `color-contrast` | A colour pair is below the 4.5:1 minimum | Adjust the token in `src/styles/tokens.css` (and the design guide), not the test |
+| Web: port 3001 already in use | Another dev server is running | Stop it, or run `pnpm dev -p 3002` |
 | Uploaded file rejected with `CONTENT_MISMATCH` | File bytes do not match its type | Check the file is a real image or PDF, not renamed |
 | Emails not arriving | Development emails are not delivered anywhere | Open http://localhost:8025 (Mailpit) |
 

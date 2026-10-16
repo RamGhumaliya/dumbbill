@@ -1,2 +1,4 @@
-# Runs from the repository root. Lint only the backend files being committed.
-cd dumbbill-backend && npx --no -- lint-staged
+# Runs from the repository root before every commit.
+# Formats and lints the staged files of each app that has its packages installed.
+(cd dumbbill-backend && [ -d node_modules ] && npx --no -- lint-staged) || exit 1
+(cd dumbbill-web && [ -d node_modules ] && npx --no -- lint-staged) || exit 1

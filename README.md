@@ -11,7 +11,7 @@ protein_retail_saas_product/
 ├── .claude/agents/                 <- AI role agents (architect, backend, frontend, mobile, designer, QA, security, reviewer)
 ├── docs/                           <- product, design, engineering, QA, AI prompts, tracker
 ├── dumbbill-backend/               <- API (NestJS + Prisma + PostgreSQL)       [started]
-├── dumbbill-web/                   <- Owner/admin web app, POS, super admin (Next.js)   [not started]
+├── dumbbill-web/                   <- Owner/admin web app, POS, super admin (Next.js)   [scaffolded]
 └── dumbbill-mobile/                <- Owner app and customer app (Flutter)     [not started]
 ```
 
@@ -25,7 +25,8 @@ protein_retail_saas_product/
 | Seed system + reference data | Done |
 | P0-2 Row-level security foundation | Done (see `docs/adr/002-prisma-rls.md`) |
 | P0-3 Logging, error format, Swagger completeness test | Done (see `docs/runbooks/logging-and-errors.md`) |
-| P0-4 Web repo scaffold (Next.js) | Next |
+| P0-4 Web app scaffold (Next.js) | Done (see `dumbbill-web/README.md`) |
+| P0-5 Design tokens JSON and UI kit | Next |
 | Web and mobile repos | Not started |
 
 The live checklist is `docs/06-tracking/progress-tracker.md`.
@@ -43,6 +44,15 @@ pnpm db:seed                  # loads plans, GST states and starter categories
 pnpm dev                      # starts the API on http://localhost:3000
 ```
 
+Run the web app in a second terminal (it works without the API, and shows a status message until the API is up):
+
+```bash
+cd dumbbill-web
+pnpm install
+cp .env.development.example .env.development
+pnpm dev                      # http://localhost:3001
+```
+
 Then open:
 
 | URL | What you see |
@@ -51,6 +61,7 @@ Then open:
 | http://localhost:3000/healthz | `{"status":"ok"}` |
 | http://localhost:3000/readyz | Confirms the database is reachable |
 | http://localhost:8025 | Mailpit: catches every email the app sends in development |
+| http://localhost:3001 | The web app: `/` owner dashboard, `/pos` point of sale, `/admin` super admin |
 
 Full instructions, every setting explained, and fixes for common problems: `docs/runbooks/`.
 

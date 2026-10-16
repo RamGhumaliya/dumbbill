@@ -78,6 +78,19 @@ pnpm lint && pnpm typecheck && pnpm test && pnpm test:int
 
 All four should finish with no errors.
 
+## 8. Run the web app (optional, in a second terminal)
+
+```bash
+cd dumbbill-web
+pnpm install
+cp .env.development.example .env.development      # PowerShell: copy .env.development.example .env.development
+pnpm dev                                          # http://localhost:3001
+```
+
+It works without the API running; the owner dashboard then shows "Cannot reach the server" with a reference. Start the API (steps 4 to 6) and reload to see "Server is ready". Port 3001 is used because the API owns 3000. Details, commands and a code map: `dumbbill-web/README.md`.
+
+For the browser tests: `pnpm exec playwright install chromium` once, then `pnpm test:e2e`. For a local production build (`pnpm build`) create `.env.production` from `.env.production.example` and set the API address to `http://localhost:3000`.
+
 ## Daily routine
 
 ```bash

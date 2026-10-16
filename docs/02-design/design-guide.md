@@ -9,7 +9,7 @@ Interactive preview: `directions/index.html`. Both themes are token sets over th
 |---|---|---|
 | bg.base / surface / side | `#0E0F11` / `#16181B` / `#121316` | `#FBFAF8` / `#FFFFFF` / `#F4F2ED` |
 | border / strong rule | `#2A2D31` / `#ECEAE4` | `#E3DFD6` / `#CFCABE` |
-| text / muted | `#ECEAE4` / `#8D9096` | `#1B1F23` / `#6B7075` |
+| text / muted | `#ECEAE4` / `#8D9096` | `#1B1F23` / `#5F646A` (darkened from `#6B7075` in P0-4: the old value measured 4.4:1 on the side panel, below the 4.5:1 minimum) |
 | accent (primary action, totals focus) | volt `#C6F432` on-accent `#0E0F11` | deep teal `#0F5C5C` on-accent `#FFFFFF` |
 | highlight / tag | `#C6F432` on `#2A2D31` | amber `#E8A33D` (tag bg `#FDF0D9`, text `#8A5A10`) |
 | success / danger | `#4DDC8E` / `#FF6A45` | `#1D7A4F` / `#B4402B` |

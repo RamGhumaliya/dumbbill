@@ -1,0 +1,24 @@
+# Local development services only. Nothing here is a deployment target.
+# Uploaded files are NOT stored here: they go to the folder set by STORAGE_LOCAL_DIR on the host.
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: dumbbill
+      POSTGRES_PASSWORD: dumbbill
+      POSTGRES_DB: dumbbill
+    ports: ['5432:5432']
+    volumes: ['pgdata:/var/lib/postgresql/data']
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U dumbbill']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+  redis:
+    image: redis:7-alpine
+    ports: ['6379:6379']
+  mailpit:
+    image: axllent/mailpit:latest
+    ports: ['1025:1025', '8025:8025']
+volumes:
+  pgdata:

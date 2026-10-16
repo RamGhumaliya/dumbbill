@@ -1,0 +1,72 @@
+# ============================================================
+# Dumbbill workspace .gitignore (one repo: docs + backend + web + mobile)
+# Patterns without a leading "/" match in any sub-folder.
+# ============================================================
+
+# --- Dependencies ---
+node_modules/
+.pnpm-store/
+
+# --- Build output ---
+dist/
+build/
+out/
+coverage/
+*.tsbuildinfo
+.turbo/
+
+# --- Next.js (dumbbill-web) ---
+.next/
+next-env.d.ts
+
+# --- Flutter / Dart (dumbbill-mobile) ---
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+**/android/.gradle/
+**/android/local.properties
+**/android/**/GeneratedPluginRegistrant.java
+**/android/key.properties
+**/ios/Pods/
+**/ios/.symlinks/
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/flutter_export_environment.sh
+**/*.jks
+**/*.keystore
+*.g.dart
+*.freezed.dart
+*.mocks.dart
+
+# --- Secrets and local settings (never commit real values; commit the .example files) ---
+.env
+.env.*
+!.env.example
+!.env.production.example
+*.pem
+*.key
+
+# --- Uploaded files (local disk storage) ---
+/dumbbill-backend/storage/
+
+# --- Logs ---
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# --- Tool and editor files ---
+.code-review-graph/
+.claude/settings.local.json
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# --- Temporary files ---
+tmp/
+*.tmp

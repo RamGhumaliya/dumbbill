@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dumbbill – Design Directions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=DM+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--page:#e9e7e2;--ink:#17181a}
+*{box-sizing:border-box;margin:0}
+body{background:var(--page);color:var(--ink);font:15px/1.5 system-ui,sans-serif;padding:32px 20px 80px}
+.wrap{max-width:1180px;margin:0 auto}
+h1{font:600 26px/1.2 system-ui;margin-bottom:6px}
+.lead{color:#55575b;max-width:62ch;margin-bottom:22px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}
+.tabs button{border:1px solid #bdb9b0;background:#f6f4ef;padding:10px 16px;font:500 14px system-ui;cursor:pointer;border-radius:6px}
+.tabs button[aria-selected=true]{background:#17181a;color:#fff;border-color:#17181a}
+.note{font-size:13px;color:#55575b;margin:0 0 14px}
+.board{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:22px;align-items:start}
+@media(max-width:980px){.board{grid-template-columns:1fr}}
+.swatches{display:flex;gap:0;margin:0 0 14px;border-radius:6px;overflow:hidden;border:1px solid #0002}
+.swatches i{flex:1;height:34px;display:block;font:500 10px/34px monospace;text-align:center;font-style:normal}
+.pick{margin-top:22px;padding:14px 16px;background:#f6f4ef;border:1px solid #bdb9b0;border-radius:6px;font-size:14px}
+
+/* ---------- shared app skeleton ---------- */
+.app{--r:var(--radius);border-radius:10px;overflow:hidden;background:var(--bg);color:var(--tx);font-family:var(--ui);border:1px solid var(--line)}
+.bar{display:flex;align-items:center;justify-content:space-between;padding:10px 18px;background:var(--bar);border-bottom:var(--rule)}
+.brand{font:var(--brandfont);letter-spacing:var(--bls);font-size:18px}
+.chips{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--mute)}
+.chip{padding:3px 9px;border:1px solid var(--line);border-radius:var(--r);background:var(--surf)}
+.pos{display:grid;grid-template-columns:1.65fr 1fr;min-height:470px}
+.left{padding:16px 18px;border-right:var(--rule)}
+.search{display:flex;align-items:center;gap:10px;border:1px solid var(--line);background:var(--surf);padding:10px 12px;border-radius:var(--r);color:var(--mute);font-size:14px}
+.search kbd{margin-left:auto;font:500 11px var(--mono);border:1px solid var(--line);padding:1px 6px;border-radius:3px;color:var(--mute)}
+table{width:100%;border-collapse:collapse;margin-top:14px;font-size:13.5px}
+th{font:500 11px var(--ui);text-transform:uppercase;letter-spacing:.07em;color:var(--mute);text-align:left;padding:6px 6px;border-bottom:var(--rule2)}
+td{padding:11px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+.num{text-align:right;font:500 13.5px var(--mono);font-variant-numeric:tabular-nums}
+th.num{font:500 11px var(--ui)}
+.pname{font-weight:600}
+.psub{color:var(--mute);font-size:12px}
+.tag{display:inline-block;font-size:10.5px;padding:1px 6px;border-radius:var(--r);margin-top:3px;background:var(--tagbg);color:var(--tagtx)}
+.right{padding:16px 18px;background:var(--side);display:flex;flex-direction:column;gap:12px}
+.cust{display:flex;justify-content:space-between;align-items:center;border:1px dashed var(--line);padding:9px 11px;border-radius:var(--r);font-size:13px}
+.cust b{font-weight:600}
+.row{display:flex;justify-content:space-between;font-size:13.5px;color:var(--mute)}
+.row b{font:500 13.5px var(--mono);color:var(--tx)}
+.big{font:var(--bigfont);font-size:var(--bigsize);line-height:1;letter-spacing:var(--bigls);font-variant-numeric:tabular-nums;margin-top:4px}
+.biglabel{font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--mute)}
+.btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btn{padding:11px 12px;border:1px solid var(--line);background:var(--surf);border-radius:var(--r);font:500 13px var(--ui);color:var(--tx);text-align:left;display:flex;justify-content:space-between}
+.btn small{font:500 11px var(--mono);color:var(--mute)}
+.pay{padding:15px;background:var(--acc);color:var(--acctx);border:0;border-radius:var(--r);font:var(--payfont);font-size:16px;letter-spacing:.02em;display:flex;justify-content:space-between;cursor:pointer}
+.pay small{font:500 12px var(--mono);opacity:.75}
+.sub2{display:grid;grid-template-columns:repeat(3,1fr);border-top:var(--rule)}
+.stat{padding:14px 18px;border-right:1px solid var(--line)}
+.stat:last-child{border:0}
+.stat .k{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--mute)}
+.stat .v{font:var(--bigfont);font-size:28px;letter-spacing:var(--bigls);margin-top:4px;font-variant-numeric:tabular-nums}
+.stat .d{font-size:12px;margin-top:2px}
+.up{color:var(--good)}.dn{color:var(--bad)}
+.branches{padding:14px 18px;border-top:var(--rule);display:grid;gap:9px}
+.br{display:grid;grid-template-columns:110px 1fr 90px;gap:12px;align-items:center;font-size:13px}
+.track{height:10px;background:var(--surf);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.track i{display:block;height:100%;background:var(--acc2)}
+.alerts{padding:12px 18px;border-top:var(--rule);font-size:13px;display:flex;gap:18px;flex-wrap:wrap;color:var(--mute)}
+.alerts b{color:var(--tx)}
+
+/* phone */
+.phone{width:260px;border-radius:30px;padding:10px;background:#111;box-shadow:0 12px 30px #0003}
+.screen{border-radius:22px;overflow:hidden;background:var(--bg);color:var(--tx);font-family:var(--ui);min-height:470px;display:flex;flex-direction:column}
+.ph-top{padding:18px 16px 12px}
+.ph-top .hi{font-size:12px;color:var(--mute)}
+.ph-top .nm{font:var(--brandfont);font-size:20px;margin-top:2px;letter-spacing:var(--bls)}
+.shop{margin:4px 14px 10px;padding:14px;border-radius:calc(var(--r) + 2px);background:var(--acc);color:var(--acctx);position:relative;overflow:hidden}
+.shop .s1{font-size:11px;opacity:.8;text-transform:uppercase;letter-spacing:.08em}
+.shop .s2{font:var(--bigfont);font-size:22px;margin-top:2px}
+.shop .pts{font:var(--bigfont);font-size:40px;line-height:1;margin-top:12px;font-variant-numeric:tabular-nums}
+.shop .pl{font-size:11px;opacity:.8}
+.qr{position:absolute;right:12px;bottom:12px;width:54px;height:54px;background:#fff;border-radius:6px;display:grid;grid-template-columns:repeat(7,1fr);padding:5px;gap:1px}
+.qr i{background:#111;display:block}.qr i.o{background:transparent}
+.offer{margin:0 14px 8px;padding:11px 12px;border:1px solid var(--line);border-radius:var(--r);background:var(--surf);font-size:13px}
+.offer b{display:block;font-weight:600}
+.offer span{color:var(--mute);font-size:12px}
+.offer em{font:500 11px var(--mono);font-style:normal;float:right;color:var(--acc3)}
+.nav{margin-top:auto;display:flex;justify-content:space-around;padding:12px;border-top:var(--rule);font-size:11px;color:var(--mute)}
+.nav .on{color:var(--tx);font-weight:600}
+.spec{font-size:12.5px;color:#3d3f43;display:grid;gap:10px}
+.spec h3{font:600 13px system-ui;margin-bottom:2px}
+.spec .box{background:#f6f4ef;border:1px solid #cfcbc1;border-radius:6px;padding:10px 12px}
+.spec code{font:12px ui-monospace,monospace}
+
+/* ============ DIRECTION A : Iron Ledger ============ */
+.A{--radius:3px;--ui:'Inter Tight',sans-serif;--mono:'JetBrains Mono',monospace;--bg:#0e0f11;--bar:#0e0f11;--surf:#16181b;--side:#121316;--line:#2a2d31;--tx:#eceae4;--mute:#8d9096;--acc:#c6f432;--acctx:#0e0f11;--acc2:#c6f432;--acc3:#c6f432;--good:#4ddc8e;--bad:#ff6a45;--tagbg:#2a2d31;--tagtx:#c6f432;--rule:2px solid #2a2d31;--rule2:2px solid #eceae4;--brandfont:700 20px 'Barlow Condensed';--bls:.06em;--bigfont:700 1em 'Barlow Condensed';--bigsize:68px;--bigls:.01em;--payfont:700 18px 'Barlow Condensed'}
+.A .brand{text-transform:uppercase}
+.A .pay{text-transform:uppercase;font-size:20px}
+.A th{color:#c6f432}
+/* ============ DIRECTION B : Quiet Ledger ============ */
+.B{--radius:5px;--ui:'Instrument Sans',sans-serif;--mono:'IBM Plex Mono',monospace;--bg:#fbfaf8;--bar:#fbfaf8;--surf:#fff;--side:#f4f2ed;--line:#e3dfd6;--tx:#1b1f23;--mute:#6b7075;--acc:#0f5c5c;--acctx:#fff;--acc2:#0f5c5c;--acc3:#0f5c5c;--good:#1d7a4f;--bad:#b4402b;--tagbg:#fdf0d9;--tagtx:#8a5a10;--rule:1px solid #e3dfd6;--rule2:1px solid #cfcabe;--brandfont:600 19px 'Newsreader';--bls:0;--bigfont:500 1em 'Newsreader';--bigsize:60px;--bigls:-.01em;--payfont:600 16px 'Instrument Sans'}
+/* ============ DIRECTION C : Corner Shop ============ */
+.C{--radius:12px;--ui:'DM Sans',sans-serif;--mono:'DM Sans',sans-serif;--bg:#fff7ea;--bar:#fff7ea;--surf:#fffdf8;--side:#f8ead3;--line:#e8d6b8;--tx:#3b2a20;--mute:#8a6f5c;--acc:#e2492f;--acctx:#fff7ea;--acc2:#3c7a4b;--acc3:#e2492f;--good:#3c7a4b;--bad:#c0392b;--tagbg:#e3efd9;--tagtx:#2d5a38;--rule:1.5px solid #e8d6b8;--rule2:1.5px solid #3b2a20;--brandfont:700 20px 'Bricolage Grotesque';--bls:-.01em;--bigfont:700 1em 'Bricolage Grotesque';--bigsize:56px;--bigls:-.02em;--payfont:700 16px 'Bricolage Grotesque'}
+.C .num,.C .row b,.C .btn small,.C .search kbd{font-family:'DM Sans';font-weight:700}
+.C .tag{transform:rotate(-2deg);border:1px solid #3c7a4b55}
+.C .shop{border-radius:22px 22px 22px 6px}
+.C .pay{border-radius:999px;padding:15px 22px}
+.C .app{border-width:1.5px}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Dumbbill – three design directions</h1>
+  <p class="lead">Same screens, three different products. Each shows the cashier POS, the owner dashboard and the customer app, using realistic Indian retail data. Pick the one that feels like <em>your</em> brand. You can also mix (for example, A's POS with C's customer app).</p>
+  <div class="tabs" role="tablist" id="tabs"></div>
+  <div id="stage"></div>
+  <div class="pick"><b>How to choose:</b> imagine a cashier using the POS for 8 hours at a bright counter, and an owner glancing at the dashboard on their phone at night. Which one would you be proud to show a customer?</div>
+</div>
+
+<script>
+const dirs={
+ A:{name:'A · Iron Ledger',tag:'Bold, gym-floor energy. Dark ink with a volt-lime accent, condensed display numerals, hard 2px rules.',
+   sw:[['#0e0f11','#fff'],['#16181b','#fff'],['#2a2d31','#fff'],['#c6f432','#111'],['#ff6a45','#111'],['#eceae4','#111']],
+   fonts:'Barlow Condensed (numbers, headings) · Inter Tight (UI) · JetBrains Mono (prices, SKUs)',
+   feel:'Best for: busy counters, bright shops, a performance-brand feel. Dark mode first. Highest contrast, so the totals can be read from across the counter.',
+   risk:'Risk: can feel aggressive for older owners; the lime accent needs care on light backgrounds.'},
+ B:{name:'B · Quiet Ledger',tag:'Calm, trustworthy, finance-grade. Warm white, deep teal, serif headlines, hairline borders.',
+   sw:[['#fbfaf8','#111'],['#f4f2ed','#111'],['#e3dfd6','#111'],['#0f5c5c','#fff'],['#e8a33d','#111'],['#1b1f23','#fff']],
+   fonts:'Newsreader (headlines, totals) · Instrument Sans (UI) · IBM Plex Mono (figures)',
+   feel:'Best for: owners who want to trust the numbers; reports and accounting-heavy use. Looks like serious business software.',
+   risk:'Risk: less distinctive for a fitness-retail brand; needs good product photography to feel alive.'},
+ C:{name:'C · Corner Shop',tag:'Warm and local. Cream paper, tomato red and leaf green, friendly rounded shapes, stamp-style tags.',
+   sw:[['#fff7ea','#111'],['#f8ead3','#111'],['#3b2a20','#fff'],['#e2492f','#fff'],['#3c7a4b','#fff'],['#e8d6b8','#111']],
+   fonts:'Bricolage Grotesque (headings, numbers) · DM Sans (UI)',
+   feel:'Best for: independent neighbourhood shops and a loyalty-driven customer app. Approachable for non-technical staff.',
+   risk:'Risk: may feel less "professional" to multi-branch owners; rounded shapes need discipline in dense tables.'}
+};
+const items=[
+ ['Optimum Nutrition Gold Standard Whey','2 lb · Double Rich Chocolate','8901234567890','1','4,899.00','4,899.00','Exp 08/2027'],
+ ['MuscleBlaze Creatine Monohydrate','250 g · Unflavoured','8909876543210','2','899.00','1,798.00',''],
+ ['Boldfit Gym Shaker','700 ml · Black','8905551234567','1','349.00','349.00','']
+];
+const qrPattern=[1,1,1,0,1,1,1, 1,0,1,1,1,0,1, 1,1,1,0,1,1,1, 0,1,0,1,0,0,1, 1,0,1,1,0,1,0, 1,0,1,0,1,0,1, 1,1,1,0,0,1,1];
+function render(k){
+ const d=dirs[k];
+ const rows=items.map(r=>`<tr><td><div class="pname">${r[0]}</div><div class="psub">${r[1]} · <span style="font-family:var(--mono)">${r[2]}</span></div>${r[6]?`<span class="tag">${r[6]}</span>`:''}</td><td class="num">${r[3]}</td><td class="num">${r[4]}</td><td class="num">${r[5]}</td></tr>`).join('');
+ const qr=qrPattern.map(v=>`<i class="${v?'':'o'}"></i>`).join('');
+ return `
+ <p class="note"><b>${d.name}</b> — ${d.tag}</p>
+ <div class="swatches">${d.sw.map(s=>`<i style="background:${s[0]};color:${s[1]}">${s[0]}</i>`).join('')}</div>
+ <div class="board ${k}">
+  <div style="display:grid;gap:22px">
+   <div class="app ${k}">
+    <div class="bar"><span class="brand">Dumbbill</span><span class="chips"><span class="chip">Andheri West · Counter 1</span><span class="chip">Imran · Cashier</span><span class="chip" style="color:var(--good)">● Online</span></span></div>
+    <div class="pos">
+     <div class="left">
+      <div class="search">⌕ Scan barcode or search product, SKU<kbd>F2</kbd></div>
+      <table><thead><tr><th>Item</th><th class="num">Qty</th><th class="num">Price ₹</th><th class="num">Amount ₹</th></tr></thead><tbody>${rows}</tbody></table>
+     </div>
+     <div class="right">
+      <div class="cust"><span><b>Aman Verma</b><br><span class="psub">Member · 420 points</span></span><span class="psub">Change</span></div>
+      <div class="row"><span>Subtotal</span><b>₹7,046.00</b></div>
+      <div class="row"><span>Discount 5% <span class="psub">(limit 5%)</span></span><b>− ₹352.30</b></div>
+      <div class="row"><span>GST 18% incl.</span><b>₹1,021.07</b></div>
+      <div class="row"><span>Round off</span><b>+ ₹0.30</b></div>
+      <div><div class="biglabel">Total payable</div><div class="big">₹6,694</div></div>
+      <div class="btns"><div class="btn">Discount <small>F4</small></div><div class="btn">Hold bill <small>F6</small></div><div class="btn">Customer <small>F7</small></div><div class="btn">Cancel <small>Esc</small></div></div>
+      <button class="pay"><span>Take payment</span><small>F9</small></button>
+     </div>
+    </div>
+   </div>
+   <div class="app ${k}">
+    <div class="bar"><span class="brand">Today · All branches</span><span class="chips"><span class="chip">Owner view</span><span class="chip">16 Oct 2026</span></span></div>
+    <div class="sub2">
+      <div class="stat"><div class="k">Sales</div><div class="v">₹1,84,260</div><div class="d up">▲ 12% vs yesterday</div></div>
+      <div class="stat"><div class="k">Bills · Avg bill</div><div class="v">61 · ₹3,021</div><div class="d dn">▼ 4% avg bill</div></div>
+      <div class="stat"><div class="k">Gross profit</div><div class="v">₹38,900</div><div class="d">21.1% margin</div></div>
+    </div>
+    <div class="branches">
+      <div class="br"><span>Andheri West</span><div class="track"><i style="width:82%"></i></div><b class="num">₹82,400</b></div>
+      <div class="br"><span>Powai</span><div class="track"><i style="width:63%"></i></div><b class="num">₹63,150</b></div>
+      <div class="br"><span>Thane</span><div class="track"><i style="width:39%"></i></div><b class="num">₹38,710</b></div>
+    </div>
+    <div class="alerts"><span><b>7</b> low stock</span><span><b>3</b> expiring in 60 days</span><span><b>2</b> discount approvals waiting</span></div>
+   </div>
+  </div>
+  <div style="display:grid;gap:16px;justify-items:center">
+   <div class="phone"><div class="screen ${k}" style="--r:${k=='A'?'3px':k=='B'?'5px':'12px'}">
+     <div class="ph-top"><div class="hi">Good evening</div><div class="nm">Aman Verma</div></div>
+     <div class="shop"><div class="s1">Member since Mar 2026</div><div class="s2">FitFuel Nutrition, Andheri</div><div class="pts">420</div><div class="pl">points · worth ₹210</div><div class="qr">${qr}</div></div>
+     <div class="offer"><em>Expires 31 Oct</em><b>₹150 off creatine</b><span>On orders above ₹1,499</span></div>
+     <div class="offer"><em>Welcome</em><b>Free shaker</b><span>With your first whey purchase</span></div>
+     <div class="nav"><span class="on">Shops</span><span>Offers</span><span>History</span><span>Profile</span></div>
+   </div></div>
+  </div>
+ </div>
+ <div class="spec" style="margin-top:18px;max-width:760px">
+   <div class="box"><h3>Type</h3>${d.fonts}</div>
+   <div class="box"><h3>Character</h3>${d.feel}<br>${d.risk}</div>
+ </div>`;
+}
+const tabs=document.getElementById('tabs'),stage=document.getElementById('stage');
+function show(k){stage.innerHTML=render(k);[...tabs.children].forEach(b=>b.setAttribute('aria-selected',b.dataset.k===k));history.replaceState(null,'','#'+k)}
+Object.keys(dirs).forEach(k=>{const b=document.createElement('button');b.textContent=dirs[k].name;b.dataset.k=k;b.setAttribute('role','tab');b.onclick=()=>show(k);tabs.appendChild(b)});
+show(location.hash.slice(1) in dirs?location.hash.slice(1):'A');
+</script>
+</body>
+</html>

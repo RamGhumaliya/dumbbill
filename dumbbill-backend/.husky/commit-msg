@@ -1,0 +1,2 @@
+# Runs from the repository root. Check the message follows Conventional Commits.
+dumbbill-backend/node_modules/.bin/commitlint --config dumbbill-backend/commitlint.config.js --edit "$1"

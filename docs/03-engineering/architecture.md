@@ -119,5 +119,5 @@ Operational queries on OLTP with proper indexes; heavy aggregates via daily/hour
 **Only two environments: `dev` (local) and `prod`.** There is no staging. Because prod has no rehearsal environment, risky changes use feature flags, backward-compatible migrations and a tested rollback, and are tried locally with realistic seed data before release.
 **Now:** local only (docker-compose: pg, redis, minio, mailpit). Optional lightweight GitHub Actions per repo (lint, typecheck, tests, secret scan). **Deployment is deferred** by the owner; when decided, target AWS Mumbai at ~US$150/month (single small ECS task, small RDS with backups, S3, CloudFront; scale up later) via Terraform. DB migrations stay backward compatible (expand → migrate → contract). Mobile release is manual.
 
-## 14. Key ADRs to write in Phase 0
+## 14. Key ADRs (written in P0-7, in `docs/adr/`)
 ADR-001 modular monolith • ADR-002 Prisma + RLS (decided: Prisma; per-request interactive transaction with `set_config('app.tenant_id', …, true)`; global client banned in request paths) • ADR-003 RLS strategy • ADR-004 money as paise • ADR-005 offline sync • ADR-006 auth/session design • ADR-007 costing engine • ADR-008 PDF rendering.

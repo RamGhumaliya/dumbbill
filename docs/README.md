@@ -60,7 +60,11 @@ The whole workspace is a single git repository with one root `.gitignore`. Each 
 **Dark theme = Direction A "Iron Ledger"** (ink + volt-lime). **Light theme = Direction B "Quiet Ledger"** (warm white + deep teal). One shared type system (Quiet Ledger's serif dropped: Inter Tight + Barlow Condensed + JetBrains Mono) and shape language so it reads as one brand. Details: `02-design/design-guide.md` §0. Interactive preview: `02-design/directions/index.html`.
 
 ## Run it
-Start at the workspace `../README.md`, then `runbooks/local-setup.md`. Other runbooks: `database-and-seeding.md`, `file-storage.md`, `troubleshooting.md`. Contributing rules: `CONTRIBUTING.md`.
+Start at the workspace `../README.md`, then `runbooks/local-setup.md`. Other runbooks: `database-and-seeding.md`, `file-storage.md`, `troubleshooting.md`, `logging-and-errors.md`, `design-system.md`. Operations skeletons (to be completed at deployment): `runbooks/incident.md`, `runbooks/restore-db.md`, `runbooks/rotate-secrets.md`, `runbooks/rollback.md`. Contributing rules: `CONTRIBUTING.md`.
+
+**Decisions (ADRs)** in `adr/`: 001 modular monolith, 002 Prisma + RLS, 003 RLS strategy, 004 money as paise, 005 offline sync, 006 auth and sessions, 007 costing engine, 008 PDF rendering (provisional, confirmed by a spike in P2-4).
+
+**Accounts to create when you are ready** (none needed to keep developing): `accounts-checklist.md`.
 
 ## Reading order
 1. `01-product/PRD.md` · 2. `user-journeys.md` · 3. `user-stories.md`

@@ -42,6 +42,10 @@ dumbbill-mobile/config/prod.json
 *.freezed.dart
 *.mocks.dart
 
+# --- Database backups (contain real data; never commit) ---
+*.dump
+*.sql.gz
+
 # --- Secrets and local settings (never commit real values; commit the .example files) ---
 .env
 .env.*

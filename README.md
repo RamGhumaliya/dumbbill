@@ -28,7 +28,8 @@ protein_retail_saas_product/
 | P0-4 Web app scaffold (Next.js) | Done (see `dumbbill-web/README.md`) |
 | P0-5 Design tokens JSON and UI kit | Done (see `docs/runbooks/design-system.md`; gallery at `/design`) |
 | P0-6 Mobile app scaffold (Flutter) | Done (see `dumbbill-mobile/README.md`) |
-| P0-7 ADR pack, runbook skeletons, accounts checklist | Next |
+| P0-7 ADR pack, runbook skeletons, accounts checklist | Done (see `docs/adr/` and `docs/accounts-checklist.md`) |
+| Phase 0 | Complete. Next: Phase 1 (`docs/05-ai-kit/prompts/phase-1-foundation.md`) |
 
 The live checklist is `docs/06-tracking/progress-tracker.md`.
 

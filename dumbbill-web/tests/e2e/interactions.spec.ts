@@ -1,4 +1,10 @@
 import { expect, test } from '@playwright/test';
+import { signIn } from './support/mock-api';
+
+/** The screens tested here sit behind the sign-in gate, so every test starts signed in (see support/mock-api.ts). */
+test.beforeEach(async ({ page, context }) => {
+  await signIn(page, context);
+});
 
 test.describe('theme switch', () => {
   test('choosing Dark and Light changes the page at once and is remembered after a reload', async ({

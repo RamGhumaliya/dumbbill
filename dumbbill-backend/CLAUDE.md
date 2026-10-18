@@ -16,6 +16,16 @@ Layers: controller (HTTP only) → service (use case) → domain (pure functions
 - Tests run against a real PostgreSQL (the docker compose one) in a **throwaway database per test file** (`test/support/test-database.ts`). Never mock the database for security tests.
 - Dev owner is a superuser and bypasses RLS: always test as `dumbbill_app`.
 
+## Authentication (P1-1). Full reasoning: `../docs/adr/006-auth-and-sessions.md`; app guide: `../docs/api/auth-flow.md`
+- **Deny by default:** a global `AuthGuard` protects every route. Open a route only with `@Public()` and write `Permission: public` in its Swagger description. Protected routes get the signed-in user with `@CurrentUser()`; never read ids for the tenant or user from the request body.
+- **`TenantTx.runAs()` sets the in-process tenant context too**, so code inside it (the audit writer, the logger) knows the business. Signup, login and job code use `runAs`; request code uses `run`.
+- **Tokens:** access token = 15-minute EdDSA JWT with audience `dumbbill-staff` (customers get their own audience in Phase 3). Refresh and emailed tokens are `<tenantId>.<secret>`, only SHA-256 hashes stored, used once. Never log or return a token hash, password hash or TOTP secret; response DTOs are separate classes for that reason.
+- **Anything a stranger can reach must answer the same for known and unknown emails** (status, code, text) and be rate limited. Use `RateLimiter` and `DomainError` with a `Retry-After` header.
+- **Append-only tables** (audit_log now; stock_ledger and points_ledger later): add the table to the `append_only` list in `app_grant_defaults()` in its migration, or the next migration's grants reopen it.
+- **Audit sensitive events** with `AuditService.write(tx, event, info)` INSIDE the transaction that does the work. No secrets in `metadata`.
+- Production refuses to start without real secrets (`pnpm keys:generate`); development uses throw-away values and logs a warning.
+- Sign-in tests use `test/support/auth-test-app.ts` (real app and database; fake clock, Redis, mail and breach check). Move time with `clock.advanceSeconds()`, give each caller a `freshIp()`, and read emails from `mailer`.
+
 ## DTOs & docs
 - class-validator + class-transformer with `whitelist: true, forbidNonWhitelisted: true`.
 - Separate response DTO classes per audience (`ProductCashierDto` vs `ProductAdminDto`). Never return Prisma entities.

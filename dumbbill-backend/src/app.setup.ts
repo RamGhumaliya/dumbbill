@@ -1,4 +1,6 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import cookieParser from 'cookie-parser';
 import { Logger } from 'nestjs-pino';
 import { ProblemDetailsFilter } from './common/errors/problem-details.filter';
 import { validationExceptionFactory } from './common/errors/validation';
@@ -12,6 +14,44 @@ import { ErrorReporter, reportError } from './observability/sentry';
  */
 export function configureApp(app: INestApplication, reporter: ErrorReporter = reportError): void {
   const logger = app.get(Logger);
+  // Small test apps are built without the settings module; they get the safe defaults (no proxy, no CORS origin).
+  let config: ConfigService | undefined;
+  try {
+    config = app.get(ConfigService, { strict: false });
+  } catch {
+    config = undefined;
+  }
+
+  // How many proxies (load balancer, CDN) sit in front of us. This decides which part of `X-Forwarded-For` is
+  // trusted as the visitor's IP. Too high and visitors can fake their address (breaking rate limits); too low
+  // and every visitor looks like the proxy. The default 0 trusts nothing.
+  const hops = config?.get<number>('TRUST_PROXY_HOPS') ?? 0;
+  if (hops > 0) app.getHttpAdapter().getInstance().set('trust proxy', hops);
+
+  // Browsers may call the API only from the web origins we list (never `*`, which cannot be combined with
+  // cookies). `credentials: true` lets the browser send the refresh cookie; the allowed headers include the CSRF
+  // header and the idempotency key; the exposed headers let the web app read the request id and retry hint.
+  app.enableCors({
+    origin: (config?.get<string>('CORS_ALLOWED_ORIGINS') ?? '')
+      .split(',')
+      .map((origin) => origin.trim())
+      .filter(Boolean),
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'X-CSRF-Token',
+      'Idempotency-Key',
+      'If-Match',
+      'X-Request-Id',
+    ],
+    exposedHeaders: ['X-Request-Id', 'Retry-After'],
+    maxAge: 600,
+  });
+
+  // Reads cookies into `request.cookies` (needed for the browser refresh-token cookie).
+  app.use(cookieParser());
 
   // Send Nest's own log messages through our JSON logger too.
   app.useLogger(logger);

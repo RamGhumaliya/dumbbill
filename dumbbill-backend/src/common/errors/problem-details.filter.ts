@@ -6,6 +6,7 @@ import { getTenantContext } from '../../modules/tenancy/tenant-context';
 import { getRequestContext } from '../request-context/request-context';
 import { newRequestId } from '../request-context/request-id';
 import { RequestWithId } from '../request-context/request-context.middleware';
+import { DomainError } from './domain-error';
 import { mapExceptionToProblem } from './problem-details';
 
 /**
@@ -62,6 +63,10 @@ export class ProblemDetailsFilter implements ExceptionFilter {
     // If the response already started streaming we can no longer change it.
     if (response.headersSent) return;
     response.setHeader('X-Request-Id', requestId);
+    if (exception instanceof DomainError && exception.headers) {
+      for (const [name, value] of Object.entries(exception.headers))
+        response.setHeader(name, value);
+    }
     response.status(problem.status).type('application/problem+json').json(problem);
   }
 }

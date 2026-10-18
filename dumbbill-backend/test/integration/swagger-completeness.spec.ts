@@ -6,6 +6,7 @@ import { LoggerModule } from 'nestjs-pino';
 import { ApiProblemResponse } from '../../src/common/swagger/api-problem-response.decorator';
 import { createApiDocument } from '../../src/swagger';
 import { findSwaggerViolations } from '../support/swagger-audit';
+import { applyTestEnvironment } from '../support/test-env';
 
 /**
  * Guard for the API manual. Every route must be documented per docs/03-engineering/api-docs-standard.md,
@@ -17,12 +18,7 @@ import { findSwaggerViolations } from '../support/swagger-audit';
 describe('Swagger completeness', () => {
   it('every route of the real API is fully documented', async () => {
     // The app module validates settings when it is loaded, so set them first.
-    Object.assign(process.env, {
-      NODE_ENV: 'production', // plain JSON logs: no pretty-printing worker thread in tests
-      LOG_LEVEL: 'fatal',
-      APP_DATABASE_URL: 'postgresql://app:app@localhost:5432/unused',
-      REDIS_URL: 'redis://localhost:6379',
-    });
+    applyTestEnvironment();
     const { AppModule } = await import('../../src/app.module');
     const app = (
       await Test.createTestingModule({ imports: [AppModule] }).compile()

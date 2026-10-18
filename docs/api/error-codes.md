@@ -25,9 +25,16 @@ Every failed request returns the same JSON body (content type `application/probl
 |---|---|---|---|
 | `BAD_REQUEST` | 400 | Bad request | Show a generic "something is wrong with this request" message. |
 | `VALIDATION_FAILED` | 400 | Some fields are invalid | Show each entry of `errors[]` next to its field. |
+| `INVALID_TOKEN` | 400 | This link is invalid or has expired | Offer to send a new verification or password-reset email. |
 | `FILE_INVALID_KEY` | 400 | Invalid file reference | Programming error; report it. |
 | `UNAUTHENTICATED` | 401 | Sign in required | Try one token refresh, then send the user to the login screen. |
+| `INVALID_CREDENTIALS` | 401 | Email or password is incorrect | Show one generic message on the login form. Never say which of the two was wrong, or whether the account exists. |
+| `TOTP_REQUIRED` | 401 | Two-step code required | The password was right but this account uses an authenticator app. Show the code box and send the same login request again with `totpCode` (or `recoveryCode`). |
+| `INVALID_TOTP_CODE` | 401 | The two-step code is not valid | Ask for the current 6-digit code again. Codes change every 30 seconds. |
+| `INVALID_REFRESH_TOKEN` | 401 | Session expired | The session cannot be renewed. Clear stored tokens and send the user to the login screen. |
 | `FORBIDDEN` | 403 | Not allowed | Show "you do not have permission"; hide or disable the action. |
+| `EMAIL_NOT_VERIFIED` | 403 | Email not verified | Tell the user to open the verification email, and offer "Resend verification email". |
+| `CSRF_FAILED` | 403 | Request could not be verified | Web only: re-read the `dumbbill_csrf` cookie, send it as `X-CSRF-Token`, and retry once. |
 | `NOT_FOUND` | 404 | Not found | Show "not found". Also returned when the item belongs to another business. |
 | `FILE_NOT_FOUND` | 404 | File not found | Show a placeholder image or "file missing". |
 | `METHOD_NOT_ALLOWED` | 405 | Method not allowed | Programming error; report it. |
@@ -38,6 +45,7 @@ Every failed request returns the same JSON body (content type `application/probl
 | `UNSUPPORTED_MEDIA_TYPE` | 415 | Unsupported file type | Ask the user to choose a supported file type. |
 | `FILE_TYPE_NOT_ALLOWED` | 415 | This file type is not allowed | List the allowed types: JPEG, PNG, WebP, PDF, CSV. |
 | `BUSINESS_RULE_VIOLATION` | 422 | Not allowed by business rules | Show `detail` to the user. |
+| `WEAK_PASSWORD` | 422 | Choose a stronger password | Show `detail` and the entries of `errors[]` next to the password field. |
 | `FILE_EMPTY` | 422 | The file is empty | Ask the user to choose another file. |
 | `FILE_CONTENT_MISMATCH` | 422 | The file does not match its type | Ask the user to choose a genuine file. |
 | `DISCOUNT_EXCEEDS_LIMIT` | 422 | Discount exceeds your limit | Offer "ask a manager for approval". |

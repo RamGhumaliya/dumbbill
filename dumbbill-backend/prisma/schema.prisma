@@ -93,15 +93,18 @@ enum TenantStatus {
 /// One retailer business (a "tenant"). Everything else in the system belongs to exactly one tenant.
 /// RLS rule for this table: a request may only see the tenant whose id equals app.tenant_id.
 model Tenant {
-  id        String       @id @default(uuid(7)) @db.Uuid
-  name      String
-  status    TenantStatus @default(TRIAL)
+  id          String       @id @default(uuid(7)) @db.Uuid
+  name        String
+  status      TenantStatus @default(TRIAL)
   /// The plan the business is on. Null only briefly during signup.
-  planId    String?      @map("plan_id") @db.Uuid
-  plan      Plan?        @relation(fields: [planId], references: [id])
-  createdAt DateTime     @default(now()) @map("created_at") @db.Timestamptz()
-  updatedAt DateTime     @updatedAt @map("updated_at") @db.Timestamptz()
-  users     User[]
+  planId      String?      @map("plan_id") @db.Uuid
+  plan        Plan?        @relation(fields: [planId], references: [id])
+  /// When the free trial ends (signup time + the plan's trial days). Billing (Phase 4) acts on it.
+  trialEndsAt DateTime?    @map("trial_ends_at") @db.Timestamptz()
+  createdAt   DateTime     @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt   DateTime     @updatedAt @map("updated_at") @db.Timestamptz()
+  users       User[]
+  sessions    Session[]
 
   @@map("tenants")
 }
@@ -132,6 +135,123 @@ model User {
   /// Who created this row (a user id), for the audit trail. Null for the first owner created at signup.
   createdBy    String?    @map("created_by") @db.Uuid
 
+  // --- Authentication (P1-1). None of these columns is ever returned by an API. ---
+  /// When the person proved they own the email address. Login is refused until this is set.
+  emailVerifiedAt    DateTime? @map("email_verified_at") @db.Timestamptz()
+  /// True for the person who created the business. Roles and permissions arrive in P1-2.
+  isOwner            Boolean   @default(false) @map("is_owner")
+  lastLoginAt        DateTime? @map("last_login_at") @db.Timestamptz()
+  passwordChangedAt  DateTime? @map("password_changed_at") @db.Timestamptz()
+  /// The TOTP (authenticator app) secret, ENCRYPTED with the server's data key. Null = two-step login is off or not finished.
+  totpSecretEnc      String?   @map("totp_secret_enc")
+  /// Set when the person confirmed their first code. Two-step login is on only when this is set.
+  totpEnabledAt      DateTime? @map("totp_enabled_at") @db.Timestamptz()
+  /// Time-step number of the last accepted code, so the same code cannot be used twice.
+  totpLastStep       BigInt?   @map("totp_last_step")
+  /// SHA-256 hashes of the unused one-time recovery codes.
+  totpRecoveryHashes String[]  @default([]) @map("totp_recovery_hashes")
+
+  sessions   Session[]
+  authTokens AuthToken[]
+
   @@index([tenantId])
   @@map("users")
+}
+
+// ---------------------------------------------------------------------------------------------
+// AUTHENTICATION TABLES (P1-1). All are tenant tables: the tenant id is carried inside every token
+// we hand out, so a request can be pointed at the right business BEFORE anything is read.
+// See docs/adr/006-auth-and-sessions.md.
+// ---------------------------------------------------------------------------------------------
+
+/// One sign-in on one device. Revoking a session stops its refresh tokens working at once.
+model Session {
+  id            String         @id @default(uuid(7)) @db.Uuid
+  tenantId      String         @map("tenant_id") @db.Uuid
+  tenant        Tenant         @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  userId        String         @map("user_id") @db.Uuid
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// WEB (refresh token in an httpOnly cookie) or MOBILE (refresh token kept by the app).
+  clientType    String         @map("client_type")
+  /// A short human label such as "Chrome on Windows", built from the User-Agent. Shown in the session list.
+  deviceLabel   String         @map("device_label")
+  /// The IP address of the sign-in, shown to the user so they can spot a stranger.
+  ipAddress     String?        @map("ip_address")
+  createdAt     DateTime       @default(now()) @map("created_at") @db.Timestamptz()
+  lastUsedAt    DateTime       @default(now()) @map("last_used_at") @db.Timestamptz()
+  /// Set when the session is ended (logout, revoked, password changed, token reuse detected).
+  revokedAt     DateTime?      @map("revoked_at") @db.Timestamptz()
+  /// Why it was ended: LOGOUT, REVOKED_BY_USER, PASSWORD_CHANGED, PASSWORD_RESET, TOKEN_REUSE.
+  revokedReason String?        @map("revoked_reason")
+  refreshTokens RefreshToken[]
+
+  @@index([tenantId, userId])
+  @@map("sessions")
+}
+
+/// One refresh token of a session. Only a hash is stored. Each token is used once and replaced by the next
+/// (rotation); presenting an already-used token means it was stolen, and the whole session is ended.
+model RefreshToken {
+  id        String    @id @default(uuid(7)) @db.Uuid
+  tenantId  String    @map("tenant_id") @db.Uuid
+  sessionId String    @map("session_id") @db.Uuid
+  session   Session   @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  /// SHA-256 of the secret part of the token. The token itself is never stored.
+  tokenHash String    @unique @map("token_hash")
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  /// 30 days after it was issued (the "sliding" window: every rotation issues a new one).
+  expiresAt DateTime  @map("expires_at") @db.Timestamptz()
+  /// Set the first time the token is exchanged for a new one.
+  usedAt    DateTime? @map("used_at") @db.Timestamptz()
+
+  @@index([tenantId, sessionId])
+  @@map("refresh_tokens")
+}
+
+/// Why a one-time emailed token exists.
+enum AuthTokenPurpose {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+}
+
+/// A single-use token sent by email (verify the address, reset the password). Only a hash is stored.
+model AuthToken {
+  id        String           @id @default(uuid(7)) @db.Uuid
+  tenantId  String           @map("tenant_id") @db.Uuid
+  userId    String           @map("user_id") @db.Uuid
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  purpose   AuthTokenPurpose
+  tokenHash String           @unique @map("token_hash")
+  /// Verification links last 24 hours, password reset links 30 minutes.
+  expiresAt DateTime         @map("expires_at") @db.Timestamptz()
+  usedAt    DateTime?        @map("used_at") @db.Timestamptz()
+  createdAt DateTime         @default(now()) @map("created_at") @db.Timestamptz()
+
+  @@index([tenantId, userId, purpose])
+  @@map("auth_tokens")
+}
+
+/// The business record of who did what (hard rule 7). APPEND-ONLY: the app role cannot UPDATE or DELETE rows.
+/// This is evidence, unlike logs, which expire. Never put secrets or full personal data in `metadata`.
+model AuditLog {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  tenantId    String   @map("tenant_id") @db.Uuid
+  /// The staff member who did it. Null for system actions.
+  actorUserId String?  @map("actor_user_id") @db.Uuid
+  /// A dotted event name such as "auth.login", "auth.password_changed".
+  action      String
+  /// What it was done to (for example "session") and its id.
+  entity      String?
+  entityId    String?  @map("entity_id")
+  /// Small extra facts (for example the reason a session ended). No secrets.
+  metadata    Json?
+  ipAddress   String?  @map("ip_address")
+  userAgent   String?  @map("user_agent")
+  /// The request id, so the audit row can be matched to the log lines of the same request.
+  requestId   String?  @map("request_id")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  @@index([tenantId, createdAt])
+  @@index([tenantId, action])
+  @@map("audit_log")
 }

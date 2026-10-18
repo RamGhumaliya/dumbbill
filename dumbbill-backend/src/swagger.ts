@@ -39,7 +39,7 @@ Dumbbill API: multi-tenant backend for protein and supplement retailers in India
 - **Money** is always an integer in **paise** (₹1 = 100). Never floats.
 - **Time** is ISO-8601 UTC. The apps display Asia/Kolkata.
 - **Tenancy**: every request is scoped to the business in the access token. Resources of other businesses return **404**.
-- **Auth**: \`Authorization: Bearer <access token>\`. Staff and customer tokens are separate.
+- **Auth**: \`Authorization: Bearer <access token>\` (15 minutes). Renew with the refresh token, which works once and is replaced each time (browser apps keep it in an httpOnly cookie and send \`X-CSRF-Token\`; mobile apps keep it in secure storage). Staff and customer tokens are separate. Every route needs a token unless its description says \`Permission: public\`. Full guide: docs/api/auth-flow.md.
 - **Idempotency**: money-creating POSTs require an \`Idempotency-Key\` header; retrying with the same key returns the original result.
 - **Pagination**: cursor-based (\`cursor\`, \`limit\` up to 100, response \`nextCursor\`).
 - **Errors**: RFC 9457 \`application/problem+json\` with a stable machine \`code\` and a \`requestId\` to quote to support.

@@ -70,6 +70,10 @@ curl http://localhost:3000/readyz      # {"status":"ok","checks":{"database":"up
 
 Open http://localhost:3000/docs to see the API manual.
 
+### Sign-up needs reference data and shows emails in Mailpit
+
+Creating a business needs the Starter plan from the seed data: run `pnpm db:seed` once (safe to repeat). Verification and password-reset emails are caught by Mailpit: open http://localhost:8025 to read them and click the link. Nothing real is ever sent from your computer. The sign-in settings in `.env.example` (signing key, pepper, encryption key) may stay empty in development: throw-away values are used and a warning is logged each start. Production refuses to start without real ones (`pnpm keys:generate`).
+
 ## 7. Check your setup is healthy
 
 ```bash
@@ -87,7 +91,7 @@ cp .env.development.example .env.development      # PowerShell: copy .env.develo
 pnpm dev                                          # http://localhost:3001
 ```
 
-It works without the API running; the owner dashboard then shows "Cannot reach the server" with a reference. Start the API (steps 4 to 6) and reload to see "Server is ready". Port 3001 is used because the API owns 3000. Details, commands and a code map: `dumbbill-web/README.md`.
+The dashboard, till and admin screens now need a sign-in. Start the API (steps 4 to 6) and run `pnpm db:seed` once, then open http://localhost:3001/signup, create a shop, and open the confirmation email in Mailpit (http://localhost:8025). With the API stopped, the sign-in page says it cannot reach the server. Port 3001 is used because the API owns 3000; on `localhost` the two count as the same site, which is what lets the sign-in cookies work. Details, commands and a code map: `dumbbill-web/README.md`.
 
 For the browser tests: `pnpm exec playwright install chromium` once, then `pnpm test:e2e`. For a local production build (`pnpm build`) create `.env.production` from `.env.production.example` and set the API address to `http://localhost:3000`.
 

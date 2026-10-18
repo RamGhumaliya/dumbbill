@@ -39,7 +39,8 @@ HTTP request
 
 Special cases (decided now, built when needed):
 - **Signup** creates the tenant and its first owner. It generates the tenant id first, runs with that id as the context, and inserts the `tenants` row (allowed because `id` equals the context) and the `users` row in the same transaction.
-- **Login by email** must find a user before knowing the tenant. This will use a narrow `SECURITY DEFINER` database function (`find_login_by_email`) that returns only the fields login needs, so the app role never gets a general "see every tenant" ability. Added in P1-1.
+- **Login by email** must find a user before knowing the tenant. This uses a narrow `SECURITY DEFINER` database function (`find_login_by_email`) that returns only the fields login needs, so the app role never gets a general "see every tenant" ability. **Built in P1-1.** Because tables use FORCE row-level security, the function is owned by a dedicated role `dumbbill_auth` that has its own SELECT-only policy and column grants (see ADR 006 section 6); a function owned by the normal owner would find no rows in production.
+- **Append-only tables:** `app_grant_defaults()` now removes UPDATE/DELETE/TRUNCATE again for every table on its `append_only` list (currently `audit_log`). **Add new append-only tables (stock_ledger, points_ledger, ...) to that list** in the migration that creates them; otherwise the next migration's grants would reopen them.
 - **Super Admin** actions across tenants use a separate, audited code path and role (Phase 4), never the normal app role.
 - **Reference tables** (`plans`, `gst_states`, `category_templates`) are global: no `tenant_id`, no RLS, readable by the app role.
 

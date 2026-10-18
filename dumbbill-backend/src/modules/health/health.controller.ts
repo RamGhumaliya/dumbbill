@@ -1,6 +1,7 @@
 import { Controller, Get, HttpCode, ServiceUnavailableException } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiProblemResponse } from '../../common/swagger/api-problem-response.decorator';
+import { Public } from '../auth/http/decorators';
 import { PrismaService } from '../prisma/prisma.service';
 import { HealthStatusDto, ReadinessDto } from './health.dto';
 
@@ -10,6 +11,7 @@ import { HealthStatusDto, ReadinessDto } from './health.dto';
  *  - /readyz   "can it serve real requests?"  (stop sending traffic if this fails)
  * They are separate on purpose: a database outage should stop traffic, not restart the app.
  */
+@Public() // probes must answer without a login
 @ApiTags('System')
 @Controller()
 export class HealthController {

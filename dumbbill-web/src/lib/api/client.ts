@@ -31,6 +31,11 @@ export interface ApiClientOptions {
   onUnauthenticated?: () => void;
   /** Give up waiting after this many milliseconds. Default 15000. */
   timeoutMs?: number;
+  /**
+   * Whether the browser sends cookies with each call. The web app uses `include`: the API lives on another
+   * address (same site, different port or subdomain), and the refresh token is an httpOnly cookie.
+   */
+  credentials?: RequestCredentials;
   /** For tests: replaces the global fetch. */
   fetchImpl?: typeof fetch;
 }
@@ -47,6 +52,8 @@ export interface RequestOptions<TSchema extends z.ZodType> {
   schema: TSchema;
   /** Required by the API on calls that create money records (bills, payments). Reuse it when retrying. */
   idempotencyKey?: string;
+  /** Extra headers for this call, for example `X-CSRF-Token` on calls authenticated by the refresh cookie. */
+  headers?: Record<string, string>;
   /** Set false for public endpoints (login, health). Default true. */
   auth?: boolean;
   /** Lets the caller cancel (for example when the user leaves the screen). */
@@ -87,6 +94,7 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
     const headers: Record<string, string> = {
       Accept: 'application/json',
       'X-Request-Id': requestId,
+      ...request.headers,
     };
     const token = request.auth === false ? null : (options.getAccessToken?.() ?? null);
     if (token) headers.Authorization = `Bearer ${token}`;
@@ -103,6 +111,7 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
         method: request.method ?? 'GET',
         headers,
         body: request.body === undefined ? undefined : JSON.stringify(request.body),
+        credentials: options.credentials,
         signal,
       });
     } catch (error) {
@@ -119,7 +128,7 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
 
     if (!response.ok) {
       const problem = parseProblem(body);
-      if (problem) throw ApiError.fromProblem(problem);
+      if (problem) throw ApiError.fromProblem(problem, readRetryAfter(response));
       throw new ApiError(
         response.status,
         'UNEXPECTED_RESPONSE',
@@ -168,4 +177,10 @@ async function readBody(response: Response): Promise<unknown> {
   } catch {
     return undefined;
   }
+}
+
+/** The `Retry-After` header as a number of seconds (the API always sends whole seconds). */
+function readRetryAfter(response: Response): number | undefined {
+  const value = Number(response.headers.get('retry-after'));
+  return Number.isFinite(value) && value > 0 ? value : undefined;
 }

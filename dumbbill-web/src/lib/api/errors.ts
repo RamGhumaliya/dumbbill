@@ -53,13 +53,15 @@ export class ApiError extends Error {
     public readonly detail?: string,
     /** Per-field problems, for forms. */
     public readonly fieldErrors: FieldError[] = [],
+    /** Seconds to wait before trying again, from the `Retry-After` header of a rate-limit (429) answer. */
+    public readonly retryAfterSeconds?: number,
   ) {
     super(detail ?? title);
     this.name = 'ApiError';
   }
 
-  /** Build from a parsed problem body. */
-  static fromProblem(problem: ProblemDetails): ApiError {
+  /** Build from a parsed problem body (and the `Retry-After` header, when the server sent one). */
+  static fromProblem(problem: ProblemDetails, retryAfterSeconds?: number): ApiError {
     return new ApiError(
       problem.status,
       problem.code,
@@ -67,6 +69,7 @@ export class ApiError extends Error {
       problem.requestId,
       problem.detail,
       problem.errors ?? [],
+      retryAfterSeconds,
     );
   }
 

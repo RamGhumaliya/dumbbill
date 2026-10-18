@@ -18,9 +18,11 @@ If a secret leaked, **rotate first, investigate after.** Deleting a commit from 
 | `APP_DATABASE_URL` (`dumbbill_app` password) | The running API | Yes (dev: `dumbbill_app/dumbbill_app`) | Owner of the database | API restart needed |
 | `REDIS_URL` | Queues, rate limits, cache | Yes (no password in dev) | Owner | API and worker restart |
 | `SENTRY_DSN` | Error reporting | Optional | Sentry project settings | Low risk (write-only), but rotate if abused |
-| JWT signing keys (with `kid`) | Access tokens | Planned P1-1 | Owner | Add a new key, keep the old one to verify until old tokens expire (15 min), then remove |
-| Password **pepper** | Added to passwords before hashing | Planned P1-1 | Owner | **Cannot be swapped silently**: existing hashes depend on it. Use a versioned pepper: new logins and password changes use the new one, old users rehash at next login |
-| Refresh-token / cookie secrets | Web sessions | Planned P1-1 | Owner | Rotating signs everyone out (acceptable) |
+| `JWT_PRIVATE_KEY` + `JWT_KEY_ID` (signs access tokens) | Access tokens | **Yes (P1-1)** | Owner | Rotation without logging anyone out: generate a new key (`pnpm keys:generate`), put the OLD public key in `JWT_PREVIOUS_PUBLIC_KEYS` as `oldkid:base64(public PEM)`, switch `JWT_PRIVATE_KEY` and `JWT_KEY_ID` to the new ones, deploy. After 15 minutes remove the old entry |
+| `PASSWORD_PEPPERS` (versioned pepper) | Mixed into passwords before hashing | **Yes (P1-1)** | Owner | **Never replace the only entry**: existing passwords would stop working. ADD a higher version (`1:old,2:new`). New passwords use the highest; people with an old one are re-hashed automatically at their next sign-in. Remove the old version only when no active user still has it (a query on `users.password_hash LIKE 'v1:%'` tells you) |
+| `DATA_ENCRYPTION_KEY` | Encrypts authenticator-app (TOTP) secrets | **Yes (P1-1)** | Owner | Changing it makes every stored TOTP secret unreadable (those people are asked to set up two-step login again, using recovery codes). Plan a re-encryption step before rotating it |
+| `MAIL_SMTP_URL` | Sends email (Mailpit in dev, SES SMTP in production) | **Yes (P1-1)** | Cloud console | API restart |
+| Refresh tokens | Sessions | Yes (P1-1) | n/a | They are random values stored only as hashes; there is no key to rotate. To sign everyone out, set `revoked_at` on all sessions (a deliberate, audited action) |
 | Razorpay key id/secret and **webhook secret** | Billing | Planned Phase 4 | Razorpay dashboard | Update both sides in a short window; verify a test event |
 | SES / SMTP credentials | Email | Planned | Cloud console | API/worker restart |
 | FCM service account | Push notifications | Planned | Firebase console | Worker restart |

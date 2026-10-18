@@ -1,7 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
-import { assertUuid, getTenantContext, TenantContext } from './tenant-context';
+import {
+  assertUuid,
+  getTenantContext,
+  runWithTenantContext,
+  TenantContext,
+} from './tenant-context';
 
 /** The query client handed to your code inside a tenant transaction. Use it for every query. */
 export type TenantTransaction = Prisma.TransactionClient;
@@ -52,12 +57,17 @@ export class TenantTx {
     assertUuid(context.tenantId, 'tenantId');
     if (context.userId !== undefined) assertUuid(context.userId, 'userId');
 
-    return this.prisma.$transaction(async (tx) => {
-      // Parameters ($1, $2) are sent separately from the SQL text, so they cannot inject SQL.
-      // The third argument `true` makes the setting local to this transaction.
-      await tx.$queryRaw`SELECT set_config('app.tenant_id', ${context.tenantId}, true),
-                                set_config('app.user_id', ${context.userId ?? ''}, true)`;
-      return work(tx);
-    }, TRANSACTION_OPTIONS);
+    // Also make the business visible to ordinary code running inside `work` (the audit writer, the logger).
+    // Without this, work started with runAs() (signup, login, jobs) would be locked to the right business in
+    // the database but would not know it in application code, and logs would carry no tenantId.
+    return runWithTenantContext(context, () =>
+      this.prisma.$transaction(async (tx) => {
+        // Parameters ($1, $2) are sent separately from the SQL text, so they cannot inject SQL.
+        // The third argument `true` makes the setting local to this transaction.
+        await tx.$queryRaw`SELECT set_config('app.tenant_id', ${context.tenantId}, true),
+                                  set_config('app.user_id', ${context.userId ?? ''}, true)`;
+        return work(tx);
+      }, TRANSACTION_OPTIONS),
+    );
   }
 }

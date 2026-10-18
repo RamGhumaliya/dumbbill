@@ -19,6 +19,8 @@ Target: OWASP ASVS L2, OWASP API Top 10 2023, India DPDP Act 2023, PCI scope avo
 | DoS | Bot floods search | WAF rate rules, per-tenant quotas, request size limits, pagination caps |
 
 ## 2. Authentication & sessions
+> **Status (18 Oct 2026): implemented in P1-1 for staff accounts**, with the details, decisions and known limits in `docs/adr/006-auth-and-sessions.md` section 6 and the app guide `docs/api/auth-flow.md`. Customer accounts (separate pool) and Super Admin mandatory two-step come later. Passkeys are not built.
+
 - Passwords: Argon2id (m=64MB,t=3,p=1 tuned), min length 10, max 128, no composition rules, breached check. Pepper in Secrets Manager.
 - Email verification mandatory; staff accounts invited by owner (no open staff signup).
 - Access JWT 15 min (EdDSA/RS256, `kid` rotation), refresh 30 days sliding with rotation + family revocation on reuse.
@@ -53,6 +55,8 @@ Target: OWASP ASVS L2, OWASP API Top 10 2023, India DPDP Act 2023, PCI scope avo
 - Mobile: certificate pinning optional, jailbreak/root signal (warn), secure storage (Keychain/Keystore), screenshot-block on sensitive screens, no secrets in app, obfuscation on release.
 
 ## 6. Audit & accountability
+> **Status:** the append-only `audit_log` table and writer exist (P1-1; UPDATE and DELETE are refused for the app role and, by trigger, for everyone). **The hash chain and the periodic anchor are not built yet** (planned for P1-6 hardening, they need a design for concurrent writes).
+
 `audit_log` append-only (DB trigger blocks UPDATE/DELETE; role has INSERT only). Events: auth (login/fail/reset), permission changes, price changes, stock adjustments/transfers, discounts above X%, approvals, cancel/refund, exports, impersonation, plan changes. Hash-chain (each row stores hash of previous) for tamper evidence; periodic anchor to S3 Object Lock.
 
 ## 7. Privacy (DPDP)

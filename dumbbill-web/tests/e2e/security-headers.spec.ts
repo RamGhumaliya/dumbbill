@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { signIn } from './support/mock-api';
 
 /**
  * Security headers are part of the product: they are checked on real responses, and the page is
@@ -37,7 +38,9 @@ test.describe('security headers', () => {
 
   test('the strict policy does not break the app: scripts run and no policy violations are reported', async ({
     page,
+    context,
   }) => {
+    await signIn(page, context); // the till is behind the sign-in gate
     const problems: string[] = [];
     page.on('console', (message) => {
       if (message.type() === 'error' || message.type() === 'warning') problems.push(message.text());

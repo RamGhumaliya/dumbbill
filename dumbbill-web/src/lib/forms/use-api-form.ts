@@ -24,7 +24,8 @@ export function useApiForm<TInput extends FieldValues, TOutput extends FieldValu
   const form = useForm<TInput, unknown, TOutput>({ ...options, resolver: zodResolver(schema) });
   const { setError } = form;
   const applyServerErrors = useCallback(
-    (error: unknown) => applyApiErrors<TInput>(error, setError),
+    (error: unknown, renames?: Record<string, string>) =>
+      applyApiErrors<TInput>(error, setError, renames),
     [setError],
   );
   return { ...form, applyServerErrors };

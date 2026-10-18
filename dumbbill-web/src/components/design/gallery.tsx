@@ -14,6 +14,7 @@
  */
 import { useState, type ReactNode } from 'react';
 import {
+  Alert,
   Badge,
   Button,
   Checkbox,
@@ -26,6 +27,7 @@ import {
   Input,
   Kbd,
   MoneyText,
+  PasswordInput,
   Popover,
   PopoverClose,
   PopoverContent,
@@ -323,6 +325,18 @@ export function Gallery() {
           <Field label="Barcode" error="This barcode is already used by Raw Whey 1 kg.">
             <Input defaultValue="8901234567890" />
           </Field>
+          <Field
+            label="Password"
+            hint="At least 10 characters. A few unrelated words work well."
+            required
+          >
+            <PasswordInput
+              showLabel="Show password"
+              hideLabel="Hide password"
+              autoComplete="new-password"
+              defaultValue="violet harbour 4 lantern"
+            />
+          </Field>
           <Field label="Supplier (disabled)">
             <Input disabled defaultValue="Sharma Nutrition Traders" />
           </Field>
@@ -354,6 +368,27 @@ export function Gallery() {
             <Checkbox label="Allow negative stock" disabled />
             <Checkbox label="I have counted the cash drawer" invalid />
           </fieldset>
+        </div>
+      </Section>
+
+      <Section
+        id="alerts"
+        title="Alerts"
+        note="Messages that stay where the person is looking. Meaning is in the title, never the edge colour alone. Danger and warning are announced at once."
+      >
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Alert tone="info" title="Check your inbox">
+            We sent a link to ravi@fitfuel.in. It works for 24 hours.
+          </Alert>
+          <Alert tone="success" title="Password changed">
+            You were signed out on your other devices.
+          </Alert>
+          <Alert tone="warning" title="Trial ends in 3 days">
+            Choose a plan to keep billing without interruption.
+          </Alert>
+          <Alert tone="danger" title="Cannot sign in">
+            The email or password is not correct.
+          </Alert>
         </div>
       </Section>
 

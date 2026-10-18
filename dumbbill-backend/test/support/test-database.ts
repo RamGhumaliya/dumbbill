@@ -27,6 +27,8 @@ const APP_USER = 'dumbbill_app';
 const APP_PASSWORD = 'dumbbill_app';
 
 export interface TestDatabase {
+  /** Connection string of the restricted app role (what the running API would use). */
+  appUrl: string;
   /** Connects as the OWNER. Can see everything; use only to inspect or to set up scenarios. */
   owner: PrismaClient;
   /** Connects as the restricted app role, exactly like the running API does. */
@@ -73,6 +75,7 @@ export async function createTestDatabase(): Promise<TestDatabase> {
   const tenantTx = new TenantTx(app);
 
   return {
+    appUrl,
     owner,
     app,
     tenantTx,

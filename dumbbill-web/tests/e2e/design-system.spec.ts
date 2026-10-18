@@ -1,5 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
+import { signIn } from './support/mock-api';
 
 /**
  * The design system, tested as a user (or an assistive technology) would meet it, on the live gallery at /design:
@@ -349,12 +350,19 @@ test.describe('motion at normal settings', () => {
 });
 
 test.describe('self-hosted assets', () => {
+  // /pos and / are behind the sign-in gate, so these tests start signed in (see support/mock-api.ts).
+  test.beforeEach(async ({ page, context }) => {
+    await signIn(page, context);
+  });
+
   for (const path of ['/design', '/pos', '/']) {
     test(`${path} loads fonts and styles only from our own server`, async ({ page, baseURL }) => {
       const foreign: string[] = [];
       page.on('request', (request) => {
         const url = new URL(request.url());
-        if (url.protocol.startsWith('http') && url.origin !== new URL(baseURL!).origin)
+        // The API (another port of our own server) is expected; anything else would be a third party.
+        const own = [new URL(baseURL!).origin, 'http://localhost:3000'];
+        if (url.protocol.startsWith('http') && !own.includes(url.origin))
           foreign.push(request.url());
       });
       await page.goto(path);
@@ -384,5 +392,62 @@ test.describe('self-hosted assets', () => {
     expect(loadedFaces).toBeGreaterThanOrEqual(4);
     expect(fontRequests.length).toBeGreaterThanOrEqual(4);
     for (const url of fontRequests) expect(new URL(url).origin).toBe(new URL(baseURL!).origin);
+  });
+});
+
+test.describe('alert', () => {
+  test('danger and warning are announced at once (role alert); info and success politely (role status)', async ({
+    page,
+  }) => {
+    await open(page);
+    const section = page.locator('section[aria-labelledby="alerts"]');
+    await expect(section.getByRole('alert')).toHaveCount(2); // warning + danger
+    await expect(section.getByRole('status')).toHaveCount(2); // info + success
+    await expect(section.getByRole('alert').filter({ hasText: 'Cannot sign in' })).toBeVisible();
+  });
+
+  test('the meaning is in the title text, not only in the edge colour', async ({ page }) => {
+    await open(page);
+    for (const title of [
+      'Check your inbox',
+      'Password changed',
+      'Trial ends in 3 days',
+      'Cannot sign in',
+    ]) {
+      await expect(
+        page.locator('section[aria-labelledby="alerts"]').getByText(title, { exact: true }),
+      ).toBeVisible();
+    }
+  });
+});
+
+test.describe('password input', () => {
+  test('shows and hides the password with a named, keyboard-operable toggle', async ({ page }) => {
+    await open(page);
+    const input = page.locator('section[aria-labelledby="forms"]').getByLabel(/^Password\s*\*?$/);
+    await expect(input).toHaveAttribute('type', 'password');
+
+    const toggle = page
+      .locator('section[aria-labelledby="forms"]')
+      .getByRole('button', { name: 'Show password' });
+    await toggle.focus();
+    await page.keyboard.press('Enter');
+    await expect(input).toHaveAttribute('type', 'text');
+    const hide = page
+      .locator('section[aria-labelledby="forms"]')
+      .getByRole('button', { name: 'Hide password' });
+    await expect(hide).toHaveAttribute('aria-pressed', 'true');
+    await page.keyboard.press('Space');
+    await expect(input).toHaveAttribute('type', 'password');
+  });
+
+  test('the toggle has a comfortable touch size', async ({ page }) => {
+    await open(page);
+    const box = await page
+      .locator('section[aria-labelledby="forms"]')
+      .getByRole('button', { name: 'Show password' })
+      .boundingBox();
+    expect(box!.width).toBeGreaterThanOrEqual(40);
+    expect(box!.height).toBeGreaterThanOrEqual(40);
   });
 });

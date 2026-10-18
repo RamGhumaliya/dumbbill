@@ -75,6 +75,52 @@ export const ERROR_CODES = {
     uiHint: 'Wait for the `Retry-After` header, then retry.',
   },
 
+  // --- Sign-in and accounts (P1-1) ---
+  INVALID_CREDENTIALS: {
+    status: 401,
+    title: 'Email or password is incorrect',
+    uiHint:
+      'Show one generic message on the login form. Never say which of the two was wrong, or whether the account exists.',
+  },
+  EMAIL_NOT_VERIFIED: {
+    status: 403,
+    title: 'Email not verified',
+    uiHint: 'Tell the user to open the verification email, and offer "Resend verification email".',
+  },
+  TOTP_REQUIRED: {
+    status: 401,
+    title: 'Two-step code required',
+    uiHint:
+      'The password was right but this account uses an authenticator app. Show the code box and send the same login request again with `totpCode` (or `recoveryCode`).',
+  },
+  INVALID_TOTP_CODE: {
+    status: 401,
+    title: 'The two-step code is not valid',
+    uiHint: 'Ask for the current 6-digit code again. Codes change every 30 seconds.',
+  },
+  INVALID_TOKEN: {
+    status: 400,
+    title: 'This link is invalid or has expired',
+    uiHint: 'Offer to send a new verification or password-reset email.',
+  },
+  INVALID_REFRESH_TOKEN: {
+    status: 401,
+    title: 'Session expired',
+    uiHint:
+      'The session cannot be renewed. Clear stored tokens and send the user to the login screen.',
+  },
+  WEAK_PASSWORD: {
+    status: 422,
+    title: 'Choose a stronger password',
+    uiHint: 'Show `detail` and the entries of `errors[]` next to the password field.',
+  },
+  CSRF_FAILED: {
+    status: 403,
+    title: 'Request could not be verified',
+    uiHint:
+      'Web only: re-read the `dumbbill_csrf` cookie, send it as `X-CSRF-Token`, and retry once.',
+  },
+
   // --- Files ---
   FILE_NOT_FOUND: {
     status: 404,

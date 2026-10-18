@@ -26,6 +26,8 @@ export class DomainError extends Error {
     public readonly detail?: string,
     /** Per-field problems, for validation-style errors. */
     public readonly errors?: FieldError[],
+    /** Extra response headers, for example `Retry-After` on a rate-limit error. */
+    public readonly headers?: Readonly<Record<string, string>>,
   ) {
     super(detail ?? code);
     this.name = 'DomainError';

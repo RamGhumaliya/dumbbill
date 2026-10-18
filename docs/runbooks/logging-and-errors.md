@@ -58,6 +58,16 @@ this.logger.warn({ msg: 'Discount rejected', code: 'DISCOUNT_EXCEEDS_LIMIT' });
 
 Log business events (invoice created, discount rejected, approval granted, stock adjusted), not just failures. Do not log whole request bodies. Never use `console.log` (lint blocks it).
 
+### Sign-in events worth searching for
+
+| Event (`event` field) | Level | Meaning |
+|---|---|---|
+| `login.failed` | warn | A sign-in was refused. `reason`: `unknown_or_inactive`, `wrong_password` or `wrong_totp`. No email, password or token is ever written |
+| `auth.refresh_token_reuse` | warn | An already-used refresh token came back more than 10 seconds later: possible theft, the session was ended. Also written to the audit log |
+| `rls.violation` | warn | A request tried to reach another business's data |
+
+Wrong-password attempts for a known account are also in the **audit log** (`auth.login_failed`), which is permanent evidence; the technical logs expire.
+
 ## 3. Errors: one format for everything
 
 Every failed request returns the same body (`application/problem+json`, RFC 9457):

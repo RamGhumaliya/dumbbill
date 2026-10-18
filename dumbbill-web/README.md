@@ -64,28 +64,33 @@ src/
   app/
     layout.tsx              root shell: language, theme, fonts, translations, data provider, skip link
     globals.css             Tailwind wired to the design tokens (default colours/sizes/radii removed on purpose)
-    (owner)/                owner/admin screens   (route groups do not appear in the address)
+    (auth)/                 public account pages: login, signup, verify-email, forgot-password, reset-password
+    (owner)/                owner/admin screens   (route groups do not appear in the address); account/security lives here
     (pos)/pos/              point of sale
     (admin)/admin/          super admin
     error.tsx, global-error.tsx, not-found.tsx
   proxy.ts                  adds the per-request Content-Security-Policy (nonce) and Permissions-Policy
   instrumentation*.ts       Sentry start-up (server and browser); off without a DSN
   components/
-    ui/                     THE DESIGN SYSTEM: Button, Field, Input, Select, Checkbox, DataTable, Dialog, Popover, Toast,
-                            Tabs, Badge, Kbd, MoneyText, EmptyState, Skeleton, icons (import from '@/components/ui')
+    ui/                     THE DESIGN SYSTEM: Button, Field, Input, PasswordInput, Select, Checkbox, DataTable, Dialog,
+                            Popover, Toast, Alert, Tabs, Badge, Kbd, MoneyText, EmptyState, Skeleton, icons
+                            (import from '@/components/ui')
+    auth/                   sign-in screens: AuthGate, UserMenu, login/signup/reset forms, account security pieces
     design/                 the /design gallery
     layout/                 SiteHeader
     theme/                  ThemeToggle (System / Dark / Light)
     providers/              TanStack Query provider
     owner/, pos/            screen-specific components
   lib/
-    api/                    typed API layer (client, errors, request ids, endpoints/, schemas/)
+    api/                    typed API layer (client, errors, request ids, endpoints/, schemas/, auth.ts = the login in memory)
+    auth/                   session actions (start, restore, end), safe "next" address, signed-in state helpers
     forms/                  react-hook-form + zod helpers, server validation errors -> form fields
     format/money.ts         paise -> "₹1,24,500.00"
     security/csp.ts         builds the Content-Security-Policy
     env.ts, env-schema.ts   validated settings
     theme*.ts               theme cookie helpers
   stores/pos-cart.ts        the bill being built (Zustand, preview only)
+  stores/session.ts         who is signed in (Zustand): restoring / signedIn / signedOut
   styles/                   tokens.css and tailwind-theme.css (GENERATED from tokens.json), animations.css (hand-written, from motion tokens)
   fonts/                    self-hosted font files (Latin and Latin-extended) and their licences
   lib/cn.ts                 class-name helper that understands our token names
@@ -101,10 +106,17 @@ tests/unit, tests/e2e       Playwright tests
 - **Components.** Screens are built from `src/components/ui`. Every component works in both themes, with the keyboard, in every state, and passes the accessibility scan. See them all at `/design`.
 - **Fonts** are self-hosted (no request to Google). Only Inter Tight has the rupee sign, so the numerals and code stacks fall back to it for `₹`.
 - **Translations.** No user-visible text inside components; use `useTranslations`/`getTranslations` with keys from `messages/en.json`. Keys are type-checked.
-- **API calls.** One function per endpoint in `src/lib/api/endpoints`, named like the operationId in the backend's Swagger (`http://localhost:3000/docs`). Responses are checked with zod. Every failure becomes an `ApiError` carrying a `code` and the `requestId` to show the user. The access token lives in memory only; refresh is a stub until login exists (P1-1).
+- **API calls.** One function per endpoint in `src/lib/api/endpoints`, named like the operationId in the backend's Swagger (`http://localhost:3000/docs`). Responses are checked with zod. Every failure becomes an `ApiError` carrying a `code` and the `requestId` to show the user. The access token lives in memory only.
+- **Signing in** (full guide: `../docs/api/auth-flow.md`). The access token (15 minutes) is a variable in memory; the refresh token is an httpOnly cookie the page cannot read. After a reload, `AuthGate` renews the login with that cookie, sending the readable `dumbbill_csrf` cookie's value as `X-CSRF-Token` (cross-site request protection). The owner, POS and admin areas are wrapped in `AuthGate`: nothing is shown until a login is confirmed, and a signed-out visitor is sent to `/login?next=...` (only in-site paths are followed, so the address cannot be used to redirect someone to another site). **Hiding a screen is not security**: the API refuses every call without a valid token. Because the token lives only in the browser, screens behind the gate load their data **in the browser**, never in a Server Component.
+- **Signing out** tells the API, then wipes everything held for that person (cached data and the bill being built at the till), because shop computers are shared.
+- **Never reveal whether an account exists.** Sign-up, "forgot password" and "send the link again" show the same words for every address ("if this address can be used..."), and a wrong email or password is one generic message. A rate limit shows how long to wait, from the `Retry-After` header.
 - **Money** is whole paise everywhere; only `formatPaise` turns it into text. The POS cart shows a **preview**; the server calculates the real bill.
 - **Security.** A strict Content-Security-Policy with a fresh nonce per request (scripts without it will not run), no third-party scripts, USB/serial access only on `/pos`, frame embedding forbidden. Because every request needs its own nonce, pages are rendered per request.
 - **Errors.** `error.tsx` shows a plain message plus a reference (requestId or Next's digest) and reports to Sentry when it is on.
+
+## Trying the sign-in screens
+
+Start the API first (`docs/runbooks/local-setup.md`, steps 4 to 6, plus `pnpm db:seed` once), then `pnpm dev` here. Sign up at http://localhost:3001/signup; the confirmation email appears in Mailpit at http://localhost:8025. The web app (port 3001) and API (port 3000) count as the same site on `localhost`, which is what lets the sign-in cookies work in development.
 
 ## Good to know
 

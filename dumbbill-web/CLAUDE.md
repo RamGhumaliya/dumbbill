@@ -20,9 +20,19 @@ Only `dev` and `prod`: `.env.development` and `.env.production` (templates commi
 - Every interactive component: Radix primitive where one exists, all states (hover, focus, disabled, loading, invalid, empty, error), keyboard operable, both themes. Meaning is never carried by colour alone.
 - Review each new screen with the checklist in `../docs/runbooks/design-system.md` (squint, swap, real data, anti-AI-look).
 
+## Sign-in rules (P1-1). Guide: `../docs/api/auth-flow.md`
+
+- Screens behind login are wrapped in `AuthGate` (owner, POS, admin layouts). **They fetch data in the browser** with `getBrowserApiClient()`; a Server Component cannot know who is asking because the access token lives only in browser memory. Never put tenant data in a Server Component behind the gate.
+- Access token: in memory only (`src/lib/api/auth.ts`). Never `localStorage`, `sessionStorage` or a readable cookie. Refresh token: httpOnly cookie; renewal and sign-out send `X-CSRF-Token` (value of the `dumbbill_csrf` cookie).
+- Anything a stranger can reach (sign up, resend, forgot password, login errors) must show the **same words whether or not the account exists**. Never write "email already registered".
+- `?next=` is always passed through `safeNextPath` (no open redirects). Notices in the address (`?notice=`) are looked up in a fixed list, never printed.
+- After sign-out, wipe everything held for the person: `endSession` clears the query cache and the POS cart. Add any new per-person client state to it.
+- Forms: `useApiForm` + a zod schema built from the translator (`buildSchema(t)`), field errors from the server through `form.applyServerErrors` (use `renames` when the API's field name differs). Error wording comes from `describeApiError`, chosen by error CODE.
+- Browser tests of gated screens start signed in with `signIn(page, context)` from `tests/e2e/support/mock-api.ts` (a pretend API; it records every call so tests can check headers and bodies).
+
 ## Rules
 
-- API layer: one typed function per endpoint, zod-validate responses at the boundary, central error handling for problem+json (show `requestId` to user on errors). Tokens in memory; refresh via httpOnly cookie.
+- API layer: one typed function per endpoint, zod-validate responses at the boundary, central error handling for problem+json (show `requestId` to user on errors). Tokens in memory; refresh via httpOnly cookie (built in P1-1, see the sign-in rules above).
 - Styling only through tokens (dark = Iron Ledger, light = Quiet Ledger, switch via `data-theme`). No raw hex/px; no default component-library look.
 - POS: keyboard-first, scanner (HID wedge) input handling, offline queue in IndexedDB (encrypted), service worker, server totals are truth; print via browser CSS 58/80 mm and WebUSB/WebSerial ESC/POS.
 - Authoritative money math is on the server. Local pricing preview exists only for offline and must pass the shared golden fixtures.

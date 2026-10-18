@@ -14,6 +14,189 @@
     "dark": "Dark",
     "light": "Light"
   },
+  "Auth": {
+    "shell": {
+      "newHere": "New to {brand}?",
+      "haveAccount": "Already have an account?",
+      "backToSignIn": "Back to sign in"
+    },
+    "fields": {
+      "email": "Email",
+      "password": "Password",
+      "newPassword": "New password",
+      "currentPassword": "Current password",
+      "confirmPassword": "Repeat the new password",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password",
+      "passwordRule": "At least 10 characters. A few unrelated words work well.",
+      "businessName": "Shop or business name",
+      "ownerName": "Your full name"
+    },
+    "validation": {
+      "emailRequired": "Enter your email address.",
+      "emailInvalid": "That does not look like an email address. Check for typing mistakes.",
+      "passwordRequired": "Enter your password.",
+      "newPasswordRequired": "Choose a password.",
+      "passwordTooShort": "Use at least 10 characters.",
+      "passwordTooLong": "Use at most 128 characters.",
+      "passwordMismatch": "The two passwords are not the same.",
+      "businessNameRequired": "Enter the name of your shop.",
+      "ownerNameRequired": "Enter your name.",
+      "codeInvalid": "Enter the 6 digits shown in your authenticator app.",
+      "recoveryRequired": "Enter one of your recovery codes."
+    },
+    "errors": {
+      "invalidCredentials": "The email or password is not correct.",
+      "locked": "Too many attempts. Wait {seconds, plural, one {# second} other {# seconds}} and try again.",
+      "lockedNoTime": "Too many attempts. Wait a minute and try again.",
+      "network": "We could not reach the server. Check your internet connection and try again.",
+      "generic": "Something went wrong on our side. Please try again.",
+      "invalidTotp": "That code is not right, or it was already used. Wait for the next code and try again.",
+      "invalidCredentialsTitle": "Cannot sign in",
+      "problemTitle": "Something went wrong"
+    },
+    "login": {
+      "title": "Sign in",
+      "subtitle": "Open your shop's dashboard and till.",
+      "submit": "Sign in",
+      "submitting": "Signing in",
+      "forgot": "Forgot your password?",
+      "createAccount": "Create your shop account",
+      "notice": {
+        "passwordReset": "Your password was changed. Sign in with the new one.",
+        "signedOut": "You are signed out.",
+        "verified": "Email confirmed. You can sign in now."
+      },
+      "unverified": {
+        "title": "Confirm your email first",
+        "body": "We sent you a link when you signed up. Open it, then sign in.",
+        "resend": "Send the link again",
+        "resending": "Sending",
+        "resent": "If that address can be used, a new link is on its way."
+      },
+      "totp": {
+        "title": "Enter your two-step code",
+        "hint": "Open your authenticator app and type the 6-digit code for {brand}.",
+        "code": "6-digit code",
+        "useRecovery": "Phone lost? Use a recovery code",
+        "recoveryCode": "Recovery code",
+        "recoveryHint": "One of the codes you saved when you switched on two-step sign-in. Each works only once.",
+        "useApp": "Use the authenticator app instead",
+        "submit": "Confirm and sign in",
+        "back": "Start again"
+      }
+    },
+    "signup": {
+      "title": "Create your shop account",
+      "subtitle": "Free for 14 days. No card needed.",
+      "submit": "Create account",
+      "submitting": "Creating your account",
+      "terms": "You can sign in as soon as you confirm your email address.",
+      "sent": {
+        "title": "Check your inbox",
+        "body": "If {email} can be used for a new account, we have sent a link to confirm it. The link works for 24 hours.",
+        "spam": "Nothing there after a few minutes? Look in the spam folder, or try again with the correct address.",
+        "again": "Use a different email"
+      }
+    },
+    "verify": {
+      "title": "Confirm your email",
+      "checking": "Confirming your email address",
+      "successTitle": "Email confirmed",
+      "successBody": "Your account is ready. Sign in to set up your shop.",
+      "signIn": "Sign in",
+      "failedTitle": "This link has expired or was already used",
+      "failedBody": "Links work once and for 24 hours. Enter your email and we will send a new one.",
+      "missingTitle": "This link is incomplete",
+      "missingBody": "Open the link from your email again, or request a new one below.",
+      "resend": "Send a new link",
+      "resending": "Sending",
+      "resent": "If that address can be used, a new link is on its way."
+    },
+    "forgot": {
+      "title": "Reset your password",
+      "subtitle": "Enter the email you signed up with. We will send a link to choose a new password.",
+      "submit": "Send the link",
+      "submitting": "Sending",
+      "sentTitle": "Check your inbox",
+      "sentBody": "If {email} has an account, a reset link is on its way. It works once and for 30 minutes.",
+      "back": "Back to sign in"
+    },
+    "reset": {
+      "title": "Choose a new password",
+      "subtitle": "You will be signed out on every device, then you can sign in with the new password.",
+      "submit": "Save new password",
+      "submitting": "Saving",
+      "invalidTitle": "This link has expired or was already used",
+      "invalidBody": "Reset links work once and for 30 minutes. Ask for a new one.",
+      "missingTitle": "This link is incomplete",
+      "missingBody": "Open the link from your email again, or ask for a new one.",
+      "requestNew": "Send me a new link"
+    },
+    "gate": {
+      "checking": "Checking your sign-in"
+    },
+    "user": {
+      "menu": "Account",
+      "security": "Account security",
+      "signOut": "Sign out",
+      "signingOut": "Signing out",
+      "signedInAs": "Signed in as {name}"
+    },
+    "security": {
+      "title": "Account security",
+      "subtitle": "Your password, two-step sign-in and the devices signed in to your account.",
+      "password": {
+        "heading": "Change password",
+        "hint": "You stay signed in here. Every other device is signed out.",
+        "submit": "Change password",
+        "submitting": "Saving",
+        "done": "Password changed",
+        "doneBody": "Other devices were signed out.",
+        "wrongCurrent": "That is not your current password."
+      },
+      "devices": {
+        "heading": "Signed-in devices",
+        "hint": "If you do not recognise one, sign it out and change your password.",
+        "current": "This device",
+        "lastUsed": "Last used {when}",
+        "signedInSince": "Signed in {when}",
+        "signOut": "Sign out",
+        "signOutLabel": "Sign out {device}",
+        "signedOut": "Device signed out",
+        "empty": "No other devices.",
+        "loading": "Loading your devices",
+        "failed": "We could not load your devices.",
+        "web": "Browser",
+        "mobile": "Phone app"
+      },
+      "totp": {
+        "heading": "Two-step sign-in",
+        "offBody": "Ask for a 6-digit code from an authenticator app each time you sign in. A stolen password alone then cannot open your account.",
+        "onBody": "Two-step sign-in is on. You are asked for a code from your authenticator app when you sign in.",
+        "start": "Set up two-step sign-in",
+        "starting": "Preparing",
+        "step1": "Open an authenticator app (Google Authenticator, Microsoft Authenticator, Authy or 1Password), choose to add an account by typing a key, and enter this key:",
+        "secretLabel": "Setup key",
+        "step2": "Then type the 6-digit code the app shows to switch it on.",
+        "code": "6-digit code",
+        "enable": "Switch on",
+        "enabling": "Checking",
+        "cancel": "Cancel",
+        "recoveryTitle": "Save your recovery codes",
+        "recoveryBody": "If you lose your phone, each of these codes lets you sign in once. They are shown only now. Write them down or store them in a password manager.",
+        "recoveryDone": "I have saved them",
+        "disableHeading": "Switch off two-step sign-in",
+        "disableBody": "Enter your password and a current code (or a recovery code).",
+        "disablePassword": "Password",
+        "disableCode": "Code or recovery code",
+        "disable": "Switch off",
+        "disabling": "Switching off",
+        "disabled": "Two-step sign-in is off",
+        "enabled": "Two-step sign-in is on"
+      }
+    }
+  },
   "Owner": {
     "title": "Owner dashboard",
     "subtitle": "Sales, stock and profit across your branches will appear here.",
@@ -86,6 +269,7 @@
   "Nav": {
     "main": "Main navigation",
     "dashboard": "Dashboard",
-    "pos": "Point of sale"
+    "pos": "Point of sale",
+    "account": "Account"
   }
 }

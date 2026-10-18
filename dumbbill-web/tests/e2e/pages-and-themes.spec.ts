@@ -1,5 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
+import { signIn } from './support/mock-api';
 
 /**
  * Every screen must (1) render, (2) look right in BOTH themes and in "follow the device" mode, and
@@ -9,6 +10,11 @@ import { expect, test, type Page } from '@playwright/test';
  *   dark  (Iron Ledger)  #0e0f11  = rgb(14, 15, 17)
  *   light (Quiet Ledger) #fbfaf8  = rgb(251, 250, 248)
  */
+/** The owner, POS and admin screens sit behind the sign-in gate, so every test here starts signed in (see support/mock-api.ts). */
+test.beforeEach(async ({ page, context }) => {
+  await signIn(page, context);
+});
+
 const ROUTES = [
   { path: '/', heading: 'Owner dashboard' },
   { path: '/pos', heading: 'Point of sale' },

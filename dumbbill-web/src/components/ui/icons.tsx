@@ -3,6 +3,8 @@ import {
   ChevronDown,
   ChevronUp,
   ChevronsUpDown,
+  Eye,
+  EyeOff,
   Loader2,
   Minus,
   PackageOpen,
@@ -38,5 +40,7 @@ export const ChevronsUpDownIcon = withDefaults(ChevronsUpDown);
 export const MinusIcon = withDefaults(Minus);
 export const CloseIcon = withDefaults(X);
 export const EmptyBoxIcon = withDefaults(PackageOpen);
+export const EyeIcon = withDefaults(Eye);
+export const EyeOffIcon = withDefaults(EyeOff);
 /** A spinning indicator. The spin stops for people who prefer reduced motion (see globals.css). */
 export const SpinnerIcon = withDefaults(Loader2);

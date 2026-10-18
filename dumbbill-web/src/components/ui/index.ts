@@ -8,6 +8,7 @@
  * empty, error) handled. See the live gallery at /design (development only) and the rules in
  * docs/02-design/design-guide.md.
  */
+export { Alert, type AlertProps } from './alert';
 export { Badge, type BadgeProps } from './badge';
 export { Button, IconButton, buttonStyles, type ButtonProps, type IconButtonProps } from './button';
 export { Checkbox, type CheckboxProps } from './checkbox';
@@ -22,12 +23,15 @@ export {
   ChevronsUpDownIcon,
   CloseIcon,
   EmptyBoxIcon,
+  EyeIcon,
+  EyeOffIcon,
   MinusIcon,
   SpinnerIcon,
 } from './icons';
 export { Input } from './input';
 export { Kbd } from './kbd';
 export { MoneyText, type MoneyTextProps } from './money-text';
+export { PasswordInput, type PasswordInputProps } from './password-input';
 export { Popover, PopoverClose, PopoverContent, PopoverTrigger } from './popover';
 export { Select, type SelectOption, type SelectProps } from './select';
 export { Skeleton } from './skeleton';

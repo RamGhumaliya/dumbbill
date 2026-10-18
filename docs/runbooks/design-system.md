@@ -47,6 +47,10 @@ Add it under `color.roles` (give it a Tailwind name and a one-line purpose), giv
 5. Add browser tests in `tests/e2e/design-system.spec.ts` for its keyboard behaviour; the accessibility scan of the gallery covers it automatically in both themes.
 6. Write the doc comment: what it is for, how to use it, what it guarantees.
 
+### The components added for sign-in (P1-1)
+- **Alert**: a message that stays where the person is looking (a failed sign-in, "check your inbox"). Flat card with a coloured left edge and a bold title; the meaning is in the title, never the edge. `danger` and `warning` use role "alert" (announced at once), `info` and `success` role "status". Use a Toast for a passing "Saved", a Dialog when the person must answer.
+- **PasswordInput**: an Input with a Show/Hide button (named, keyboard-operable, `aria-pressed`, 44 px touch target). Use it for every password box: long passphrases are what we ask for, and typing one blind causes mistakes.
+
 ### Change fonts
 `pnpm add -D @fontsource...`, edit `scripts/copy-fonts.mjs`, run `pnpm fonts`, update `src/app/layout.tsx` and the font names in `tokens.json`, run `pnpm tokens`. Commit the font files (they are self-hosted: the app never contacts Google).
 

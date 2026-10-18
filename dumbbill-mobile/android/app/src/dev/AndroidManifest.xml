@@ -1,0 +1,8 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <!-- DEV BUILDS ONLY: allow plain http so the app can reach the API on your computer (http://10.0.2.2:3000
+         from the emulator). Production builds do not have this file, so they only ever use https. -->
+    <application
+        android:usesCleartextTraffic="true"
+        tools:targetApi="28" />
+</manifest>

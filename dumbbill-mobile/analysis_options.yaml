@@ -1,0 +1,36 @@
+# Lint rules: very_good_analysis is strict on purpose. It requires a doc comment on every public member,
+# which is exactly the project's "comment everything" rule (see ../CLAUDE.md).
+include: package:very_good_analysis/analysis_options.yaml
+
+analyzer:
+  language:
+    strict-casts: true
+    strict-inference: true
+    strict-raw-types: true
+  exclude:
+    # Generated code: never edited by hand, so never linted.
+    - '**/*.g.dart'
+    - '**/*.freezed.dart'
+    - '**/*.generated.dart'
+    - 'lib/l10n/app_localizations*.dart'
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
+
+# Code is formatted to 100 columns (the same as the web app); `dart format .` applies it.
+formatter:
+  page_width: 100
+
+linter:
+  rules:
+    # The default limit of 80 would fight with the 100-column formatter above.
+    lines_longer_than_80_chars: false
+    # Money and text formatting use package imports everywhere; keep relative imports out of lib/.
+    always_use_package_imports: true
+    prefer_relative_imports: false
+    # Sorted imports and exports keep diffs small.
+    directives_ordering: true

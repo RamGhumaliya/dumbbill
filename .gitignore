@@ -36,6 +36,8 @@ next-env.d.ts
 **/ios/Flutter/flutter_export_environment.sh
 **/*.jks
 **/*.keystore
+# Real mobile prod settings (the .example template is committed)
+dumbbill-mobile/config/prod.json
 *.g.dart
 *.freezed.dart
 *.mocks.dart

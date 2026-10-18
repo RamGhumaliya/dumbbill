@@ -1,0 +1,46 @@
+{
+  "@@locale": "en",
+
+  "themeLabel": "Colour theme",
+  "themeSystem": "System",
+  "themeDark": "Dark",
+  "themeLight": "Light",
+
+  "referenceLabel": "Reference: {code}",
+  "@referenceLabel": {
+    "description": "Shown with an error so the person can quote it to support.",
+    "placeholders": { "code": { "type": "String" } }
+  },
+
+  "ownerTitle": "Owner dashboard",
+  "ownerSubtitle": "Sales, stock and profit across your branches will appear here.",
+  "ownerSampleHeading": "Preview of the dashboard",
+  "sampleNotice": "Sample figures for layout only. Not real data.",
+  "ownerSampleSales": "Sales today",
+  "ownerSampleBills": "Bills",
+  "ownerSampleProfit": "Gross profit",
+  "ownerSampleLowStock": "Low stock",
+
+  "customerTitle": "Your shops",
+  "customerSubtitle": "Join a shop with its code or QR to collect points and see its offers.",
+  "customerSampleHeading": "Preview of a shop card",
+  "customerSampleShop": "FitFuel Nutrition, Andheri West",
+  "customerSamplePointsLabel": "points",
+  "customerSamplePointsWorth": "worth {amount}",
+  "@customerSamplePointsWorth": {
+    "placeholders": { "amount": { "type": "String" } }
+  },
+  "customerSampleOffer": "₹150 off creatine on orders above ₹1,499",
+  "customerSampleOfferExpiry": "Expires 31 Oct",
+
+  "statusHeading": "System status",
+  "statusChecking": "Checking the server",
+  "statusReady": "Server is ready",
+  "statusDatabaseUp": "Database connected",
+  "statusDatabaseDown": "Database not reachable",
+  "statusUnreachable": "Cannot reach the server",
+  "statusUnreachableHint": "Start the API (see the dumbbill-backend README) and try again.",
+  "statusProblem": "The server answered with a problem",
+  "statusApiAddress": "API address",
+  "tryAgain": "Try again"
+}

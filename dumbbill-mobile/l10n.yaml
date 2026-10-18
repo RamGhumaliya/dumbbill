@@ -1,0 +1,7 @@
+# Translation setup. All user-visible text lives in lib/l10n/app_en.arb (English only today, ready for more).
+# Add app_hi.arb etc. later and the same keys translate everywhere with no code change.
+arb-dir: lib/l10n
+template-arb-file: app_en.arb
+output-localization-file: app_localizations.dart
+output-class: AppLocalizations
+nullable-getter: false

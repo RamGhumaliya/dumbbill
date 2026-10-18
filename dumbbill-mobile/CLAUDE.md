@@ -23,3 +23,10 @@ Rules: UI never calls dio directly; screens watch providers; providers call repo
 
 ## Comments (mandatory)
 Follow the "Comments" section of `../CLAUDE.md`: file purpose, a doc comment on every exported symbol, and the *why* behind business rules, security choices and non-obvious code, in plain English.
+
+## Commands and gotchas
+- Checks before commit: `flutter analyze` (must be clean), `flutter test`, `dart run tool/generate_tokens.dart --check`. After editing annotated files run `dart run build_runner build` (generated `*.g.dart`/`*.freezed.dart` are not committed).
+- Run: `flutter run --flavor ownerDev -t lib/main_owner.dart --dart-define-from-file=config/dev.json` (or `customerDev` / `lib/main_customer.dart`). Details in `README.md`.
+- `lib/core/theme/design_tokens.generated.dart` is generated from `docs/02-design/tokens/tokens.json`; never edit by hand.
+- Riverpod automatic retry is OFF (`noAutomaticRetry`); writes are never retried silently. Min Android 8 (API 26). Keep `kotlin.incremental=false` (project on D:, pub cache on C:).
+- Only Android flavors exist; iOS dev/prod schemes need a Mac and are a manual step.

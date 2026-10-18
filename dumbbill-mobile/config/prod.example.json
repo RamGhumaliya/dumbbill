@@ -1,0 +1,6 @@
+{
+  "ENV": "prod",
+  "API_BASE_URL": "https://api.dumbbill.in",
+  "APP_VERSION": "1.0.0",
+  "SENTRY_DSN": ""
+}

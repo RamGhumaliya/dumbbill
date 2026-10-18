@@ -27,8 +27,8 @@ protein_retail_saas_product/
 | P0-3 Logging, error format, Swagger completeness test | Done (see `docs/runbooks/logging-and-errors.md`) |
 | P0-4 Web app scaffold (Next.js) | Done (see `dumbbill-web/README.md`) |
 | P0-5 Design tokens JSON and UI kit | Done (see `docs/runbooks/design-system.md`; gallery at `/design`) |
-| P0-6 Mobile app scaffold (Flutter) | Next |
-| Web and mobile repos | Not started |
+| P0-6 Mobile app scaffold (Flutter) | Done (see `dumbbill-mobile/README.md`) |
+| P0-7 ADR pack, runbook skeletons, accounts checklist | Next |
 
 The live checklist is `docs/06-tracking/progress-tracker.md`.
 

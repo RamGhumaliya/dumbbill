@@ -91,6 +91,19 @@ It works without the API running; the owner dashboard then shows "Cannot reach t
 
 For the browser tests: `pnpm exec playwright install chromium` once, then `pnpm test:e2e`. For a local production build (`pnpm build`) create `.env.production` from `.env.production.example` and set the API address to `http://localhost:3000`.
 
+## 8b. Run the mobile apps (optional)
+
+You need Flutter with the Android SDK and an Android emulator (create one in Android Studio's Device Manager; a phone image such as Pixel 9 works). Start the API first (steps 4 to 6).
+
+```bash
+cd dumbbill-mobile
+flutter pub get
+dart run build_runner build
+flutter run --flavor ownerDev -t lib/main_owner.dart --dart-define-from-file=config/dev.json
+```
+
+Use `--flavor customerDev -t lib/main_customer.dart` for the customer app. The emulator reaches your API at `10.0.2.2:3000`. The first Android build is slow (several minutes). Full details: `dumbbill-mobile/README.md`.
+
 ## Daily routine
 
 ```bash

@@ -32,6 +32,12 @@ Find your message, apply the fix.
 | Want to see why a request is slow | Tracing is off by default | Set `OTEL_EXPORTER=console` in `.env`, restart, repeat the request |
 | Web: `Invalid environment configuration ... NEXT_PUBLIC_API_BASE_URL` on dev, build or start | The web app has no `.env.development` / `.env.production` | Copy the matching `.example` file (see `dumbbill-web/README.md`). `pnpm build` reads `.env.production` |
 | Web: owner dashboard says "Cannot reach the server" | The API is not running, or `NEXT_PUBLIC_API_BASE_URL` points elsewhere | Start the API (`docker compose up -d`, `pnpm dev` in dumbbill-backend), then reload. The reference shown matches the request in the API logs |
+| Mobile: errors about missing `*.g.dart` / `*.freezed.dart` files | Generated code is not committed | `dart run build_runner build` in `dumbbill-mobile` |
+| Mobile: `Could not close incremental caches` during an Android build | Kotlin cannot relate project paths on D: to the pub cache on C: | Keep `kotlin.incremental=false` in `android/gradle.properties` |
+| Mobile: `The plugin sentry_flutter requires a higher Android SDK version` | minSdk is below 26 | Keep `minSdk` at 26 or more in `android/app/build.gradle.kts` |
+| Mobile: emulator exits at start with `Broken AVD system path` | The emulator was created for a system image you no longer have | Create a new emulator in Android Studio Device Manager with an installed image |
+| Mobile: home screen says "Cannot reach the server" | API not running, or wrong `API_BASE_URL` | Start the API; emulator uses `http://10.0.2.2:3000`, a real phone needs your computer's wifi address (see `dumbbill-mobile/config/README.md`) |
+| Mobile: `flutter test` says the generated tokens are out of date | `tokens.json` changed | `dart run tool/generate_tokens.dart` in `dumbbill-mobile`, then commit the result |
 | Web: console says "violates the following Content Security Policy" | Something loads a script or style the strict policy does not allow | Do not loosen the policy. Fix the code (no inline scripts, no third-party scripts). The policy is built in `src/lib/security/csp.ts` |
 | Web: `pnpm test:e2e` cannot find a browser | Chromium for tests is not installed | `pnpm exec playwright install chromium` |
 | Web: accessibility test fails with `color-contrast` | A colour pair is below the 4.5:1 minimum | Adjust the token in `src/styles/tokens.css` (and the design guide), not the test |

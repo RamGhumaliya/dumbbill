@@ -93,30 +93,32 @@ enum TenantStatus {
 /// One retailer business (a "tenant"). Everything else in the system belongs to exactly one tenant.
 /// RLS rule for this table: a request may only see the tenant whose id equals app.tenant_id.
 model Tenant {
-  id          String       @id @default(uuid(7)) @db.Uuid
+  id          String            @id @default(uuid(7)) @db.Uuid
   name        String
-  status      TenantStatus @default(TRIAL)
+  status      TenantStatus      @default(TRIAL)
   /// The plan the business is on. Null only briefly during signup.
-  planId      String?      @map("plan_id") @db.Uuid
-  plan        Plan?        @relation(fields: [planId], references: [id])
+  planId      String?           @map("plan_id") @db.Uuid
+  plan        Plan?             @relation(fields: [planId], references: [id])
   /// When the free trial ends (signup time + the plan's trial days). Billing (Phase 4) acts on it.
-  trialEndsAt DateTime?    @map("trial_ends_at") @db.Timestamptz()
+  trialEndsAt DateTime?         @map("trial_ends_at") @db.Timestamptz()
   /// Business profile (P1-3). GSTIN is optional: a shop not registered for GST issues bills of supply, not tax invoices.
-  gstin       String?      @db.VarChar(15)
+  gstin       String?           @db.VarChar(15)
   /// Two-digit GST state code of the registered address; decides CGST+SGST (same state) vs IGST (other state).
-  stateCode   String?      @map("state_code") @db.VarChar(2)
-  addressLine String?      @map("address_line")
+  stateCode   String?           @map("state_code") @db.VarChar(2)
+  addressLine String?           @map("address_line")
   city        String?
-  pincode     String?      @db.VarChar(6)
-  phone       String?      @db.VarChar(15)
+  pincode     String?           @db.VarChar(6)
+  phone       String?           @db.VarChar(15)
   /// Storage key of the logo image (never a public URL; the API streams it to signed-in people).
-  logoKey     String?      @map("logo_key")
-  createdAt   DateTime     @default(now()) @map("created_at") @db.Timestamptz()
-  updatedAt   DateTime     @updatedAt @map("updated_at") @db.Timestamptz()
+  logoKey     String?           @map("logo_key")
+  createdAt   DateTime          @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt   DateTime          @updatedAt @map("updated_at") @db.Timestamptz()
   users       User[]
   sessions    Session[]
   roles       Role[]
   branches    Branch[]
+  categories  ProductCategory[]
+  products    Product[]
 
   @@map("tenants")
 }
@@ -362,4 +364,81 @@ model UserBranch {
   @@unique([userId, branchId])
   @@index([tenantId, branchId])
   @@map("user_branches")
+}
+
+/// A product category of ONE business (for example "Protein & whey"). New businesses start with a copy of the
+/// category templates; the owner can add more. HSN and GST here are suggestions that pre-fill the product form.
+model ProductCategory {
+  id               String    @id @default(uuid(7)) @db.Uuid
+  tenantId         String    @map("tenant_id") @db.Uuid
+  tenant           Tenant    @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  name             String
+  defaultHsn       String?   @map("default_hsn") @db.VarChar(8)
+  defaultGstRateBp Int?      @map("default_gst_rate_bp")
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  products         Product[]
+
+  @@unique([tenantId, name])
+  @@index([tenantId])
+  @@map("product_categories")
+}
+
+/// One sellable item. A VARIANT (2 kg / Chocolate) is its own row with its own barcode and price, sharing the name
+/// and brand with its siblings. Products are switched off, never deleted: invoices and stock will refer to them.
+/// There is no price column: prices live in `price_history` (effective-dated), so a bill always uses the price that
+/// was valid at bill time.
+model Product {
+  id                String           @id @default(uuid(7)) @db.Uuid
+  tenantId          String           @map("tenant_id") @db.Uuid
+  tenant            Tenant           @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  name              String
+  brand             String           @default("")
+  categoryId        String?          @map("category_id") @db.Uuid
+  category          ProductCategory? @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  /// For example "2 kg / Chocolate". Empty for a product with no variants.
+  variant           String           @default("")
+  sku               String?
+  /// The code printed on the pack (EAN-13 and similar). Unique inside a business.
+  barcode           String?
+  /// HSN: the goods classification code (4, 6 or 8 digits) printed on a tax invoice. Required when the business has a GSTIN.
+  hsn               String?          @db.VarChar(8)
+  /// GST rate in basis points (1800 = 18.00%).
+  gstRateBp         Int?             @map("gst_rate_bp")
+  /// What the owner says the item costs, entered by hand. CONFIDENTIAL: only people with products.cost.read see or set it.
+  /// Purchases and weighted average cost (P1-5) will supersede it for profit figures.
+  purchaseCostPaise Int?             @map("purchase_cost_paise")
+  imageKey          String?          @map("image_key")
+  thumbKey          String?          @map("thumb_key")
+  isActive          Boolean          @default(true) @map("is_active")
+  createdBy         String?          @map("created_by") @db.Uuid
+  createdAt         DateTime         @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt         DateTime         @updatedAt @map("updated_at") @db.Timestamptz()
+  prices            PriceHistory[]
+
+  @@unique([tenantId, barcode])
+  @@unique([tenantId, sku])
+  @@unique([tenantId, name, brand, variant])
+  @@index([tenantId, categoryId])
+  @@map("products")
+}
+
+/// Every selling price a product ever had. APPEND-ONLY: a price change adds a row; nothing is edited or deleted, so the
+/// history is a trustworthy record of who changed what, when and why. The price in force is the newest row whose
+/// `effective_from` is not in the future.
+model PriceHistory {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  productId     String   @map("product_id") @db.Uuid
+  product       Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
+  /// Maximum retail price printed on the pack, in paise. The law forbids selling above it.
+  mrpPaise      Int      @map("mrp_paise")
+  /// What this business sells it for, in paise.
+  pricePaise    Int      @map("price_paise")
+  effectiveFrom DateTime @map("effective_from") @db.Timestamptz()
+  changedBy     String?  @map("changed_by") @db.Uuid
+  reason        String
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  @@index([tenantId, productId, effectiveFrom(sort: Desc)])
+  @@map("price_history")
 }

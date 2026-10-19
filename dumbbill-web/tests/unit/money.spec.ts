@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { formatPaise } from '@/lib/format/money';
+import { formatPaise, paiseToRupeeText, parseRupeesToPaise } from '@/lib/format/money';
 
 /** Money is shown with Indian digit grouping (lakhs and crores) and is always built from whole paise. */
 test.describe('formatPaise', () => {
@@ -24,5 +24,28 @@ test.describe('formatPaise', () => {
     expect(() => formatPaise(10.5)).toThrow(/whole number of paise/);
     expect(() => formatPaise(Number.NaN)).toThrow();
     expect(() => formatPaise(Infinity)).toThrow();
+  });
+});
+
+/** What a person types in a price box becomes exact paise; nothing is ever computed with decimal numbers. */
+test.describe('parseRupeesToPaise', () => {
+  test('reads typed amounts exactly, including ones that floating point gets wrong', () => {
+    expect(parseRupeesToPaise('1499')).toBe(149_900);
+    expect(parseRupeesToPaise('1,24,500.50')).toBe(12_450_050);
+    expect(parseRupeesToPaise('₹ 299')).toBe(29_900);
+    expect(parseRupeesToPaise('19.99')).toBe(1_999);
+    expect(parseRupeesToPaise('0.5')).toBe(50);
+  });
+
+  test('refuses anything that is not an amount', () => {
+    for (const text of ['', 'abc', '-5', '1.234', '1e5', '10000001'])
+      expect(parseRupeesToPaise(text)).toBeNull();
+  });
+
+  test('round-trips with the text shown in an edit box', () => {
+    for (const paise of [0, 5, 100, 29_900, 299_950, 12_450_050])
+      expect(parseRupeesToPaise(paiseToRupeeText(paise))).toBe(paise);
+    expect(paiseToRupeeText(299_950)).toBe('2999.50');
+    expect(paiseToRupeeText(300_000)).toBe('3000');
   });
 });

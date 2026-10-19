@@ -37,6 +37,14 @@ Only `dev` and `prod`: `.env.development` and `.env.production` (templates commi
 - Files: the API client sends a `FormData` body as multipart (never set its Content-Type by hand) and can read a file answer with `expect: 'blob'`. The logo needs the token, so it is downloaded and shown from memory, not with a plain `<img src>`.
 - A new first-steps checklist item comes from the server (`GET /v1/business/onboarding`); add its wording under `Business.onboarding.steps` and its link in `onboarding-checklist.tsx`.
 
+## Catalogue screens (P1-4). Guide: `../docs/api/catalogue.md`
+
+- Screens live in `src/components/products/`. **Cost and margin exist only for people with `products.cost.read`** (`useCan`): the table column, the column picker entry and the form box are absent for everyone else, and the form must not send `purchaseCostPaise` for them. The API returns those fields only to them (they are optional in `schemas/products.ts`).
+- **A price is never edited in place.** Table cells only PROPOSE a new price; the Change price dialog asks why and records it. The price form on a new product sets the first price only.
+- Money in boxes is rupee text turned into paise with `parseRupeesToPaise` (exact, no floats); show it with `MoneyText`.
+- Keyboard: price buttons carry `data-price-cell` for Arrow Up/Down; a button's accessible name must contain its visible text (axe `label-content-name-mismatch`).
+- The column choice is remembered in `localStorage` as a per-person convenience only; always wrap in try/catch.
+
 ## Rules
 
 - API layer: one typed function per endpoint, zod-validate responses at the boundary, central error handling for problem+json (show `requestId` to user on errors). Tokens in memory; refresh via httpOnly cookie (built in P1-1, see the sign-in rules above).

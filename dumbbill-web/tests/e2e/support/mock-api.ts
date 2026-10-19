@@ -23,6 +23,8 @@ export const WEB_ORIGIN = 'http://localhost:3100';
 export interface RecordedCall {
   method: string;
   path: string;
+  /** The query string including the leading "?" (empty when there is none), so tests can check filters. */
+  search: string;
   body: unknown;
   headers: Record<string, string>;
 }
@@ -109,7 +111,15 @@ export const SAMPLE_TENANT = {
 /** What the sample owner may do: everything, in every branch. */
 export const SAMPLE_ACCESS = {
   roleName: 'Owner',
-  permissions: ['team.manage', 'settings.manage', 'products.read', 'pos.sell'],
+  permissions: [
+    'team.manage',
+    'settings.manage',
+    'products.read',
+    'products.write',
+    'products.cost.read',
+    'pricing.write',
+    'pos.sell',
+  ],
   discountLimitBp: 10000,
   allBranches: true,
   branchIds: [] as string[],
@@ -135,7 +145,8 @@ export async function installMockApi(page: Page): Promise<MockApi> {
       return;
     }
 
-    const path = new URL(request.url()).pathname;
+    const url = new URL(request.url());
+    const path = url.pathname;
     const raw = request.postData();
     let body: unknown;
     try {
@@ -143,7 +154,13 @@ export async function installMockApi(page: Page): Promise<MockApi> {
     } catch {
       body = raw;
     }
-    const call: RecordedCall = { method: request.method(), path, body, headers: request.headers() };
+    const call: RecordedCall = {
+      method: request.method(),
+      path,
+      search: url.search,
+      body,
+      headers: request.headers(),
+    };
     api.calls.push(call);
 
     const handler = api.find(`${call.method} ${call.path}`) ?? api.find(`${call.method} *`);

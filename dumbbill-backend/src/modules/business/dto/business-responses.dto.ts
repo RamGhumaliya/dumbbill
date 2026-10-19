@@ -54,12 +54,12 @@ export class GstStateListDto {
 
 export class OnboardingStepDto {
   @ApiProperty({
-    enum: ['PROFILE', 'BRANCH', 'TEAM'],
+    enum: ['PROFILE', 'BRANCH', 'PRODUCTS', 'TEAM'],
     example: 'PROFILE',
     description:
-      'Which step. Steps for products, suppliers, the first purchase and a test bill are added by the modules that build them.',
+      'Which step. Steps for suppliers, the first purchase and a test bill are added by the modules that build them.',
   })
-  key!: 'PROFILE' | 'BRANCH' | 'TEAM';
+  key!: 'PROFILE' | 'BRANCH' | 'PRODUCTS' | 'TEAM';
 
   @ApiProperty({ example: false })
   done!: boolean;

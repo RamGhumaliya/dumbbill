@@ -30,6 +30,9 @@ export function applyTestEnvironment(overrides: Record<string, string> = {}): vo
     DATA_ENCRYPTION_KEY: randomBytes(32).toString('base64'),
     PASSWORD_PEPPERS: `1:${randomBytes(24).toString('hex')}`,
     PASSWORD_BREACH_CHECK: 'false',
+    // A developer's .env may switch rate limits off for hand testing (RATE_LIMIT_DISABLED=true). Tests must not inherit
+    // that: they check the limits themselves, and production-mode startup refuses the switch.
+    RATE_LIMIT_DISABLED: 'false',
     // The production floor for password hashing memory is 19456 KiB; tests stay just above it.
     ARGON2_MEMORY_KIB: '19456',
     ARGON2_TIME_COST: '1',

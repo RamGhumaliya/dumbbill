@@ -101,6 +101,7 @@ src/
     permissions/                                       permission catalogue (permissions.matrix.ts), @Permission, the global guard, branch scope
     team/                                              roles, members, invitations, approval PIN (see docs/api/team-and-permissions.md)
     business/                                          business profile, GSTIN rules, branches, first-steps checklist (see docs/api/business-and-branches.md)
+    catalogue/                                         products, categories, price history, pictures, CSV import (see docs/api/catalogue.md)
     audit/                                             append-only audit log writer
     mail/                                              outgoing email (SMTP) and the account email texts
 prisma/

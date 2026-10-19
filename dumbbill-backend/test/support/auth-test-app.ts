@@ -6,6 +6,7 @@ import { Clock } from '../../src/common/clock';
 import { BreachChecker } from '../../src/modules/auth/password/breach-checker';
 import { EphemeralStore, MemoryEphemeralStore } from '../../src/modules/auth/store/ephemeral-store';
 import { Mailer, MemoryMailer } from '../../src/modules/mail/mailer';
+import { CATEGORY_TEMPLATES } from '../../prisma/seed/data/category-templates';
 import { GST_STATES } from '../../prisma/seed/data/gst-states';
 import { FakeClock } from './fakes';
 import { applyTestEnvironment } from './test-env';
@@ -53,6 +54,10 @@ export async function createAuthTestApp(
 
   // The real GST state list, so state codes in tests are validated exactly as in production.
   await db.owner.gstState.createMany({ data: GST_STATES.map((state) => ({ ...state })) });
+
+  await db.owner.categoryTemplate.createMany({
+    data: CATEGORY_TEMPLATES.map((template) => ({ ...template })),
+  });
 
   const clock = new FakeClock();
   const mailer = new MemoryMailer();

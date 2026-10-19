@@ -31,9 +31,10 @@ protein_retail_saas_product/
 | P0-7 ADR pack, runbook skeletons, accounts checklist | Done (see `docs/adr/` and `docs/accounts-checklist.md`) |
 | P1-1 Auth, sessions, tenancy (backend and web screens) | Done (see `docs/api/auth-flow.md`, ADR 006) |
 | P1-2 Roles, permissions, team (backend, accept-invitation page) | Done (see `docs/api/team-and-permissions.md`, ADR 009) |
-| P1-3 Business profile, GSTIN, branches, first-steps checklist (backend and web) | Done, not yet committed (see `docs/api/business-and-branches.md`, ADR 010) |
+| P1-3 Business profile, GSTIN, branches, first-steps checklist (backend and web) | Done (see `docs/api/business-and-branches.md`, ADR 010) |
+| P1-4 Catalogue and pricing: products, price history, pictures, CSV import (backend and web) | Done, not yet committed (see `docs/api/catalogue.md`, ADR 011) |
 | Phase 0 | Complete |
-| Phase 1 | In progress. Next: P1-4 catalogue and pricing (`docs/05-ai-kit/prompts/phase-1-foundation.md`) |
+| Phase 1 | In progress. Next: P1-5 suppliers, purchases, stock ledger and weighted average cost (`docs/05-ai-kit/prompts/phase-1-foundation.md`) |
 
 The live checklist is `docs/06-tracking/progress-tracker.md`.
 

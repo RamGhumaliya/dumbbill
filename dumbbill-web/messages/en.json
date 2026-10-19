@@ -284,7 +284,8 @@
     "pos": "Point of sale",
     "account": "Account",
     "branches": "Branches",
-    "business": "Business profile"
+    "business": "Business profile",
+    "products": "Products"
   },
   "Business": {
     "title": "Business profile",
@@ -371,6 +372,11 @@
           "title": "Invite your team",
           "body": "Add a cashier so someone else can bill while you manage.",
           "action": "Invite someone"
+        },
+        "PRODUCTS": {
+          "title": "Add your products",
+          "body": "Import a spreadsheet or add them one by one. Each needs a price (and HSN and GST if you have a GSTIN).",
+          "action": "Add products"
         }
       },
       "comingSoon": "Screen coming soon",
@@ -477,6 +483,224 @@
       "forbidden": "Only the owner can change branches.",
       "generic": "Something went wrong on our side. Please try again.",
       "lastActive": "This is your only active branch. Add another before switching it off."
+    }
+  },
+  "Products": {
+    "title": "Products",
+    "subtitle": "Everything you sell, with its price, barcode and GST details.",
+    "caption": "Products of your business",
+    "loading": "Loading products",
+    "loadFailed": "We could not load your products.",
+    "retry": "Try again",
+    "add": "Add a product",
+    "import": "Import from CSV",
+    "search": "Search products",
+    "searchPlaceholder": "Name, brand, barcode or SKU",
+    "filters": {
+      "category": "Category",
+      "allCategories": "All categories",
+      "status": "Show",
+      "active": "Active products",
+      "inactive": "Switched-off products",
+      "all": "All products"
+    },
+    "columns": {
+      "name": "Product",
+      "category": "Category",
+      "barcode": "Barcode",
+      "sku": "SKU",
+      "hsn": "HSN",
+      "gst": "GST",
+      "mrp": "MRP",
+      "price": "Price",
+      "cost": "Cost",
+      "margin": "Margin",
+      "status": "Status",
+      "actions": "Actions",
+      "picker": "Columns",
+      "pickerHint": "Choose the columns you want to see."
+    },
+    "gstValue": "{percent}%",
+    "status": {
+      "active": "Active",
+      "off": "Switched off",
+      "belowCost": "Below cost"
+    },
+    "noValue": "Not set",
+    "empty": {
+      "title": "No products yet",
+      "body": "Add your first product, or import many at once from a spreadsheet.",
+      "filtered": "No product matches these filters."
+    },
+    "paging": {
+      "showing": "Showing {from}-{to} of {total}",
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "edit": "Edit",
+    "editLabel": "Edit {name}",
+    "switchOff": "Switch off",
+    "switchOffLabel": "Switch off {name}",
+    "switchOn": "Switch on",
+    "switchOnLabel": "Switch on {name}",
+    "toast": {
+      "created": "Product added.",
+      "saved": "Product saved.",
+      "off": "Product switched off.",
+      "on": "Product switched on.",
+      "priceChanged": "Price changed.",
+      "priceScheduled": "Price change scheduled.",
+      "imageSaved": "Picture saved.",
+      "imageRemoved": "Picture removed."
+    },
+    "inline": {
+      "edit": "{price}. Change the price of {name}. Press Enter to open the change form.",
+      "hint": "Arrow up and down move between prices. Enter edits, Escape cancels.",
+      "save": "Review the change",
+      "cancel": "Cancel"
+    },
+    "form": {
+      "newTitle": "Add a product",
+      "newSubtitle": "A product with variants (2 kg, 5 lb, flavours) needs one entry per variant, each with its own barcode and price.",
+      "editTitle": "Edit product",
+      "editSubtitle": "Prices change through \"Change price\", so every change is recorded.",
+      "back": "Back to products",
+      "notFound": "This product does not exist.",
+      "sections": {
+        "basics": "Product",
+        "tax": "Tax",
+        "price": "Price",
+        "cost": "Cost (private)",
+        "picture": "Picture",
+        "history": "Price history"
+      },
+      "fields": {
+        "name": "Product name",
+        "nameHint": "For example Gold Standard 100% Whey.",
+        "brand": "Brand",
+        "variant": "Variant",
+        "variantHint": "Size and flavour, for example 2 kg / Chocolate.",
+        "category": "Category",
+        "categoryPlaceholder": "Choose a category",
+        "categoryNone": "No category",
+        "categoryHint": "Choosing a category fills in a suggested HSN and GST rate. Check them with your CA.",
+        "sku": "SKU",
+        "skuHint": "Your own stock code. Optional.",
+        "barcode": "Barcode",
+        "barcodeHint": "The code on the pack. Scan it into this box.",
+        "hsn": "HSN code",
+        "hsnHint": "4, 6 or 8 digits.",
+        "gst": "GST rate",
+        "gstPlaceholder": "Choose a rate",
+        "gstNone": "Not set",
+        "mrp": "MRP",
+        "mrpHint": "Maximum retail price printed on the pack, in rupees.",
+        "price": "Selling price",
+        "priceHint": "What you sell it for, in rupees. Never above the MRP.",
+        "cost": "Purchase cost",
+        "costHint": "What it costs you, in rupees. Only people with cost access see this."
+      },
+      "taxRequired": "Your business has a GSTIN, so HSN and GST rate are required on every product.",
+      "currentPrice": "Selling price now",
+      "mrpNow": "MRP now",
+      "changePrice": "Change price",
+      "save": "Save product",
+      "create": "Add product",
+      "saving": "Saving",
+      "newCategory": "Add a category",
+      "newCategoryName": "New category name",
+      "newCategorySave": "Add category"
+    },
+    "validation": {
+      "nameRequired": "Enter the product name.",
+      "nameTooLong": "Use 150 characters or fewer.",
+      "brandTooLong": "Use 80 characters or fewer.",
+      "variantTooLong": "Use 80 characters or fewer.",
+      "barcode": "A barcode is 3 to 32 letters or digits.",
+      "sku": "Use letters, digits and - _ . / only.",
+      "hsn": "An HSN code has 4, 6 or 8 digits.",
+      "hsnRequired": "HSN is required because your business has a GSTIN.",
+      "gstRequired": "Choose a GST rate because your business has a GSTIN.",
+      "amount": "Enter an amount in rupees, for example 1499.50.",
+      "priceAboveMrp": "The selling price cannot be higher than the MRP.",
+      "reasonRequired": "Say why the price changes (at least 3 characters).",
+      "categoryName": "Enter a name of 2 to 80 characters."
+    },
+    "priceDialog": {
+      "title": "Change the price of {name}",
+      "description": "The change is added to the price history with your name and the reason. Old prices are never edited.",
+      "mrp": "MRP",
+      "price": "New selling price",
+      "reason": "Why is it changing?",
+      "reasonHint": "For example Supplier price change, Diwali offer, Correction.",
+      "startsAt": "Starts",
+      "startsHint": "Leave empty to start now, or pick a later time to schedule it.",
+      "submit": "Save price",
+      "cancel": "Cancel",
+      "belowCost": "This price is below what the product costs you.",
+      "sameAsNow": "The product already has this price.",
+      "inPast": "A price cannot start in the past."
+    },
+    "history": {
+      "caption": "Price history",
+      "when": "Starts",
+      "mrp": "MRP",
+      "price": "Price",
+      "reason": "Why",
+      "by": "Changed by",
+      "current": "In force now",
+      "scheduled": "Scheduled",
+      "older": "Earlier",
+      "empty": "No prices yet."
+    },
+    "image": {
+      "alt": "Picture of the product",
+      "none": "No picture",
+      "hint": "JPEG, PNG or WebP, up to 2 MB. It is resized and saved again for you.",
+      "choose": "Choose a picture",
+      "replace": "Replace picture",
+      "remove": "Remove picture",
+      "uploading": "Uploading",
+      "tooBig": "That picture is over 2 MB. Choose a smaller one.",
+      "wrongType": "Choose a JPEG, PNG or WebP picture.",
+      "notReal": "That file is not a real picture of the type it claims.",
+      "saveFirst": "Save the product first, then add a picture."
+    },
+    "errors": {
+      "title": "Could not save",
+      "network": "We could not reach the server. Check your internet connection and try again.",
+      "forbidden": "You do not have permission to do this.",
+      "generic": "Something went wrong on our side. Please try again.",
+      "clash": "This product clashes with one you already have."
+    },
+    "importPage": {
+      "title": "Import products",
+      "subtitle": "Upload a spreadsheet saved as CSV. Every row is checked; the good rows are added and each bad row is explained.",
+      "back": "Back to products",
+      "step1": "Your file",
+      "columnsHeading": "Columns",
+      "columnsBody": "name, mrp and price are required. Optional: brand, category, variant, sku, barcode, hsn, gst_percent, cost. Amounts are in rupees. Up to 2000 rows and 2 MB.",
+      "columnsBodyCost": "The cost column is private: only people with cost access may use it.",
+      "template": "Download a template",
+      "choose": "Choose a CSV file",
+      "chosen": "Selected file: {name}",
+      "check": "Check the file",
+      "checking": "Checking",
+      "run": "Import the good rows",
+      "importing": "Importing",
+      "notCsv": "Choose a .csv file.",
+      "tooBig": "That file is over 2 MB. Split it into smaller files.",
+      "result": {
+        "checkedTitle": "File checked. Nothing has been saved yet.",
+        "importedTitle": "Import finished.",
+        "summary": "{created, plural, one {# product} other {# products}} {dryRun, select, true {would be added} other {added}}, {failed, plural, one {# row has} other {# rows have}} problems.",
+        "categories": "New categories: {names}",
+        "ignored": "Columns not used: {names}",
+        "fileProblem": "The file cannot be read",
+        "failedHeading": "Rows with problems",
+        "row": "Row {number}",
+        "fixHint": "Fix these rows in your spreadsheet and import the file again: rows already added are skipped because they now exist."
+      }
     }
   }
 }

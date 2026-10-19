@@ -15,9 +15,11 @@ export function OwnerNav() {
   const t = useTranslations('Nav');
   const pathname = usePathname();
   const canManage = useCan('settings.manage');
+  const canSeeProducts = useCan('products.read');
 
   const links = [
     { href: '/', label: t('dashboard'), exact: true },
+    ...(canSeeProducts ? [{ href: '/products', label: t('products'), exact: false }] : []),
     { href: '/branches', label: t('branches'), exact: false },
     ...(canManage ? [{ href: '/settings/business', label: t('business'), exact: false }] : []),
     { href: '/pos', label: t('pos'), exact: false },

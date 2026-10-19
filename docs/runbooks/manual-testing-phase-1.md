@@ -82,13 +82,34 @@ There are no team screens yet, so use Swagger (`/docs`).
 4. **Dashboard:** profile and branch show done. The team step says "Screen coming soon".
 5. **Cashier view** (private window): Branches shows only their branch with no buttons, and "Business profile" is not in the menu.
 
+## 3b. P1-4: products, prices, pictures and CSV import (web, as the owner)
+
+Use a business with a GSTIN (Business profile: Maharashtra, `27AAPFU0939F1ZV`) so HSN and GST are required.
+
+1. **Add one product by hand:** Products, Add a product. Name `Gold Standard 100% Whey`, brand `Optimum Nutrition`, variant `2 kg / Chocolate`, category `Protein & whey` (HSN `21069099` and GST 18% fill in by themselves), barcode `748927052145`, MRP `3499`, price `2999`, cost `2400`. You land on the edit page.
+   - Save with HSN empty: refused ("required because your business has a GSTIN").
+   - Price `4000` with MRP `3499`: refused.
+   - A second product with the same barcode: refused under the barcode box.
+2. **Picture:** on the edit page choose a JPEG or PNG. It appears. Try a `.pdf` (refused), a text file renamed `.png` (refused by the server).
+3. **Price history:** "Change price", new price `2799`, reason `Diwali offer`. The history table lists both prices, who changed it, and marks the one in force. Try a start time in the past (refused) and one tomorrow (marked "Scheduled", today's price stays).
+4. **Keyboard:** on the Products table click a price, press Enter, type `2699`, press Enter. The dialog asks why. Arrow Up and Down move between rows; Escape cancels.
+5. **CSV import:** Import from CSV, download the template, add rows (one with a 2-digit HSN, one with a price above its MRP), choose the file, **Check the file**: nothing is saved and each bad row is explained. Then **Import the good rows**. Import the same file again: nothing new is created.
+6. **Cost secrecy:** sign in as the cashier. Products shows no Cost, Margin or Actions columns and no Add / Import buttons; prices are plain text. In Swagger, with the cashier's token, `GET /v1/products` contains no cost word anywhere; `POST /v1/products` and `POST /v1/products/{id}/prices` answer 403.
+7. **History cannot be edited:**
+
+   ```bash
+   docker compose exec postgres psql -U dumbbill -d dumbbill -c "update price_history set price_paise = 1"
+   ```
+
+   It must fail with "price_history is append-only", even though you are using the owner password.
+
 ## 4. Audit check
 
 ```bash
 docker compose exec postgres psql -U dumbbill -d dumbbill -c "select created_at, action from audit_log order by created_at"
 ```
 
-Expect entries such as `auth.login`, `team.member_invited`, `authz.denied`, `business.profile_updated`, `branch.created`, `branch.deactivated`.
+Expect entries such as `auth.login`, `team.member_invited`, `authz.denied`, `business.profile_updated`, `branch.created`, `branch.deactivated`, `product.created`, `product.price_changed`, `product.imported`.
 
 ## 5. If something looks wrong
 

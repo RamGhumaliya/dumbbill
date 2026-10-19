@@ -42,3 +42,24 @@ export async function createDefaultRolesAndBranch(
   });
   return { roleIds, branchId: branch.id };
 }
+
+/**
+ * Give a brand-new business its starter product categories: a copy of the category templates (protein and whey,
+ * performance, vitamins and wellness, accessories and apparel). The HSN and GST rate on each are SUGGESTIONS that
+ * pre-fill the product form; the business's CA decides the real values per product. Called by sign-up in the same
+ * transaction that creates the business.
+ */
+export async function createDefaultCategories(
+  tx: TenantTransaction,
+  tenantId: string,
+): Promise<void> {
+  const templates = await tx.categoryTemplate.findMany({ orderBy: { sortOrder: 'asc' } });
+  await tx.productCategory.createMany({
+    data: templates.map((template) => ({
+      tenantId,
+      name: template.name,
+      defaultHsn: template.defaultHsn,
+      defaultGstRateBp: template.defaultGstRateBp,
+    })),
+  });
+}

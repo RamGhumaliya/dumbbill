@@ -44,6 +44,14 @@ Layers: controller (HTTP only) → service (use case) → domain (pure functions
 - **Logo files** go through `FileStorage` under the business's own folder with a random name; only PNG, JPEG, WebP; the service ignores any client file name.
 - Business and branch tests: `test/integration/business-flow.spec.ts` (uses a second `GROWTH` plan to allow several branches), `test/security/business-db-security.spec.ts`. The test app seeds the real GST state list.
 
+## Catalogue and pricing (P1-4). Reasoning: `../docs/adr/011-catalogue-and-pricing.md`; app guide: `../docs/api/catalogue.md`
+- **Cost secrecy is a TYPE decision.** `ProductCashierDto` has no cost, margin or profit field; `ProductAdminDto` adds them and is returned only when the caller holds `products.cost.read` (`describeMany` in `products.service.ts`). Never add a cost-like field to the cashier type, never put cost in an audit `metadata` or a log (record field NAMES only), and make any new product endpoint go through `describeMany`. `test/integration/catalogue-flow.spec.ts` (the leak scanner) fails the build otherwise.
+- **A price is never edited.** There is no price column on `products`; prices live in the append-only `price_history` (app role has no UPDATE/DELETE, a trigger refuses everyone). The price in force = newest row with `effective_from <= now` (read through the injected `Clock`, so tests can move time). New price rows come only from `changePrice` (reason required, no start in the past, price not above MRP) and from creation and import ("Initial price").
+- **Tax rules live in one place each:** GST rates in `domain/gst-rates.ts` (the CA owns that list), field rules in `domain/product-rules.ts` (used by the API AND the CSV import), rupee text in `domain/money.ts`.
+- **Pictures** go through `images/product-images.ts` (decode, re-encode, size cap) and `FileStorage`; the storage key always comes from the business's own row, never from a request.
+- **Uniqueness:** check first (`assertUnique`) so the error names the field; the unique indexes are the safety net.
+- New append-only table? Add it to `append_only` inside `app_grant_defaults()` in its migration (price_history is there now).
+
 ## DTOs & docs
 - class-validator + class-transformer with `whitelist: true, forbidNonWhitelisted: true`.
 - Separate response DTO classes per audience (`ProductCashierDto` vs `ProductAdminDto`). Never return Prisma entities.

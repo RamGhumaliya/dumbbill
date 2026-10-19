@@ -29,7 +29,7 @@ Why:
 
 ## What is allowed
 
-JPEG, PNG, WebP, PDF and CSV only, up to the size limit. Every file is checked three ways:
+JPEG, PNG, WebP, PDF and CSV only, up to the size limit. Product pictures and the business logo are decoded and re-encoded (product pictures as 800 px and 160 px WebP by the `sharp` library) before they are stored, so what is kept is never the raw upload. Every file is checked three ways:
 1. Its extension is on the allow-list.
 2. The declared type matches the extension.
 3. The first bytes of the file really look like that type, so a script renamed `photo.png` is rejected.

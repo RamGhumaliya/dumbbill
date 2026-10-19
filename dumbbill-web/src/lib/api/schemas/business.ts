@@ -43,7 +43,9 @@ export interface BusinessProfileInput {
 
 /** The first-steps checklist: each step is done when real data proves it. More steps arrive with later modules. */
 export const onboardingSchema = z.object({
-  steps: z.array(z.object({ key: z.enum(['PROFILE', 'BRANCH', 'TEAM']), done: z.boolean() })),
+  steps: z.array(
+    z.object({ key: z.enum(['PROFILE', 'BRANCH', 'PRODUCTS', 'TEAM']), done: z.boolean() }),
+  ),
   gstinMissing: z.boolean(),
 });
 export type Onboarding = z.infer<typeof onboardingSchema>;

@@ -196,12 +196,13 @@ export class BusinessService {
    */
   async onboarding(): Promise<OnboardingDto> {
     return this.tenantTx.run(async (tx) => {
-      const [tenant, detailedBranches, people] = await Promise.all([
+      const [tenant, detailedBranches, people, products] = await Promise.all([
         tx.tenant.findFirstOrThrow(),
         tx.branch.count({
           where: { isActive: true, stateCode: { not: null }, addressLine: { not: null } },
         }),
         tx.user.count({ where: { status: { not: 'DISABLED' } } }),
+        tx.product.count({ where: { isActive: true } }),
       ]);
       return {
         steps: [
@@ -210,6 +211,7 @@ export class BusinessService {
             done: Boolean(tenant.stateCode && tenant.addressLine && tenant.city && tenant.pincode),
           },
           { key: 'BRANCH', done: detailedBranches > 0 },
+          { key: 'PRODUCTS', done: products > 0 },
           { key: 'TEAM', done: people > 1 },
         ],
         gstinMissing: !tenant.gstin,

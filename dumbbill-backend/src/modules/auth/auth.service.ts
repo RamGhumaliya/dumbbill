@@ -29,7 +29,7 @@ import { ChangePasswordDto, LoginDto, ResetPasswordDto, SignupDto } from './dto/
 import { PasswordRules } from './password/password-rules.service';
 import { AuthTokenService } from './auth-token.service';
 import { AccessService } from '../permissions/access.service';
-import { createDefaultRolesAndBranch } from '../permissions/default-roles';
+import { createDefaultCategories, createDefaultRolesAndBranch } from '../permissions/default-roles';
 import { PasswordHasher } from './password/password-hasher.service';
 import { RateLimiter } from './rate-limit/rate-limiter.service';
 import { SessionService } from './session/session.service';
@@ -135,6 +135,7 @@ export class AuthService {
         });
         // The business starts with its three built-in roles and a first branch; the owner holds the Owner role.
         const { roleIds } = await createDefaultRolesAndBranch(tx, tenantId);
+        await createDefaultCategories(tx, tenantId);
         await tx.user.create({
           data: {
             id: userId,

@@ -39,3 +39,33 @@ export function formatPaise(paise: number, options: FormatPaiseOptions = {}): st
   }
   return rupees.format(paise / 100);
 }
+
+/** Largest amount a price box accepts: Rs 1 crore, in paise. The API enforces the same guard. */
+export const MAX_PRICE_PAISE = 10_000_000_00;
+
+/**
+ * Read what a person typed in a price box ("1499", "1,499.50", "₹299") as whole paise, without decimal arithmetic.
+ * The digits are read as TEXT (19.99 would be 1998.9999999999998 as a float), so the result is always exact.
+ *
+ * @returns the amount in paise, or `null` when it is not an amount (empty, negative, letters, more than two decimals,
+ *   above Rs 1 crore).
+ */
+export function parseRupeesToPaise(text: string): number | null {
+  const cleaned = text.replace(/[₹\s,]/g, '');
+  const match = /^(\d{1,9})(?:\.(\d{1,2}))?$/.exec(cleaned);
+  if (!match) return null;
+  const paise = Number(match[1]) * 100 + Number((match[2] ?? '').padEnd(2, '0') || '0');
+  return paise <= MAX_PRICE_PAISE ? paise : null;
+}
+
+/** An amount in paise as the plain text a price box shows for editing: 299900 -> "2999", 299950 -> "2999.50". No symbol, no commas. */
+export function paiseToRupeeText(paise: number): string {
+  if (!Number.isSafeInteger(paise) || paise < 0) {
+    throw new Error(`Money must be a whole, non-negative number of paise, received ${paise}.`);
+  }
+  const rupeesPart = Math.floor(paise / 100);
+  const paisePart = paise % 100;
+  return paisePart === 0
+    ? String(rupeesPart)
+    : `${rupeesPart}.${String(paisePart).padStart(2, '0')}`;
+}

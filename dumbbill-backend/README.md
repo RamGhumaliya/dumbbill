@@ -100,6 +100,7 @@ src/
     auth/                                              sign-up, sign-in, sessions, two-step login (see docs/api/auth-flow.md)
     permissions/                                       permission catalogue (permissions.matrix.ts), @Permission, the global guard, branch scope
     team/                                              roles, members, invitations, approval PIN (see docs/api/team-and-permissions.md)
+    business/                                          business profile, GSTIN rules, branches, first-steps checklist (see docs/api/business-and-branches.md)
     audit/                                             append-only audit log writer
     mail/                                              outgoing email (SMTP) and the account email texts
 prisma/

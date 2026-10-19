@@ -24,7 +24,7 @@
     "db:seed": "prisma db seed",
     "db:seed:demo": "prisma db seed -- --group demo",
     "db:seed:list": "prisma db seed -- --list",
-    "db:reset": "node scripts/assert-not-production.mjs && prisma migrate reset --force",
+    "db:reset": "node scripts/assert-not-production.mjs && prisma migrate reset --force && node scripts/setup-db-roles.mjs",
     "db:studio": "prisma studio",
     "postinstall": "prisma generate",
     "prepare": "cd .. && husky dumbbill-backend/.husky",

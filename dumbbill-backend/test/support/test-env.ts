@@ -1,4 +1,6 @@
 import { generateKeyPairSync, randomBytes } from 'node:crypto';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
 /**
  * The environment variables the app needs when started inside a test.
@@ -31,6 +33,8 @@ export function applyTestEnvironment(overrides: Record<string, string> = {}): vo
     // The production floor for password hashing memory is 19456 KiB; tests stay just above it.
     ARGON2_MEMORY_KIB: '19456',
     ARGON2_TIME_COST: '1',
+    // Uploaded files from tests go to the system temp folder, never into the project's own storage folder.
+    STORAGE_LOCAL_DIR: join(tmpdir(), 'dumbbill-test-storage'),
     ...overrides,
   });
 }

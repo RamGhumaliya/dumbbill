@@ -109,7 +109,7 @@ export const SAMPLE_TENANT = {
 /** What the sample owner may do: everything, in every branch. */
 export const SAMPLE_ACCESS = {
   roleName: 'Owner',
-  permissions: ['team.manage', 'products.read', 'pos.sell'],
+  permissions: ['team.manage', 'settings.manage', 'products.read', 'pos.sell'],
   discountLimitBp: 10000,
   allBranches: true,
   branchIds: [] as string[],

@@ -73,7 +73,10 @@ function discoverRoutes(): RouteInfo[] {
       const method = Reflect.getMetadata(METHOD_METADATA, handler) as number | undefined;
       if (method === undefined) continue;
       const sub = (Reflect.getMetadata(PATH_METADATA, handler) as string | undefined) ?? '';
-      const path = `/${[base, sub].filter(Boolean).join('/')}`.replace(/\/+/g, '/');
+      // A route declared with `@Get()` or `@Get('/')` has no trailing slash once Express registers it.
+      const path = `/${[base, sub].filter(Boolean).join('/')}`
+        .replace(/\/+/g, '/')
+        .replace(/(.)\/$/, '$1');
       routes.push({
         method: METHOD_NAMES[method] ?? String(method),
         path,

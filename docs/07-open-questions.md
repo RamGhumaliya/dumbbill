@@ -18,5 +18,14 @@ These were not specified in the plan, so a default was chosen. All are editable 
 3. **One owner per business** for now. Transferring ownership or adding a second owner is not built.
 4. **Invitation links last 7 days.** An address that already has an account anywhere cannot be invited, and the answer never says why.
 5. **Approval PIN rules:** 6 digits, 5 wrong tries lock it for the person trying (1 minute, doubling), obvious PINs refused.
-6. **Branches:** only a name and an "active" flag exist so far (plus a default "Main branch" at signup); the full branch details and screens are P1-3.
+6. **Branches:** a default "Main branch" is made at signup; its details are filled in during P1-3 (below).
+
+## Decisions made while building P1-3 (please confirm or change)
+1. **GSTIN is optional**, with a warning that only bills of supply can be issued without one (journey J1). It is checked for shape, check character and state, **not** against the GST portal.
+2. **One PAN per business:** every branch GSTIN must carry the same PAN (characters 3 to 12) as the business GSTIN. A shop trading under two legal entities should be two businesses.
+3. **Invoice prefix:** 1 to 6 capital letters or digits, unique inside a business; a new business starts with `MAIN` on its first branch. It will be locked after the first invoice is issued (Phase 2).
+4. **The branch limit counts active branches only**; switched-off branches are free. The last active branch cannot be switched off. Branches are never deleted.
+5. **Reading the profile and branches needs only a login** (the till prints them); changing them needs `settings.manage` (owner only by default).
+6. **Logo:** PNG, JPEG or WebP, at most 2 MB, kept on the server's disk and shown only to signed-in people.
+7. **Existing businesses** keep working: their branch got the prefix `B1`; the owner edits state and address in the branch screen (the checklist nudges them).
 

@@ -101,6 +101,16 @@ model Tenant {
   plan        Plan?        @relation(fields: [planId], references: [id])
   /// When the free trial ends (signup time + the plan's trial days). Billing (Phase 4) acts on it.
   trialEndsAt DateTime?    @map("trial_ends_at") @db.Timestamptz()
+  /// Business profile (P1-3). GSTIN is optional: a shop not registered for GST issues bills of supply, not tax invoices.
+  gstin       String?      @db.VarChar(15)
+  /// Two-digit GST state code of the registered address; decides CGST+SGST (same state) vs IGST (other state).
+  stateCode   String?      @map("state_code") @db.VarChar(2)
+  addressLine String?      @map("address_line")
+  city        String?
+  pincode     String?      @db.VarChar(6)
+  phone       String?      @db.VarChar(15)
+  /// Storage key of the logo image (never a public URL; the API streams it to signed-in people).
+  logoKey     String?      @map("logo_key")
   createdAt   DateTime     @default(now()) @map("created_at") @db.Timestamptz()
   updatedAt   DateTime     @updatedAt @map("updated_at") @db.Timestamptz()
   users       User[]
@@ -312,16 +322,29 @@ model Role {
 /// A shop location of a business. P1-2 only needs the bare minimum (so staff can be assigned to branches); P1-3
 /// adds address, GST number, invoice prefix, printer settings and the screens to manage them.
 model Branch {
-  id        String       @id @default(uuid(7)) @db.Uuid
-  tenantId  String       @map("tenant_id") @db.Uuid
-  tenant    Tenant       @relation(fields: [tenantId], references: [id], onDelete: Restrict)
-  name      String
-  isActive  Boolean      @default(true) @map("is_active")
-  createdAt DateTime     @default(now()) @map("created_at") @db.Timestamptz()
-  updatedAt DateTime     @updatedAt @map("updated_at") @db.Timestamptz()
-  users     UserBranch[]
+  id             String       @id @default(uuid(7)) @db.Uuid
+  tenantId       String       @map("tenant_id") @db.Uuid
+  tenant         Tenant       @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  name           String
+  isActive       Boolean      @default(true) @map("is_active")
+  addressLine    String?      @map("address_line")
+  city           String?
+  pincode        String?      @db.VarChar(6)
+  phone          String?      @db.VarChar(15)
+  /// GST state of THIS shop. Tax logic compares it with the customer's state (place of supply).
+  stateCode      String?      @map("state_code") @db.VarChar(2)
+  /// A branch in another state has its own GSTIN; it must start with the branch's state code.
+  gstin          String?      @db.VarChar(15)
+  /// Letters and digits printed at the start of every invoice number of this branch, for example "FF". Unique per business.
+  invoicePrefix  String       @map("invoice_prefix") @db.VarChar(6)
+  /// Receipt paper width: 58 or 80 mm.
+  printerWidthMm Int          @default(80) @map("printer_width_mm")
+  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt      DateTime     @updatedAt @map("updated_at") @db.Timestamptz()
+  users          UserBranch[]
 
   @@unique([tenantId, name])
+  @@unique([tenantId, invoicePrefix])
   @@index([tenantId])
   @@map("branches")
 }

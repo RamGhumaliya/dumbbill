@@ -1,5 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 import { Suspense } from 'react';
+import { OnboardingChecklist } from '@/components/business/onboarding-checklist';
 import { ServerStatus } from '@/components/owner/server-status';
 import { Badge, MoneyText } from '@/components/ui';
 
@@ -45,6 +46,8 @@ export default async function OwnerHomePage() {
         </h1>
         <p className="mt-1 max-w-prose text-body text-muted">{t('subtitle')}</p>
       </div>
+
+      <OnboardingChecklist />
 
       <section aria-labelledby="sample-heading">
         <div className="mb-3 flex items-baseline justify-between gap-4">

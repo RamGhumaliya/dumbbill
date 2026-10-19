@@ -683,7 +683,7 @@ describe('branches', () => {
     const other = await createBusiness(t);
     const main = await t.db.owner.branch.findFirstOrThrow({ where: { tenantId: owner.tenantId } });
     const second = await t.db.owner.branch.create({
-      data: { tenantId: owner.tenantId, name: 'Andheri West' },
+      data: { tenantId: owner.tenantId, name: 'Andheri West', invoicePrefix: 'AW' },
     });
     const foreign = await t.db.owner.branch.findFirstOrThrow({
       where: { tenantId: other.tenantId },

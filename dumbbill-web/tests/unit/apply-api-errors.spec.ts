@@ -45,4 +45,15 @@ test.describe('applyApiErrors', () => {
     expect(applyApiErrors('text', setError)).toBe(false);
     expect(calls).toEqual([]);
   });
+
+  test('also places the field list of a CONFLICT (a branch prefix another branch already uses)', () => {
+    const calls: Call[] = [];
+    const conflict = new ApiError(409, 'CONFLICT', 'Conflict', 'REQ4', 'x', [
+      { field: 'invoicePrefix', message: 'Another branch already uses this prefix.' },
+    ]);
+    const handled = applyApiErrors(conflict, ((name: string, error: { type: string }) =>
+      calls.push([name, error])) as never);
+    expect(handled).toBe(true);
+    expect(calls[0]?.[0]).toBe('invoicePrefix');
+  });
 });

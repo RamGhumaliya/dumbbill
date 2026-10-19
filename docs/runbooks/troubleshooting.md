@@ -63,6 +63,9 @@ Find your message, apply the fix.
 | Web: `addStyleTag` or an injected `<style>` is blocked in a test | The strict Content-Security-Policy refuses inline `<style>` tags (working as designed) | Set styles through the DOM (`element.style...`) or a class instead |
 | Web: port 3001 already in use | Another dev server is running | Stop it, or run `pnpm dev -p 3002` |
 | Uploaded file rejected with `CONTENT_MISMATCH` | File bytes do not match its type | Check the file is a real image or PDF, not renamed |
+| Sign-up answers 500 and the API log says `function find_login_by_email(text) does not exist` | The local database has the tables but not the SQL functions, because it was not created by the migrations (for example after a manual reset or a schema push) | Local data only: `pnpm db:reset` (drops and rebuilds the local database from the migrations, then run `pnpm db:seed`). Never do this on a real server |
+| Sign-up answers 500 and the API log says `function find_login_by_email(text) does not exist`, although the function is in the database | The app role lost its right to use the `public` schema (a database reset rebuilds the schema). PostgreSQL reports the missing right as "does not exist" | Run `node scripts/setup-db-roles.mjs` (`pnpm db:reset` now does this itself) and retry |
+| Integration tests fail at random with `Exceeded timeout of 5000 ms for a hook` | An old checkout whose `jest.config.js` sets `testTimeout` inside projects (Jest ignores that), so starting the app on a cold compile cache is cut off at 5 seconds | Use the current `jest.config.js` (it loads `test/support/long-timeout.ts`) |
 | Emails not arriving | Development emails are not delivered anywhere | Open http://localhost:8025 (Mailpit) |
 
 ## Useful checks

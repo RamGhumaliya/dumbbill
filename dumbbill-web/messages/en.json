@@ -282,6 +282,201 @@
     "main": "Main navigation",
     "dashboard": "Dashboard",
     "pos": "Point of sale",
-    "account": "Account"
+    "account": "Account",
+    "branches": "Branches",
+    "business": "Business profile"
+  },
+  "Business": {
+    "title": "Business profile",
+    "subtitle": "These details are printed on your invoices and decide how GST is charged.",
+    "loading": "Loading your business details",
+    "loadFailed": "We could not load your business details.",
+    "readOnly": "You can see these details but only the owner can change them.",
+    "sections": {
+      "identity": "Business",
+      "logo": "Logo",
+      "place": "GST, address and contact"
+    },
+    "fields": {
+      "name": "Business name",
+      "nameHint": "As you want it printed on invoices.",
+      "stateCode": "State",
+      "statePlaceholder": "Choose the state of your registered address",
+      "stateHint": "Decides whether a sale is charged CGST + SGST (same state) or IGST (another state).",
+      "gstin": "GSTIN",
+      "gstinHint": "15 characters, for example 27AAPFU0939F1ZV. Leave empty if you are not registered for GST.",
+      "addressLine": "Street address",
+      "city": "City",
+      "pincode": "PIN code",
+      "phone": "Phone",
+      "phoneHint": "Printed on receipts. Digits only, with +91 if you like."
+    },
+    "gstinMissing": {
+      "title": "No GSTIN on file",
+      "body": "You can still sell, but only bills of supply (no GST charged) can be issued. Add your GSTIN here when you have one, to issue tax invoices."
+    },
+    "validation": {
+      "nameRequired": "Enter the business name.",
+      "nameTooLong": "Use 120 characters or fewer.",
+      "stateRequired": "Choose a state.",
+      "gstinShape": "A GSTIN has 15 letters and digits, like 27AAPFU0939F1ZV.",
+      "pincode": "A PIN code has six digits and does not start with 0.",
+      "phone": "Use 8 to 14 digits, with an optional + at the start.",
+      "addressTooLong": "Use 200 characters or fewer.",
+      "cityTooLong": "Use 80 characters or fewer."
+    },
+    "save": "Save details",
+    "saving": "Saving",
+    "saved": "Business details saved.",
+    "logo": {
+      "alt": "Your business logo",
+      "none": "No logo yet",
+      "hint": "PNG, JPEG or WebP, up to 2 MB. Shown on invoices and receipts.",
+      "choose": "Choose a logo",
+      "replace": "Replace logo",
+      "remove": "Remove logo",
+      "uploading": "Uploading",
+      "uploaded": "Logo saved.",
+      "removed": "Logo removed.",
+      "tooBig": "That image is over 2 MB. Choose a smaller one.",
+      "wrongType": "Choose a PNG, JPEG or WebP image.",
+      "notReal": "That file is not a real image of the type it claims."
+    },
+    "errors": {
+      "title": "Could not save",
+      "network": "We could not reach the server. Check your internet connection and try again.",
+      "forbidden": "Only the owner can change business details.",
+      "generic": "Something went wrong on our side. Please try again.",
+      "ruleViolation": "These details clash with a branch. {detail}"
+    },
+    "onboarding": {
+      "title": "Set up your shop",
+      "subtitle": "A few steps before your first bill. Each one turns done when the work is really done.",
+      "progress": "{done} of {total} done",
+      "allDone": "The basics are in place.",
+      "loadFailed": "We could not load the checklist.",
+      "open": "Open",
+      "steps": {
+        "PROFILE": {
+          "title": "Business profile",
+          "body": "Name, state and address. They go on every invoice.",
+          "action": "Fill in the profile"
+        },
+        "BRANCH": {
+          "title": "First branch",
+          "body": "Address, invoice prefix and receipt paper width for your shop.",
+          "action": "Set up the branch"
+        },
+        "TEAM": {
+          "title": "Invite your team",
+          "body": "Add a cashier so someone else can bill while you manage.",
+          "action": "Invite someone"
+        }
+      },
+      "comingSoon": "Screen coming soon",
+      "stepDone": "Done"
+    }
+  },
+  "Branches": {
+    "title": "Branches",
+    "subtitle": "Each branch has its own address, invoice numbers and receipt printer.",
+    "caption": "Branches of your business",
+    "loading": "Loading your branches",
+    "loadFailed": "We could not load your branches.",
+    "usage": "{used} of {max, plural, one {# branch} other {# branches}} in use on your plan",
+    "add": "Add a branch",
+    "columns": {
+      "name": "Branch",
+      "prefix": "Invoice prefix",
+      "state": "State",
+      "paper": "Receipt paper",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "paperValue": "{mm} mm",
+    "status": {
+      "active": "Active",
+      "off": "Switched off"
+    },
+    "edit": "Edit",
+    "editLabel": "Edit {name}",
+    "switchOff": "Switch off",
+    "switchOffLabel": "Switch off {name}",
+    "switchOn": "Switch on",
+    "switchOnLabel": "Switch on {name}",
+    "empty": {
+      "title": "No branches to show",
+      "body": "You have no access to any branch yet. Ask the owner to assign you one."
+    },
+    "limit": {
+      "title": "Your plan is full",
+      "body": "Your plan allows {max, plural, one {# branch} other {# branches}} and all are in use. Switch a branch off, or upgrade your plan to add more.",
+      "upgrade": "Upgrade (coming soon)"
+    },
+    "confirmOff": {
+      "title": "Switch off {name}?",
+      "body": "Nobody can bill from this branch until you switch it on again. Its history is kept.",
+      "confirm": "Switch off",
+      "cancel": "Keep it on"
+    },
+    "toast": {
+      "created": "Branch added.",
+      "saved": "Branch saved.",
+      "off": "Branch switched off.",
+      "on": "Branch switched on."
+    },
+    "new": {
+      "title": "Add a branch",
+      "subtitle": "Each branch prints its own invoice numbers, so the prefix must be different."
+    },
+    "editPage": {
+      "title": "Edit branch",
+      "subtitle": "Changes apply to new invoices straight away.",
+      "back": "Back to branches",
+      "notFound": "This branch does not exist, or you cannot use it."
+    },
+    "fields": {
+      "name": "Branch name",
+      "nameHint": "For example the area: Kothrud shop.",
+      "invoicePrefix": "Invoice prefix",
+      "invoicePrefixHint": "1 to 6 capital letters or digits. Invoices read KOT-000123.",
+      "printerWidthMm": "Receipt paper width",
+      "printerWidthHint": "Check the roll in your printer: 58 mm is the narrow one.",
+      "stateCode": "State",
+      "statePlaceholder": "Choose the state of this branch",
+      "stateHint": "Tax on a sale depends on this branch's state.",
+      "gstin": "GSTIN of this branch",
+      "gstinHint": "Only if this branch has its own GST registration. It must start with the state code and share your business PAN.",
+      "addressLine": "Street address",
+      "city": "City",
+      "pincode": "PIN code",
+      "phone": "Phone"
+    },
+    "paper": {
+      "58": "58 mm (narrow roll)",
+      "80": "80 mm (standard roll)"
+    },
+    "validation": {
+      "nameRequired": "Enter a branch name.",
+      "nameTooLong": "Use 80 characters or fewer.",
+      "prefixRequired": "Enter an invoice prefix.",
+      "prefixShape": "Use 1 to 6 capital letters or digits, no spaces or symbols.",
+      "stateRequired": "Choose a state.",
+      "gstinShape": "A GSTIN has 15 letters and digits, like 27AAPFU0939F1ZV.",
+      "pincode": "A PIN code has six digits and does not start with 0.",
+      "phone": "Use 8 to 14 digits, with an optional + at the start.",
+      "addressTooLong": "Use 200 characters or fewer.",
+      "cityTooLong": "Use 80 characters or fewer."
+    },
+    "submitCreate": "Add branch",
+    "submitSave": "Save branch",
+    "submitting": "Saving",
+    "errors": {
+      "title": "Could not save",
+      "network": "We could not reach the server. Check your internet connection and try again.",
+      "forbidden": "Only the owner can change branches.",
+      "generic": "Something went wrong on our side. Please try again.",
+      "lastActive": "This is your only active branch. Add another before switching it off."
+    }
   }
 }

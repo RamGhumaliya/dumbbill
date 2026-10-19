@@ -36,6 +36,14 @@ Layers: controller (HTTP only) → service (use case) → domain (pure functions
 - Audit every team change with `AuditService.write` inside the transaction; refusals are audited by the guard (`authz.denied`).
 - Team and permission tests use `test/support/team-helpers.ts` (`createBusiness`, `addTeamMember`, `as(person).get(...)`). Run integration tests with `--runInBand` (`pnpm test:int` does): files share one database server, and parallel runs race on role creation.
 
+## Business profile and branches (P1-3). Reasoning: `../docs/adr/010-business-profile-and-branches.md`; app guide: `../docs/api/business-and-branches.md`
+- **GSTIN rules live in one pure file**, `src/modules/business/domain/gstin.ts` (shape, check character). State and PAN agreement are checked by `place-rules.ts` for the business AND every branch; the database has matching `CHECK` constraints. Never validate a GSTIN anywhere else.
+- **Reading needs a login, changing needs `settings.manage`.** Branch lists are filtered by `BranchScope`; a branch of another business is a 404.
+- **The plan limit counts ACTIVE branches** (`BranchesService.assertRoomForAnother`, `PLAN_LIMIT_REACHED`). Branches are switched off, never deleted; the last active branch cannot be switched off.
+- **Invoice prefixes are unique per business.** Check for the clash first so the error names the field (`errors[]` on a `CONFLICT`); the unique index is the safety net for two simultaneous requests.
+- **Logo files** go through `FileStorage` under the business's own folder with a random name; only PNG, JPEG, WebP; the service ignores any client file name.
+- Business and branch tests: `test/integration/business-flow.spec.ts` (uses a second `GROWTH` plan to allow several branches), `test/security/business-db-security.spec.ts`. The test app seeds the real GST state list.
+
 ## DTOs & docs
 - class-validator + class-transformer with `whitelist: true, forbidNonWhitelisted: true`.
 - Separate response DTO classes per audience (`ProductCashierDto` vs `ProductAdminDto`). Never return Prisma entities.

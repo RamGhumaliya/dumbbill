@@ -46,8 +46,10 @@ export interface RequestOptions<TSchema extends z.ZodType> {
   path: string;
   /** Query string values. Undefined values are left out. */
   query?: Record<string, string | number | boolean | undefined>;
-  /** Request body, sent as JSON. */
+  /** Request body, sent as JSON. A `FormData` (file upload) is sent as multipart instead; the browser sets its headers. */
   body?: unknown;
+  /** How to read a successful answer: `json` (default) or `blob` for files such as the logo image. */
+  expect?: 'json' | 'blob';
   /** What a successful response must look like. */
   schema: TSchema;
   /** Required by the API on calls that create money records (bills, payments). Reuse it when retrying. */
@@ -99,7 +101,9 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
     const token = request.auth === false ? null : (options.getAccessToken?.() ?? null);
     if (token) headers.Authorization = `Bearer ${token}`;
     if (request.idempotencyKey) headers['Idempotency-Key'] = request.idempotencyKey;
-    if (request.body !== undefined) headers['Content-Type'] = 'application/json';
+    const isUpload = request.body instanceof FormData;
+    // A FormData body needs the browser to write the multipart Content-Type itself (it adds the boundary).
+    if (request.body !== undefined && !isUpload) headers['Content-Type'] = 'application/json';
 
     // Stop waiting after the timeout; also stop if the caller cancels.
     const timeout = AbortSignal.timeout(timeoutMs);
@@ -110,7 +114,12 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
       response = await doFetch(url, {
         method: request.method ?? 'GET',
         headers,
-        body: request.body === undefined ? undefined : JSON.stringify(request.body),
+        body:
+          request.body === undefined
+            ? undefined
+            : isUpload
+              ? (request.body as FormData)
+              : JSON.stringify(request.body),
         credentials: options.credentials,
         signal,
       });
@@ -124,7 +133,9 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
 
     // The server echoes the id (or replaces an unsafe one). Prefer what the server says it used.
     const serverRequestId = response.headers.get('x-request-id') ?? requestId;
-    const body: unknown = await readBody(response);
+    // Files are read as a Blob only when the call succeeded; error answers are always JSON problem bodies.
+    const body: unknown =
+      request.expect === 'blob' && response.ok ? await response.blob() : await readBody(response);
 
     if (!response.ok) {
       const problem = parseProblem(body);

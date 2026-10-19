@@ -30,9 +30,10 @@ protein_retail_saas_product/
 | P0-6 Mobile app scaffold (Flutter) | Done (see `dumbbill-mobile/README.md`) |
 | P0-7 ADR pack, runbook skeletons, accounts checklist | Done (see `docs/adr/` and `docs/accounts-checklist.md`) |
 | P1-1 Auth, sessions, tenancy (backend and web screens) | Done (see `docs/api/auth-flow.md`, ADR 006) |
-| P1-2 Roles, permissions, team (backend, accept-invitation page) | Done, not yet committed (see `docs/api/team-and-permissions.md`, ADR 009) |
+| P1-2 Roles, permissions, team (backend, accept-invitation page) | Done (see `docs/api/team-and-permissions.md`, ADR 009) |
+| P1-3 Business profile, GSTIN, branches, first-steps checklist (backend and web) | Done, not yet committed (see `docs/api/business-and-branches.md`, ADR 010) |
 | Phase 0 | Complete |
-| Phase 1 | In progress. Next: P1-3 branches and business profile (`docs/05-ai-kit/prompts/phase-1-foundation.md`) |
+| Phase 1 | In progress. Next: P1-4 catalogue and pricing (`docs/05-ai-kit/prompts/phase-1-foundation.md`) |
 
 The live checklist is `docs/06-tracking/progress-tracker.md`.
 

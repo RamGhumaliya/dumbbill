@@ -1,8 +1,11 @@
 import { TenantTransaction } from '../tenancy/tenant-tx.service';
 import { ROLE_PRESETS, SystemRoleKey } from './permissions.matrix';
 
-/** Name of the first branch every business starts with. Renamed in the business settings (P1-3). */
+/** Name of the first branch every business starts with. The owner renames it on the branch screen. */
 export const DEFAULT_BRANCH_NAME = 'Main branch';
+
+/** Invoice prefix of that first branch. The owner changes it before the first invoice is issued. */
+export const DEFAULT_INVOICE_PREFIX = 'MAIN';
 
 /**
  * Give a brand-new business what it needs to have people and branches: the three built-in roles (Owner, Admin,
@@ -34,6 +37,8 @@ export async function createDefaultRolesAndBranch(
     });
     roleIds[key] = role.id;
   }
-  const branch = await tx.branch.create({ data: { tenantId, name: DEFAULT_BRANCH_NAME } });
+  const branch = await tx.branch.create({
+    data: { tenantId, name: DEFAULT_BRANCH_NAME, invoicePrefix: DEFAULT_INVOICE_PREFIX },
+  });
   return { roleIds, branchId: branch.id };
 }

@@ -6,6 +6,7 @@ export { ApiError, parseProblem, type ProblemDetails, type FieldError } from './
 export { createApiClient, type ApiClient } from './client';
 export * as systemApi from './endpoints/system';
 export * as authApi from './endpoints/auth';
+export * as businessApi from './endpoints/business';
 export { readCsrfToken } from './auth';
 
 /** Renews the login with the refresh cookie. Built once; shared by the API client and the session restore. */

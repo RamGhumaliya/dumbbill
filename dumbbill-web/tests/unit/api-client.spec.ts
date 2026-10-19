@@ -286,4 +286,33 @@ test.describe('renewing the login on a 401', () => {
     });
     expect(refreshes).toBe(0);
   });
+
+  test('sends a FormData body as multipart, leaving the Content-Type for the browser to write', async () => {
+    const { impl, calls } = fakeFetch(json({ hello: 'ok' }));
+    const client = createApiClient({ baseUrl: BASE, fetchImpl: impl });
+    const form = new FormData();
+    form.append('file', new Blob(['x'], { type: 'image/png' }), 'logo.png');
+    await client.request({ method: 'PUT', path: '/v1/business/logo', body: form, schema });
+    const headers = calls[0]!.init.headers as Record<string, string>;
+    expect(calls[0]!.init.body).toBe(form);
+    // Without the browser's own value the multipart boundary would be missing and the server could not read the file.
+    expect(headers['Content-Type']).toBeUndefined();
+  });
+
+  test('can read a successful answer as a file, while errors are still read as problem bodies', async () => {
+    const { impl } = fakeFetch(
+      new Response('PNGDATA', { status: 200, headers: { 'content-type': 'image/png' } }),
+      problem({ code: 'NOT_FOUND' }, 404),
+    );
+    const client = createApiClient({ baseUrl: BASE, fetchImpl: impl });
+    const blob = await client.request({
+      path: '/v1/business/logo',
+      expect: 'blob',
+      schema: z.instanceof(Blob),
+    });
+    expect(await blob.text()).toBe('PNGDATA');
+    await expect(
+      client.request({ path: '/v1/business/logo', expect: 'blob', schema: z.instanceof(Blob) }),
+    ).rejects.toMatchObject({ code: 'NOT_FOUND', status: 404 });
+  });
 });

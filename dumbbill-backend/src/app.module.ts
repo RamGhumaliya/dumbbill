@@ -6,6 +6,7 @@ import { RequestContextMiddleware } from './common/request-context/request-conte
 import { validateEnv } from './config/env.validation';
 import { AuditModule } from './modules/audit/audit.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { BusinessModule } from './modules/business/business.module';
 import { HealthModule } from './modules/health/health.module';
 import { MailModule } from './modules/mail/mail.module';
 import { PermissionsModule } from './modules/permissions/permissions.module';
@@ -44,6 +45,7 @@ import { TenancyModule } from './modules/tenancy/tenancy.module';
     PermissionsModule, // who may do what: the global permission guard and branch scope
     AuthModule, // sign-up, sign-in, sessions, two-step login; also the global login guard
     TeamModule, // roles, members, invitations, approval PIN
+    BusinessModule, // business profile (GSTIN, state), branches, first-steps checklist
     HealthModule, // /healthz and /readyz
   ],
 })

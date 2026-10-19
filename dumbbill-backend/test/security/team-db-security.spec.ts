@@ -22,7 +22,9 @@ beforeAll(async () => {
     const role = await db.owner.role.create({
       data: { tenantId, name: 'Cashier', systemKey: 'CASHIER', permissions: ['pos.sell'] },
     });
-    const branch = await db.owner.branch.create({ data: { tenantId, name: 'Main branch' } });
+    const branch = await db.owner.branch.create({
+      data: { tenantId, name: 'Main branch', invoicePrefix: 'MAIN' },
+    });
     await db.owner.user.create({
       data: {
         id: userId,

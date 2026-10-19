@@ -30,6 +30,13 @@ Only `dev` and `prod`: `.env.development` and `.env.production` (templates commi
 - Forms: `useApiForm` + a zod schema built from the translator (`buildSchema(t)`), field errors from the server through `form.applyServerErrors` (use `renames` when the API's field name differs). Error wording comes from `describeApiError`, chosen by error CODE.
 - Browser tests of gated screens start signed in with `signIn(page, context)` from `tests/e2e/support/mock-api.ts` (a pretend API; it records every call so tests can check headers and bodies).
 
+## Business and branch screens (P1-3). Guide: `../docs/api/business-and-branches.md`
+
+- Screens live in `src/components/business/` and are loaded in the browser (behind `AuthGate`). Show or hide buttons with `useCan('settings.manage')`; it is a convenience only, the API refuses what is not allowed.
+- The profile and branch forms share the address, state and GSTIN fields (`place.tsx`). The browser only checks a GSTIN's SHAPE; the check character and state agreement come back from the server as a field error, shown under the box (`form.applyServerErrors`; `CONFLICT` field lists are handled too).
+- Files: the API client sends a `FormData` body as multipart (never set its Content-Type by hand) and can read a file answer with `expect: 'blob'`. The logo needs the token, so it is downloaded and shown from memory, not with a plain `<img src>`.
+- A new first-steps checklist item comes from the server (`GET /v1/business/onboarding`); add its wording under `Business.onboarding.steps` and its link in `onboarding-checklist.tsx`.
+
 ## Rules
 
 - API layer: one typed function per endpoint, zod-validate responses at the boundary, central error handling for problem+json (show `requestId` to user on errors). Tokens in memory; refresh via httpOnly cookie (built in P1-1, see the sign-in rules above).

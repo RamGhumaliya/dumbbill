@@ -6,6 +6,7 @@ import { Clock } from '../../src/common/clock';
 import { BreachChecker } from '../../src/modules/auth/password/breach-checker';
 import { EphemeralStore, MemoryEphemeralStore } from '../../src/modules/auth/store/ephemeral-store';
 import { Mailer, MemoryMailer } from '../../src/modules/mail/mailer';
+import { GST_STATES } from '../../prisma/seed/data/gst-states';
 import { FakeClock } from './fakes';
 import { applyTestEnvironment } from './test-env';
 import { createTestDatabase, TestDatabase } from './test-database';
@@ -49,6 +50,9 @@ export async function createAuthTestApp(
     // 25 seats so ordinary tests are not blocked by the plan limit; the plan-limit test lowers it on purpose.
     data: { code: 'STARTER', name: 'Starter', maxBranches: 1, maxUsers: 25, trialDays: 14 },
   });
+
+  // The real GST state list, so state codes in tests are validated exactly as in production.
+  await db.owner.gstState.createMany({ data: GST_STATES.map((state) => ({ ...state })) });
 
   const clock = new FakeClock();
   const mailer = new MemoryMailer();

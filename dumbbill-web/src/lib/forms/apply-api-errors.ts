@@ -39,5 +39,9 @@ export function applyApiErrors<TFieldValues extends FieldValues>(
   return true;
 }
 
-/** Error codes whose `errors[]` list belongs next to form fields: invalid input, and a password the rules refuse. */
-const FIELD_ERROR_CODES: ReadonlySet<string> = new Set(['VALIDATION_FAILED', 'WEAK_PASSWORD']);
+/** Error codes whose `errors[]` list belongs next to form fields: invalid input, a refused password, and a value that clashes with an existing one (a branch prefix already used). */
+const FIELD_ERROR_CODES: ReadonlySet<string> = new Set([
+  'VALIDATION_FAILED',
+  'WEAK_PASSWORD',
+  'CONFLICT',
+]);

@@ -30,6 +30,8 @@ Target: OWASP ASVS L2, OWASP API Top 10 2023, India DPDP Act 2023, PCI scope avo
 - Customer and staff identity pools separate (`aud` claims, separate tables, separate guards).
 
 ## 3. Authorization
+> **Status (19 Oct 2026): implemented in P1-2.** Permission catalogue in `permissions.matrix.ts`, `@Permission` + deny-by-default global guard, editable role templates, per-person extras and removals, branch scope, no-escalation rules, audit of refusals, and the automatic route-by-role matrix test. Reasoning and limits: `docs/adr/009-roles-and-permissions.md`. `discount.limit_pct` is not a yes/no permission but a per-role (and per-person) limit in basis points.
+
 - Deny-by-default; every controller declares `@Permission('products.cost.read')`.
 - Permission keys (granular): `products.read|write`, `products.cost.read`, `pricing.write`, `purchases.write`, `stock.adjust`, `stock.transfer`, `pos.sell`, `discount.apply`, `discount.limit_pct`, `discount.approve`, `invoice.cancel`, `invoice.refund`, `reports.sales`, `reports.profit`, `team.manage`, `settings.manage`, `loyalty.manage`, `audit.read`.
 - Scope = tenant (RLS) + branch set (service layer). Role presets are editable templates, not hardcoded checks (`if role == 'admin'` is banned).

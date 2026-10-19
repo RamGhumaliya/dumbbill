@@ -105,6 +105,8 @@ model Tenant {
   updatedAt   DateTime     @updatedAt @map("updated_at") @db.Timestamptz()
   users       User[]
   sessions    Session[]
+  roles       Role[]
+  branches    Branch[]
 
   @@map("tenants")
 }
@@ -150,6 +152,24 @@ model User {
   totpLastStep       BigInt?   @map("totp_last_step")
   /// SHA-256 hashes of the unused one-time recovery codes.
   totpRecoveryHashes String[]  @default([]) @map("totp_recovery_hashes")
+
+  // --- Team and permissions (P1-2) ---
+  /// The role template this person works under (Owner, Admin, Cashier or a custom one). Null only for rows created before P1-2.
+  roleId            String?      @map("role_id") @db.Uuid
+  role              Role?        @relation(fields: [roleId], references: [id], onDelete: Restrict)
+  /// Permissions granted to this person ON TOP of their role (the owner picks them one by one).
+  extraPermissions  String[]     @default([]) @map("extra_permissions")
+  /// Permissions taken away from this person even though their role has them. Wins over everything else.
+  deniedPermissions String[]     @default([]) @map("denied_permissions")
+  /// This person's own discount limit in basis points (500 = 5%). Null = use the role's limit.
+  discountLimitBp   Int?         @map("discount_limit_bp")
+  /// Hash of the 6-digit approval PIN (peppered Argon2id). Never returned by any API.
+  pinHash           String?      @map("pin_hash")
+  pinSetAt          DateTime?    @map("pin_set_at") @db.Timestamptz()
+  /// When access was removed, and by whom. Cleared if the person is switched back on.
+  disabledAt        DateTime?    @map("disabled_at") @db.Timestamptz()
+  disabledBy        String?      @map("disabled_by") @db.Uuid
+  branches          UserBranch[]
 
   sessions   Session[]
   authTokens AuthToken[]
@@ -212,6 +232,8 @@ model RefreshToken {
 enum AuthTokenPurpose {
   EMAIL_VERIFICATION
   PASSWORD_RESET
+  /// The link in a team invitation email: lets the invited person choose a password.
+  INVITATION
 }
 
 /// A single-use token sent by email (verify the address, reset the password). Only a hash is stored.
@@ -254,4 +276,67 @@ model AuditLog {
   @@index([tenantId, createdAt])
   @@index([tenantId, action])
   @@map("audit_log")
+}
+
+// ---------------------------------------------------------------------------------------------
+// TEAM, ROLES AND BRANCHES (P1-2)
+// ---------------------------------------------------------------------------------------------
+
+/// A role template: a named bundle of permissions ("Cashier"). Every business gets Owner, Admin and Cashier at
+/// signup and may edit the Admin and Cashier ones, or add its own. The OWNER role is locked: the owner always has
+/// every permission, so nobody can lock themselves out of their own business.
+/// Permission keys come from src/modules/permissions/permissions.matrix.ts (the single source of truth).
+model Role {
+  id              String   @id @default(uuid(7)) @db.Uuid
+  tenantId        String   @map("tenant_id") @db.Uuid
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  name            String
+  description     String   @default("")
+  /// OWNER, ADMIN or CASHIER for the three built-in templates; null for roles the business created itself.
+  systemKey       String?  @map("system_key")
+  /// The permission keys this role grants.
+  permissions     String[] @default([])
+  /// The biggest discount this role may give on its own, in basis points (500 = 5%). Above it, a manager approves.
+  discountLimitBp Int      @default(0) @map("discount_limit_bp")
+  /// True when people in this role may work in every branch; otherwise only the branches assigned to them.
+  allBranches     Boolean  @default(false) @map("all_branches")
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz()
+  users           User[]
+
+  @@unique([tenantId, name])
+  @@index([tenantId])
+  @@map("roles")
+}
+
+/// A shop location of a business. P1-2 only needs the bare minimum (so staff can be assigned to branches); P1-3
+/// adds address, GST number, invoice prefix, printer settings and the screens to manage them.
+model Branch {
+  id        String       @id @default(uuid(7)) @db.Uuid
+  tenantId  String       @map("tenant_id") @db.Uuid
+  tenant    Tenant       @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  name      String
+  isActive  Boolean      @default(true) @map("is_active")
+  createdAt DateTime     @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt DateTime     @updatedAt @map("updated_at") @db.Timestamptz()
+  users     UserBranch[]
+
+  @@unique([tenantId, name])
+  @@index([tenantId])
+  @@map("branches")
+}
+
+/// Which branches a person may work in (only used when their role is not "all branches").
+model UserBranch {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  branchId  String   @map("branch_id") @db.Uuid
+  branch    Branch   @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  @@unique([userId, branchId])
+  @@index([tenantId, branchId])
+  @@map("user_branches")
 }

@@ -8,7 +8,9 @@ import { AuditModule } from './modules/audit/audit.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { HealthModule } from './modules/health/health.module';
 import { MailModule } from './modules/mail/mail.module';
+import { PermissionsModule } from './modules/permissions/permissions.module';
 import { PrismaModule } from './modules/prisma/prisma.module';
+import { TeamModule } from './modules/team/team.module';
 import { StorageModule } from './modules/storage/storage.module';
 import { TenancyModule } from './modules/tenancy/tenancy.module';
 
@@ -39,7 +41,9 @@ import { TenancyModule } from './modules/tenancy/tenancy.module';
     StorageModule, // uploaded files (server disk today)
     MailModule, // outgoing email (Mailpit locally)
     AuditModule, // append-only audit log writer
+    PermissionsModule, // who may do what: the global permission guard and branch scope
     AuthModule, // sign-up, sign-in, sessions, two-step login; also the global login guard
+    TeamModule, // roles, members, invitations, approval PIN
     HealthModule, // /healthz and /readyz
   ],
 })

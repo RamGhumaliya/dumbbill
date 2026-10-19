@@ -46,6 +46,8 @@ Every failed request returns the same JSON body (content type `application/probl
 | `FILE_TYPE_NOT_ALLOWED` | 415 | This file type is not allowed | List the allowed types: JPEG, PNG, WebP, PDF, CSV. |
 | `BUSINESS_RULE_VIOLATION` | 422 | Not allowed by business rules | Show `detail` to the user. |
 | `WEAK_PASSWORD` | 422 | Choose a stronger password | Show `detail` and the entries of `errors[]` next to the password field. |
+| `PLAN_LIMIT_REACHED` | 422 | Your plan does not allow more | Show `detail` and offer "Upgrade plan" (billing arrives in Phase 4). |
+| `INVALID_PIN` | 422 | That PIN is not valid | Ask the approver to try again. The same answer is given whether the PIN is wrong, not set, or the person cannot approve. |
 | `FILE_EMPTY` | 422 | The file is empty | Ask the user to choose another file. |
 | `FILE_CONTENT_MISMATCH` | 422 | The file does not match its type | Ask the user to choose a genuine file. |
 | `DISCOUNT_EXCEEDS_LIMIT` | 422 | Discount exceeds your limit | Offer "ask a manager for approval". |

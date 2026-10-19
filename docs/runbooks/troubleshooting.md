@@ -46,6 +46,12 @@ Find your message, apply the fix.
 | Mobile: emulator exits at start with `Broken AVD system path` | The emulator was created for a system image you no longer have | Create a new emulator in Android Studio Device Manager with an installed image |
 | Mobile: home screen says "Cannot reach the server" | API not running, or wrong `API_BASE_URL` | Start the API; emulator uses `http://10.0.2.2:3000`, a real phone needs your computer's wifi address (see `dumbbill-mobile/config/README.md`) |
 | Mobile: `flutter test` says the generated tokens are out of date | `tokens.json` changed | `dart run tool/generate_tokens.dart` in `dumbbill-mobile`, then commit the result |
+| `403 FORBIDDEN` for someone who used to have access | The owner changed their role or permissions, or their role was edited (changes apply at once) | Check `GET /v1/team/members/{id}` (`effective.permissions`) or the team screen; the audit log has `authz.denied` and `team.member_updated` entries |
+| `401` for a team member whose sign-in still works elsewhere | They were switched off (their sessions end at once) | Switch them back on (`POST /v1/team/members/{id}/enable`); they sign in again |
+| Invitation says `PLAN_LIMIT_REACHED` | All seats on the plan are used (invited people count; switched-off people do not) | Switch someone off, or upgrade the plan (billing arrives in Phase 4) |
+| Invitation says "This email address cannot be invited" | The address already has an account somewhere, or is already on this team | Use another address. The message never says which |
+| Integration tests fail with `tuple concurrently updated` | Two test files created the shared database role at the same moment | Run integration tests in band: `pnpm test:int` (it uses `--runInBand`) |
+| Server start-up log: `Route has no valid access rule; refusing it` | A route was added without `@Public()`, `@Authenticated()` or `@Permission(...)` | Add the right declaration; `pnpm test:int` also names the route |
 | Web: console says "violates the following Content Security Policy" | Something loads a script or style the strict policy does not allow | Do not loosen the policy. Fix the code (no inline scripts, no third-party scripts). The policy is built in `src/lib/security/csp.ts` |
 | Web: `pnpm test:e2e` cannot find a browser | Chromium for tests is not installed | `pnpm exec playwright install chromium` |
 | Web: accessibility test fails with `color-contrast` | A colour pair is below the 4.5:1 minimum | Adjust the token in `src/styles/tokens.css` (and the design guide), not the test |

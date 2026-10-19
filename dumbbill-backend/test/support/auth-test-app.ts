@@ -1,4 +1,4 @@
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, Type } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { configureApp } from '../../src/app.setup';
@@ -37,21 +37,27 @@ export interface AuthTestApp {
 /** A password that passes every rule. */
 export const STRONG_PASSWORD = 'violet harbour 4 lantern';
 
-export async function createAuthTestApp(): Promise<AuthTestApp> {
+export async function createAuthTestApp(
+  options: { extraControllers?: Type<unknown>[] } = {},
+): Promise<AuthTestApp> {
   const db = await createTestDatabase();
   // Settings must exist BEFORE the app module is loaded (it validates them when imported).
   applyTestEnvironment({ APP_DATABASE_URL: db.appUrl, TRUST_PROXY_HOPS: '1' });
 
   // Reference data the signup flow needs (normally loaded by `pnpm db:seed`).
   await db.owner.plan.create({
-    data: { code: 'STARTER', name: 'Starter', maxBranches: 1, maxUsers: 3, trialDays: 14 },
+    // 25 seats so ordinary tests are not blocked by the plan limit; the plan-limit test lowers it on purpose.
+    data: { code: 'STARTER', name: 'Starter', maxBranches: 1, maxUsers: 25, trialDays: 14 },
   });
 
   const clock = new FakeClock();
   const mailer = new MemoryMailer();
   const breached = new Set<string>();
   const { AppModule } = await import('../../src/app.module');
-  const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
+  const moduleRef = await Test.createTestingModule({
+    imports: [AppModule],
+    controllers: options.extraControllers ?? [],
+  })
     .overrideProvider(Clock)
     .useValue(clock)
     .overrideProvider(EphemeralStore)

@@ -13,7 +13,7 @@ import { useSession } from '@/stores/session';
 /** Remember a successful sign-in: keep the access token in memory and tell the screens who is signed in. */
 export function startSession(result: LoginResponse): void {
   setAccessToken(result.accessToken);
-  useSession.getState().setSignedIn(result.user, result.tenant);
+  useSession.getState().setSignedIn(result.user, result.tenant, result.access);
 }
 
 // React's development mode runs effects twice; a second restore must not start a second refresh.
@@ -33,7 +33,7 @@ export function restoreSession(): Promise<void> {
         return;
       }
       const me = await authApi.getCurrentUser(getBrowserApiClient());
-      useSession.getState().setSignedIn(me.user, me.tenant);
+      useSession.getState().setSignedIn(me.user, me.tenant, me.access);
     } catch {
       // Could not reach the API or it refused: treat as signed out (the sign-in screen explains any outage).
       clearAccessToken();

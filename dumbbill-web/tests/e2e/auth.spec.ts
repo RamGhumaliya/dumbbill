@@ -468,6 +468,73 @@ test.describe('forgot and reset password', () => {
   });
 });
 
+test.describe('accepting a team invitation', () => {
+  test('the invited person chooses a password, then goes to sign in with a notice', async ({
+    page,
+  }) => {
+    const api = await installMockApi(page);
+    api.on('POST /v1/auth/accept-invitation', { status: 204 });
+    await page.goto('/accept-invitation?token=invite-tok');
+    await expect(page.getByRole('heading', { level: 1, name: 'Join your team' })).toBeVisible();
+    await fill(page, 'Password', 'violet harbour 4 lantern');
+    await fill(page, 'Repeat the new password', 'violet harbour 4 lantern');
+    await page.getByRole('button', { name: 'Create my account' }).click();
+    await expect(page).toHaveURL(/\/login\?notice=invitation-accepted$/);
+    await expect(page.getByRole('status')).toContainText('Your account is ready');
+    expect(bodyOf(api, 'POST /v1/auth/accept-invitation')).toEqual({
+      token: 'invite-tok',
+      password: 'violet harbour 4 lantern',
+    });
+  });
+
+  test('checks the two passwords match before sending anything', async ({ page }) => {
+    const api = await installMockApi(page);
+    await page.goto('/accept-invitation?token=invite-tok');
+    await fill(page, 'Password', 'violet harbour 4 lantern');
+    await fill(page, 'Repeat the new password', 'something different here');
+    await page.getByRole('button', { name: 'Create my account' }).click();
+    await expect(page.getByText('The two passwords are not the same.')).toBeVisible();
+    expect(api.count('POST /v1/auth/accept-invitation')).toBe(0);
+  });
+
+  test('a refused password is explained under the box and the link keeps working', async ({
+    page,
+  }) => {
+    const api = await installMockApi(page);
+    api.on('POST /v1/auth/accept-invitation', {
+      problem: 'WEAK_PASSWORD',
+      problemExtra: {
+        errors: [{ field: 'password', message: 'This password is too common or too predictable.' }],
+      },
+    });
+    await page.goto('/accept-invitation?token=invite-tok');
+    await fill(page, 'Password', 'password1234');
+    await fill(page, 'Repeat the new password', 'password1234');
+    await page.getByRole('button', { name: 'Create my account' }).click();
+    await expect(page.getByText('This password is too common or too predictable.')).toBeVisible();
+    await expect(page).toHaveURL(/accept-invitation/);
+    await expect(page.getByRole('button', { name: 'Create my account' })).toBeEnabled();
+  });
+
+  test('an expired or used link says to ask for a new invitation', async ({ page }) => {
+    const api = await installMockApi(page);
+    api.on('POST /v1/auth/accept-invitation', { problem: 'INVALID_TOKEN' });
+    await page.goto('/accept-invitation?token=old-tok');
+    await fill(page, 'Password', 'violet harbour 4 lantern');
+    await fill(page, 'Repeat the new password', 'violet harbour 4 lantern');
+    await page.getByRole('button', { name: 'Create my account' }).click();
+    await expect(page.getByText('This invitation has expired or was already used')).toBeVisible();
+    await expect(page.getByText(/Ask the person who invited you/)).toBeVisible();
+  });
+
+  test('a link without a token says it is incomplete and sends nothing', async ({ page }) => {
+    const api = await installMockApi(page);
+    await page.goto('/accept-invitation');
+    await expect(page.getByText('This link is incomplete')).toBeVisible();
+    expect(api.count('POST /v1/auth/accept-invitation')).toBe(0);
+  });
+});
+
 test.describe('signing out', () => {
   test('ends the session on the server with the CSRF proof, clears the screen, and the till bill with it', async ({
     page,
@@ -654,6 +721,7 @@ const SCREENS = [
   { name: 'forgot password', path: '/forgot-password', heading: 'Reset your password' },
   { name: 'reset password', path: '/reset-password?token=t', heading: 'Choose a new password' },
   { name: 'confirm email (failed link)', path: '/verify-email', heading: 'Confirm your email' },
+  { name: 'accept invitation', path: '/accept-invitation?token=t', heading: 'Join your team' },
 ] as const;
 
 for (const theme of THEMES) {

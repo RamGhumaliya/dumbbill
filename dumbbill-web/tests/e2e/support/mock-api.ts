@@ -106,12 +106,21 @@ export const SAMPLE_TENANT = {
   status: 'TRIAL',
   trialEndsAt: '2026-11-01T09:30:00.000Z',
 };
+/** What the sample owner may do: everything, in every branch. */
+export const SAMPLE_ACCESS = {
+  roleName: 'Owner',
+  permissions: ['team.manage', 'products.read', 'pos.sell'],
+  discountLimitBp: 10000,
+  allBranches: true,
+  branchIds: [] as string[],
+};
 export const SAMPLE_LOGIN = {
   accessToken: 'test-access-token',
   tokenType: 'Bearer',
   expiresInSeconds: 900,
   user: SAMPLE_USER,
   tenant: SAMPLE_TENANT,
+  access: SAMPLE_ACCESS,
 };
 
 /** Start intercepting the browser's calls to the API address. */
@@ -188,7 +197,9 @@ export async function signIn(page: Page, context: BrowserContext): Promise<MockA
   api.on('POST /v1/auth/refresh', {
     json: { accessToken: 'test-access-token', tokenType: 'Bearer', expiresInSeconds: 900 },
   });
-  api.on('GET /v1/auth/me', { json: { user: SAMPLE_USER, tenant: SAMPLE_TENANT } });
+  api.on('GET /v1/auth/me', {
+    json: { user: SAMPLE_USER, tenant: SAMPLE_TENANT, access: SAMPLE_ACCESS },
+  });
   api.on('POST /v1/auth/logout', { status: 204 });
   return api;
 }

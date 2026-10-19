@@ -123,3 +123,34 @@ export function passwordChangedEmail(input: Common): MailMessage {
     html: page(brand, lines.map(escapeHtml)),
   };
 }
+
+/**
+ * "You have been invited to <business>". Sent when an owner or manager adds a person to the team.
+ * The link lets the invited person choose their own password; nobody else ever sees or sets it.
+ */
+export function invitationEmail(
+  input: Common & {
+    inviterName: string;
+    businessName: string;
+    roleName: string;
+    link: string;
+    validDays: number;
+  },
+): MailMessage {
+  const { to, brand, name, inviterName, businessName, roleName, link, validDays } = input;
+  const lines = [
+    `Hi ${name},`,
+    `${inviterName} has invited you to join ${businessName} on ${brand}, as ${roleName}.`,
+    `Choose a password to start. The link works once and for ${validDays} days.`,
+  ];
+  const ignore = `If you were not expecting this, ignore this email: nothing happens until you open the link.`;
+  return {
+    to,
+    subject: `${inviterName} invited you to ${businessName} on ${brand}`,
+    text: `${lines.join('\n\n')}\n\n${link}\n\n${ignore}\n`,
+    html: page(brand, [...lines.map(escapeHtml), escapeHtml(ignore)], {
+      label: 'Accept the invitation',
+      url: link,
+    }),
+  };
+}

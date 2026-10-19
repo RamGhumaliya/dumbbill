@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { AuthTokenPurpose, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { Logger } from 'nestjs-pino';
 import { Clock } from '../../common/clock';
 import { DomainError } from '../../common/errors/domain-error';
@@ -14,11 +14,11 @@ import {
 } from '../mail/auth-emails';
 import { MailMessage, Mailer } from '../mail/mailer';
 import { LoginLookup } from '../tenancy/login-lookup.service';
-import { TenantTransaction, TenantTx } from '../tenancy/tenant-tx.service';
+import { TenantTx } from '../tenancy/tenant-tx.service';
 import { AuthenticatedUser } from './auth.types';
-import { checkPasswordPolicy } from './domain/password-policy';
-import { formatToken, generateSecret, hashSecret, parseToken } from './domain/opaque-token';
+import { hashSecret, parseToken } from './domain/opaque-token';
 import {
+  AccessSummaryDto,
   AuthTenantDto,
   AuthUserDto,
   LoginResponseDto,
@@ -26,7 +26,10 @@ import {
   RefreshResponseDto,
 } from './dto/auth-responses.dto';
 import { ChangePasswordDto, LoginDto, ResetPasswordDto, SignupDto } from './dto/auth-requests.dto';
-import { BreachChecker } from './password/breach-checker';
+import { PasswordRules } from './password/password-rules.service';
+import { AuthTokenService } from './auth-token.service';
+import { AccessService } from '../permissions/access.service';
+import { createDefaultRolesAndBranch } from '../permissions/default-roles';
 import { PasswordHasher } from './password/password-hasher.service';
 import { RateLimiter } from './rate-limit/rate-limiter.service';
 import { SessionService } from './session/session.service';
@@ -72,7 +75,9 @@ export class AuthService {
     private readonly tenantTx: TenantTx,
     private readonly lookup: LoginLookup,
     private readonly hasher: PasswordHasher,
-    private readonly breach: BreachChecker,
+    private readonly rules: PasswordRules,
+    private readonly authTokens: AuthTokenService,
+    private readonly accessService: AccessService,
     private readonly limiter: RateLimiter,
     private readonly sessions: SessionService,
     private readonly twoFactor: TwoFactorService,
@@ -97,7 +102,7 @@ export class AuthService {
    */
   async signup(dto: SignupDto, info: RequestInfo): Promise<{ message: string }> {
     await this.limiter.hit('signup:ip', info.ip ?? 'unknown', 5, 60 * 60);
-    await this.assertPasswordAcceptable(dto.password, {
+    await this.rules.assertAcceptable(dto.password, {
       email: dto.email,
       fullName: dto.ownerName,
       businessName: dto.businessName,
@@ -128,6 +133,8 @@ export class AuthService {
         await tx.tenant.create({
           data: { id: tenantId, name: dto.businessName.trim(), planId: plan.id, trialEndsAt },
         });
+        // The business starts with its three built-in roles and a first branch; the owner holds the Owner role.
+        const { roleIds } = await createDefaultRolesAndBranch(tx, tenantId);
         await tx.user.create({
           data: {
             id: userId,
@@ -137,6 +144,7 @@ export class AuthService {
             fullName: dto.ownerName.trim(),
             status: 'ACTIVE',
             isOwner: true,
+            roleId: roleIds.OWNER,
             passwordChangedAt: this.clock.now(),
           },
         });
@@ -145,7 +153,7 @@ export class AuthService {
           { action: 'auth.signup', actorUserId: userId, entity: 'tenant', entityId: tenantId },
           info,
         );
-        return this.issueToken(
+        return this.authTokens.issue(
           tx,
           tenantId,
           userId,
@@ -181,7 +189,7 @@ export class AuthService {
     const parsed = parseToken(token);
     if (!parsed) throw this.invalidToken();
     const done = await this.tenantTx.runAs({ tenantId: parsed.tenantId }, async (tx) => {
-      const userId = await this.claimToken(tx, parsed.secret, 'EMAIL_VERIFICATION');
+      const userId = await this.authTokens.claim(tx, parsed.secret, 'EMAIL_VERIFICATION');
       if (!userId) return false;
       await tx.user.updateMany({
         where: { id: userId, emailVerifiedAt: null },
@@ -206,7 +214,7 @@ export class AuthService {
       const token = await this.tenantTx.runAs(
         { tenantId: record.tenantId, userId: record.userId },
         (tx) =>
-          this.issueToken(
+          this.authTokens.issue(
             tx,
             record.tenantId,
             record.userId,
@@ -343,7 +351,11 @@ export class AuthService {
       tenantId: record.tenantId,
       sessionId: outcome.sessionId,
     });
-    const { user, tenant } = await this.profile(record.tenantId, record.userId);
+    const {
+      user,
+      tenant,
+      access: permissions,
+    } = await this.profile(record.tenantId, record.userId);
     return {
       refreshToken: outcome.refreshToken,
       sessionId: outcome.sessionId,
@@ -353,6 +365,7 @@ export class AuthService {
         expiresInSeconds: access.expiresInSeconds,
         user,
         tenant,
+        access: permissions,
       },
     };
   }
@@ -405,7 +418,7 @@ export class AuthService {
       const token = await this.tenantTx.runAs(
         { tenantId: record.tenantId, userId: record.userId },
         async (tx) => {
-          const issued = await this.issueToken(
+          const issued = await this.authTokens.issue(
             tx,
             record.tenantId,
             record.userId,
@@ -460,7 +473,7 @@ export class AuthService {
       return valid ? row.user : null;
     });
     if (!who) throw this.invalidToken();
-    await this.assertPasswordAcceptable(dto.newPassword, {
+    await this.rules.assertAcceptable(dto.newPassword, {
       email: who.email,
       fullName: who.fullName,
     });
@@ -469,7 +482,7 @@ export class AuthService {
     const ended = await this.tenantTx.runAs(
       { tenantId: parsed.tenantId, userId: who.id },
       async (tx) => {
-        const userId = await this.claimToken(tx, parsed.secret, 'PASSWORD_RESET');
+        const userId = await this.authTokens.claim(tx, parsed.secret, 'PASSWORD_RESET');
         if (!userId) return null;
         const now = this.clock.now();
         await tx.user.update({
@@ -520,7 +533,7 @@ export class AuthService {
       : { valid: false };
     if (!current.valid)
       throw new DomainError('INVALID_CREDENTIALS', 'The current password is not correct.');
-    await this.assertPasswordAcceptable(dto.newPassword, {
+    await this.rules.assertAcceptable(dto.newPassword, {
       email: user.email,
       fullName: user.fullName,
     });
@@ -561,81 +574,14 @@ export class AuthService {
   // Helpers
   // ---------------------------------------------------------------------------------------------
 
-  /**
-   * Apply the password rules and the breach check.
-   * @throws WEAK_PASSWORD with the reasons listed in `errors[]`
-   */
-  private async assertPasswordAcceptable(
-    password: string,
-    context: { email?: string; fullName?: string; businessName?: string },
-  ): Promise<void> {
-    const problems = checkPasswordPolicy(password, { ...context, brandName: this.brand });
-    // Ask the breach service only for passwords that already passed the cheap local rules.
-    if (problems.length === 0 && (await this.breach.isBreached(password))) {
-      problems.push({
-        field: 'password',
-        message: 'This password has appeared in a data breach. Please choose a different one.',
-      });
-    }
-    if (problems.length > 0) {
-      throw new DomainError('WEAK_PASSWORD', problems[0]?.message, problems);
-    }
-  }
-
-  /** Create a one-time emailed token (replacing any earlier unused one of the same kind) and return its text. */
-  private async issueToken(
-    tx: TenantTransaction,
-    tenantId: string,
-    userId: string,
-    purpose: AuthTokenPurpose,
-    validMinutes: number,
-  ): Promise<string> {
-    const now = this.clock.now();
-    // Only the newest link should work: older unused ones are retired.
-    await tx.authToken.updateMany({
-      where: { userId, purpose, usedAt: null },
-      data: { usedAt: now },
-    });
-    const secret = generateSecret();
-    await tx.authToken.create({
-      data: {
-        tenantId,
-        userId,
-        purpose,
-        tokenHash: hashSecret(secret),
-        expiresAt: new Date(now.getTime() + validMinutes * 60 * 1000),
-      },
-    });
-    return formatToken(tenantId, secret);
-  }
-
-  /**
-   * Use up a one-time token. Returns the user it belongs to, or null if it is unknown, the wrong kind, expired or
-   * already used. The "used" change and the check happen in ONE database statement, so two people clicking the same
-   * link at the same instant cannot both succeed.
-   */
-  private async claimToken(
-    tx: TenantTransaction,
-    secret: string,
-    purpose: AuthTokenPurpose,
-  ): Promise<string | null> {
-    const now = this.clock.now();
-    const row = await tx.authToken.findUnique({ where: { tokenHash: hashSecret(secret) } });
-    if (!row || row.purpose !== purpose) return null;
-    const claimed = await tx.authToken.updateMany({
-      where: { id: row.id, usedAt: null, expiresAt: { gt: now } },
-      data: { usedAt: now },
-    });
-    return claimed.count === 1 ? row.userId : null;
-  }
-
   /** The user and business as the API describes them. */
   private async profile(
     tenantId: string,
     userId: string,
-  ): Promise<{ user: AuthUserDto; tenant: AuthTenantDto }> {
+  ): Promise<{ user: AuthUserDto; tenant: AuthTenantDto; access: AccessSummaryDto }> {
     return this.tenantTx.runAs({ tenantId, userId }, async (tx) => {
       const user = await tx.user.findUniqueOrThrow({ where: { id: userId } });
+      const access = await this.accessService.loadIn(tx, userId);
       const tenant = await tx.tenant.findUniqueOrThrow({ where: { id: tenantId } });
       return {
         user: {
@@ -650,6 +596,13 @@ export class AuthService {
           name: tenant.name,
           status: tenant.status,
           trialEndsAt: tenant.trialEndsAt?.toISOString() ?? null,
+        },
+        access: {
+          roleName: access.roleName,
+          permissions: [...access.permissions],
+          discountLimitBp: access.discountLimitBp,
+          allBranches: access.branchScope === 'ALL',
+          branchIds: access.branchScope === 'ALL' ? [] : [...access.branchScope],
         },
       };
     });

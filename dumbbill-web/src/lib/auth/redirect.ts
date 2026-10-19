@@ -8,7 +8,14 @@
  */
 
 /** Pages that must never be a destination (they would send the person straight back to sign in or loop). */
-const AUTH_PAGES = ['/login', '/signup', '/verify-email', '/forgot-password', '/reset-password'];
+const AUTH_PAGES = [
+  '/login',
+  '/signup',
+  '/verify-email',
+  '/forgot-password',
+  '/reset-password',
+  '/accept-invitation',
+];
 
 /**
  * @returns `value` when it is a safe in-site path, otherwise `fallback`.

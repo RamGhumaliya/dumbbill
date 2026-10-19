@@ -26,6 +26,16 @@ Layers: controller (HTTP only) → service (use case) → domain (pure functions
 - Production refuses to start without real secrets (`pnpm keys:generate`); development uses throw-away values and logs a warning.
 - Sign-in tests use `test/support/auth-test-app.ts` (real app and database; fake clock, Redis, mail and breach check). Move time with `clock.advanceSeconds()`, give each caller a `freshIp()`, and read emails from `mailer`.
 
+## Permissions and the team (P1-2). Reasoning: `../docs/adr/009-roles-and-permissions.md`; app guide: `../docs/api/team-and-permissions.md`
+- **Every route declares exactly one of** `@Public()`, `@Authenticated()` or `@Permission('area.action', ...)` (all listed permissions are required). Nothing declared = refused for everyone and the build fails (`test/integration/permission-matrix.spec.ts`, generated from the real routes). The Swagger `Permission:` line must match; the test checks it.
+- **Permission names exist in ONE place**: `src/modules/permissions/permissions.matrix.ts`. Never type a permission string anywhere else; never write `if (role === 'admin')`. To add a capability, add one line to the catalogue (and decide which built-in roles get it in `ROLE_PRESETS`).
+- A person's access is **re-read on every request** (`AccessService`); the controller gets it as `request.access` (`LoadedAccess`). Do not copy permissions into tokens or caches.
+- **Cashier-leak rule:** a cashier-style role must never hold a `confidential` permission (`products.cost.read`, `reports.profit`). A new permission that reveals cost or profit must be marked `confidential: true`.
+- **Hand-out rules** live in `RolesService` and `MembersService`: nobody grants what they do not hold, nobody edits themselves, nobody edits the owner. Any new endpoint that changes someone's access must reuse them.
+- **Branches:** filter lists with `BranchScope.filter()`, check one item with `BranchScope.assert(branchId)`, or mark the route `@BranchScoped({ param })`. Row-level security only separates businesses.
+- Audit every team change with `AuditService.write` inside the transaction; refusals are audited by the guard (`authz.denied`).
+- Team and permission tests use `test/support/team-helpers.ts` (`createBusiness`, `addTeamMember`, `as(person).get(...)`). Run integration tests with `--runInBand` (`pnpm test:int` does): files share one database server, and parallel runs race on role creation.
+
 ## DTOs & docs
 - class-validator + class-transformer with `whitelist: true, forbidNonWhitelisted: true`.
 - Separate response DTO classes per audience (`ProductCashierDto` vs `ProductAdminDto`). Never return Prisma entities.

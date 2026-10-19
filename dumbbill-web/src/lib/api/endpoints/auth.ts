@@ -178,3 +178,20 @@ export function disableTotp(
     schema: noContentSchema,
   });
 }
+
+/**
+ * operationId acceptInvitation. Permission: public (the emailed token is the credential).
+ * The invited person chooses their password. A refused password (WEAK_PASSWORD) does not use up the link.
+ */
+export function acceptInvitation(
+  client: ApiClient,
+  body: { token: string; password: string },
+): Promise<void> {
+  return client.request({
+    method: 'POST',
+    path: '/v1/auth/accept-invitation',
+    body,
+    schema: noContentSchema,
+    auth: false,
+  });
+}

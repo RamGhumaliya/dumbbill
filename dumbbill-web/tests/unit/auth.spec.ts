@@ -265,7 +265,21 @@ test.describe('auth endpoints', () => {
     status: 'TRIAL',
     trialEndsAt: '2026-11-01T09:30:00.000Z',
   };
-  const login = { accessToken: 'a', tokenType: 'Bearer', expiresInSeconds: 900, user, tenant };
+  const access = {
+    roleName: 'Owner',
+    permissions: ['team.manage'],
+    discountLimitBp: 10000,
+    allBranches: true,
+    branchIds: [],
+  };
+  const login = {
+    accessToken: 'a',
+    tokenType: 'Bearer',
+    expiresInSeconds: 900,
+    user,
+    tenant,
+    access,
+  };
 
   test('logIn always asks for the browser kind, so the refresh token arrives as a cookie and not in JSON', async () => {
     const { impl, calls } = fakeFetch(json(login));
@@ -321,7 +335,7 @@ test.describe('auth endpoints', () => {
     setAccessToken('my-access-token');
     const { impl, calls } = fakeFetch(
       new Response(null, { status: 204 }),
-      json({ user, tenant }),
+      json({ user, tenant, access }),
       json({ sessions: [] }),
     );
     const client = createApiClient({ baseUrl: BASE, fetchImpl: impl, getAccessToken });
@@ -335,6 +349,20 @@ test.describe('auth endpoints', () => {
     clearAccessToken();
   });
 
+  test('acceptInvitation posts the token and the chosen password, without a login', async () => {
+    const { impl, calls } = fakeFetch(new Response(null, { status: 204 }));
+    await authApi.acceptInvitation(createApiClient({ baseUrl: BASE, fetchImpl: impl }), {
+      token: 'invite-token',
+      password: 'violet harbour 4 lantern',
+    });
+    expect(calls[0]!.url.pathname).toBe('/v1/auth/accept-invitation');
+    expect(JSON.parse(String(calls[0]!.init.body))).toEqual({
+      token: 'invite-token',
+      password: 'violet harbour 4 lantern',
+    });
+    expect(headerOf(calls[0], 'Authorization')).toBeUndefined();
+  });
+
   test('revokeSession escapes the id it puts in the address', async () => {
     const { impl, calls } = fakeFetch(new Response(null, { status: 204 }));
     await authApi.revokeSession(createApiClient({ baseUrl: BASE, fetchImpl: impl }), '../x?y=1');
@@ -346,14 +374,27 @@ test.describe('auth endpoints', () => {
 test.describe('the signed-in state the screens read', () => {
   const user = { id: 'u1', email: 'a@b.in', fullName: 'A B', isOwner: true, totpEnabled: false };
   const tenant = { id: 't1', name: 'Shop', status: 'TRIAL' as const, trialEndsAt: null };
+  const access = {
+    roleName: 'Owner',
+    permissions: ['team.manage'],
+    discountLimitBp: 10000,
+    allBranches: true,
+    branchIds: [],
+  };
 
   test.beforeEach(() => {
-    useSession.setState({ status: 'restoring', user: null, tenant: null, choseToSignOut: false });
+    useSession.setState({
+      status: 'restoring',
+      user: null,
+      tenant: null,
+      access: null,
+      choseToSignOut: false,
+    });
   });
 
   test('starts as "restoring", becomes signed in, and can learn that two-step sign-in was switched on', () => {
     expect(useSession.getState().status).toBe('restoring');
-    useSession.getState().setSignedIn(user, tenant);
+    useSession.getState().setSignedIn(user, tenant, access);
     expect(useSession.getState()).toMatchObject({ status: 'signedIn', user: { fullName: 'A B' } });
     useSession.getState().updateUser({ totpEnabled: true });
     expect(useSession.getState().user?.totpEnabled).toBe(true);
@@ -361,7 +402,7 @@ test.describe('the signed-in state the screens read', () => {
 
   test('when the API finds the login dead, the screens are told and the access token is forgotten', () => {
     setAccessToken('token');
-    useSession.getState().setSignedIn(user, tenant);
+    useSession.getState().setSignedIn(user, tenant, access);
     notifySignedOut();
     expect(getAccessToken()).toBeNull();
     expect(useSession.getState()).toMatchObject({
@@ -375,7 +416,7 @@ test.describe('the signed-in state the screens read', () => {
   test('remembers when the person chose to sign out, and forgets it at the next sign-in', () => {
     useSession.getState().setSignedOut(true);
     expect(useSession.getState().choseToSignOut).toBe(true);
-    useSession.getState().setSignedIn(user, tenant);
+    useSession.getState().setSignedIn(user, tenant, access);
     expect(useSession.getState().choseToSignOut).toBe(false);
   });
 

@@ -4,12 +4,14 @@ import { APP_GUARD } from '@nestjs/core';
 import { Logger } from 'nestjs-pino';
 import { Clock, SystemClock } from '../../common/clock';
 import { AuthController } from './auth.controller';
+import { AuthTokenService } from './auth-token.service';
 import { AuthService } from './auth.service';
 import { SecretCipher } from './crypto/secret-cipher.service';
 import { AuthContextMiddleware } from './http/auth-context.middleware';
 import { AuthGuard } from './http/auth.guard';
 import { BreachChecker, HibpBreachChecker, NoBreachChecker } from './password/breach-checker';
 import { PasswordHasher } from './password/password-hasher.service';
+import { PasswordRules } from './password/password-rules.service';
 import { RATE_LIMIT_DISABLED, RateLimiter } from './rate-limit/rate-limiter.service';
 import { RevocationList } from './session/revocation-list';
 import { SessionService } from './session/session.service';
@@ -53,6 +55,8 @@ import { TwoFactorService } from './two-factor.service';
         config.get<boolean>('RATE_LIMIT_DISABLED') === true,
     },
     PasswordHasher,
+    PasswordRules,
+    AuthTokenService,
     SecretCipher,
     AccessTokenService,
     RateLimiter,
@@ -63,7 +67,8 @@ import { TwoFactorService } from './two-factor.service';
     AuthContextMiddleware,
     { provide: APP_GUARD, useClass: AuthGuard },
   ],
-  exports: [Clock],
+  // Shared with the team module (invitations, PIN, disabling people ends their sessions).
+  exports: [Clock, PasswordHasher, PasswordRules, AuthTokenService, RateLimiter, SessionService],
 })
 export class AuthModule implements NestModule {
   /**

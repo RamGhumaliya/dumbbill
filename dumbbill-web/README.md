@@ -64,7 +64,7 @@ src/
   app/
     layout.tsx              root shell: language, theme, fonts, translations, data provider, skip link
     globals.css             Tailwind wired to the design tokens (default colours/sizes/radii removed on purpose)
-    (auth)/                 public account pages: login, signup, verify-email, forgot-password, reset-password
+    (auth)/                 public account pages: login, signup, verify-email, forgot-password, reset-password, accept-invitation
     (owner)/                owner/admin screens   (route groups do not appear in the address); account/security lives here
     (pos)/pos/              point of sale
     (admin)/admin/          super admin

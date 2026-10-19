@@ -65,7 +65,8 @@
       "notice": {
         "passwordReset": "Your password was changed. Sign in with the new one.",
         "signedOut": "You are signed out.",
-        "verified": "Email confirmed. You can sign in now."
+        "verified": "Email confirmed. You can sign in now.",
+        "invitationAccepted": "Your account is ready. Sign in with the password you just chose."
       },
       "unverified": {
         "title": "Confirm your email first",
@@ -195,6 +196,17 @@
         "disabled": "Two-step sign-in is off",
         "enabled": "Two-step sign-in is on"
       }
+    },
+    "invite": {
+      "title": "Join your team",
+      "subtitle": "You have been invited. Choose a password to start.",
+      "submit": "Create my account",
+      "submitting": "Creating your account",
+      "invalidTitle": "This invitation has expired or was already used",
+      "invalidBody": "Invitation links work once and for 7 days. Ask the person who invited you to send a new one.",
+      "missingTitle": "This link is incomplete",
+      "missingBody": "Open the link from your invitation email again, or ask for a new invitation.",
+      "signIn": "Already have your password? Sign in"
     }
   },
   "Owner": {

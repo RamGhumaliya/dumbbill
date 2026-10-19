@@ -98,6 +98,8 @@ src/
     tenancy/                                           TenantTx: tenant-locked transactions
     storage/                                           file storage (local disk)
     auth/                                              sign-up, sign-in, sessions, two-step login (see docs/api/auth-flow.md)
+    permissions/                                       permission catalogue (permissions.matrix.ts), @Permission, the global guard, branch scope
+    team/                                              roles, members, invitations, approval PIN (see docs/api/team-and-permissions.md)
     audit/                                             append-only audit log writer
     mail/                                              outgoing email (SMTP) and the account email texts
 prisma/
@@ -114,7 +116,7 @@ Each feature module will follow `controller -> service -> domain -> repository` 
 
 The Auth endpoints (`/v1/auth/...`) are documented in Swagger and, for web and mobile developers, in `docs/api/auth-flow.md`. To try them locally: start Docker and the API, run `pnpm db:seed` once (a business needs the Starter plan), sign up through `/docs`, then open Mailpit at http://localhost:8025 to read the verification email.
 
-**Every route needs a login unless it is marked `@Public()`** (a global guard, deny by default). Public routes must say `Permission: public` in their Swagger description.
+**Every route must declare who may call it**: `@Public()`, `@Authenticated()` (any signed-in person, own account) or `@Permission('products.write')`. A route that declares nothing is refused for everyone and fails `pnpm test:int` (the route-by-role matrix test). The permission names live in one file, `src/modules/permissions/permissions.matrix.ts`; the Swagger description must carry a matching `Permission:` line. See `docs/api/team-and-permissions.md`.
 
 ## Good to know
 

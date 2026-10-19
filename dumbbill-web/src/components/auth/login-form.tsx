@@ -62,12 +62,13 @@ function buildSchema(t: AuthT, step: Step, useRecovery: boolean) {
 
 /**
  * Notices carried in the address, for example after a password reset: `/login?notice=password-reset`.
- * Only these three values are recognised, so nobody can make the page print text of their own choosing.
+ * Only these four values are recognised, so nobody can make the page print text of their own choosing.
  */
 const NOTICE_KEYS = {
   'password-reset': 'login.notice.passwordReset',
   'signed-out': 'login.notice.signedOut',
   verified: 'login.notice.verified',
+  'invitation-accepted': 'login.notice.invitationAccepted',
 } as const;
 
 export function LoginForm() {

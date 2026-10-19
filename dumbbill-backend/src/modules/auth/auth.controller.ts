@@ -46,6 +46,7 @@ import {
   TotpEnabledDto,
   TotpSetupDto,
 } from './dto/auth-responses.dto';
+import { Authenticated } from '../permissions/permission.decorators';
 import { ClientInfo, CurrentUser, Public } from './http/decorators';
 import {
   assertCsrf,
@@ -272,6 +273,7 @@ export class AuthController {
   }
 
   @Get('me')
+  @Authenticated()
   @ApiBearerAuth('staff-bearer')
   @ApiOperation({
     operationId: 'getCurrentUser',
@@ -345,6 +347,7 @@ export class AuthController {
 
   @Post('change-password')
   @HttpCode(204)
+  @Authenticated()
   @ApiBearerAuth('staff-bearer')
   @ApiOperation({
     operationId: 'changePassword',
@@ -378,6 +381,7 @@ export class AuthController {
   // --- Devices (sessions) -----------------------------------------------------------------------
 
   @Get('sessions')
+  @Authenticated()
   @ApiBearerAuth('staff-bearer')
   @ApiOperation({
     operationId: 'listSessions',
@@ -405,6 +409,7 @@ export class AuthController {
 
   @Delete('sessions/:sessionId')
   @HttpCode(204)
+  @Authenticated()
   @ApiBearerAuth('staff-bearer')
   @ApiOperation({
     operationId: 'revokeSession',
@@ -431,6 +436,7 @@ export class AuthController {
 
   @Post('totp/setup')
   @HttpCode(200)
+  @Authenticated()
   @ApiBearerAuth('staff-bearer')
   @ApiOperation({
     operationId: 'startTotpSetup',
@@ -455,6 +461,7 @@ export class AuthController {
 
   @Post('totp/enable')
   @HttpCode(200)
+  @Authenticated()
   @ApiBearerAuth('staff-bearer')
   @ApiOperation({
     operationId: 'enableTotp',
@@ -490,6 +497,7 @@ export class AuthController {
 
   @Post('totp/disable')
   @HttpCode(204)
+  @Authenticated()
   @ApiBearerAuth('staff-bearer')
   @ApiOperation({
     operationId: 'disableTotp',

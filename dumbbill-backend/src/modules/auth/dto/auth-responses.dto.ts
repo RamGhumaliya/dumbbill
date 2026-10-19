@@ -54,6 +54,34 @@ export class AuthTenantDto {
   trialEndsAt!: string | null;
 }
 
+/** What the signed-in person may do. The API enforces it; the apps use it to show or hide buttons. */
+export class AccessSummaryDto {
+  @ApiPropertyOptional({ description: 'Name of their role.', example: 'Cashier', nullable: true })
+  roleName!: string | null;
+
+  @ApiProperty({
+    description: 'Permission keys they hold (see `GET /v1/team/options` for the catalogue).',
+    type: [String],
+    example: ['products.read', 'pos.sell', 'discount.apply'],
+  })
+  permissions!: string[];
+
+  @ApiProperty({
+    description: 'Largest discount they may give alone, in basis points (500 = 5%).',
+    example: 500,
+  })
+  discountLimitBp!: number;
+
+  @ApiProperty({ description: 'True if they may work in every branch.', example: false })
+  allBranches!: boolean;
+
+  @ApiProperty({
+    description: 'Branches they are assigned to (meaningful when `allBranches` is false).',
+    type: [String],
+  })
+  branchIds!: string[];
+}
+
 /** Returned by sign-in. */
 export class LoginResponseDto {
   @ApiProperty({
@@ -79,6 +107,9 @@ export class LoginResponseDto {
 
   @ApiProperty({ type: AuthTenantDto })
   tenant!: AuthTenantDto;
+
+  @ApiProperty({ type: AccessSummaryDto })
+  access!: AccessSummaryDto;
 }
 
 /** Returned by token refresh. */
@@ -106,6 +137,9 @@ export class MeResponseDto {
 
   @ApiProperty({ type: AuthTenantDto })
   tenant!: AuthTenantDto;
+
+  @ApiProperty({ type: AccessSummaryDto })
+  access!: AccessSummaryDto;
 }
 
 export class SessionDto {

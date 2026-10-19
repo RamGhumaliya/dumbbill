@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { onSignedOut } from '@/lib/api/auth';
-import type { AuthTenant, AuthUser } from '@/lib/api/schemas/auth';
+import type { Access, AuthTenant, AuthUser } from '@/lib/api/schemas/auth';
 
 /**
  * Who is signed in, as far as the screens are concerned.
@@ -19,10 +19,12 @@ interface SessionState {
   status: SessionStatus;
   user: AuthUser | null;
   tenant: AuthTenant | null;
+  /** What they may do (permissions, discount limit, branches). Screens use it to show or hide actions. */
+  access: Access | null;
   /** True when the person chose to sign out (so the next screen says "you were signed out", not "continue where you were"). */
   choseToSignOut: boolean;
   /** Record a successful sign-in (or restore). */
-  setSignedIn: (user: AuthUser, tenant: AuthTenant) => void;
+  setSignedIn: (user: AuthUser, tenant: AuthTenant, access: Access) => void;
   /** Record that there is no login. Pass `deliberate` when the person asked to sign out. */
   setSignedOut: (deliberate?: boolean) => void;
   /** Change facts about the signed-in person (for example two-step sign-in was just switched on). */
@@ -33,10 +35,18 @@ export const useSession = create<SessionState>()((set) => ({
   status: 'restoring',
   user: null,
   tenant: null,
+  access: null,
   choseToSignOut: false,
-  setSignedIn: (user, tenant) => set({ status: 'signedIn', user, tenant, choseToSignOut: false }),
+  setSignedIn: (user, tenant, access) =>
+    set({ status: 'signedIn', user, tenant, access, choseToSignOut: false }),
   setSignedOut: (deliberate = false) =>
-    set({ status: 'signedOut', user: null, tenant: null, choseToSignOut: deliberate }),
+    set({
+      status: 'signedOut',
+      user: null,
+      tenant: null,
+      access: null,
+      choseToSignOut: deliberate,
+    }),
   updateUser: (changes) =>
     set((state) => (state.user ? { user: { ...state.user, ...changes } } : state)),
 }));

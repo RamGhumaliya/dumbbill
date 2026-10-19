@@ -121,6 +121,19 @@ export const ERROR_CODES = {
       'Web only: re-read the `dumbbill_csrf` cookie, send it as `X-CSRF-Token`, and retry once.',
   },
 
+  // --- Team and permissions (P1-2) ---
+  PLAN_LIMIT_REACHED: {
+    status: 422,
+    title: 'Your plan does not allow more',
+    uiHint: 'Show `detail` and offer "Upgrade plan" (billing arrives in Phase 4).',
+  },
+  INVALID_PIN: {
+    status: 422,
+    title: 'That PIN is not valid',
+    uiHint:
+      'Ask the approver to try again. The same answer is given whether the PIN is wrong, not set, or the person cannot approve.',
+  },
+
   // --- Files ---
   FILE_NOT_FOUND: {
     status: 404,

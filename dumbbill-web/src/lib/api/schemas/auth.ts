@@ -30,6 +30,17 @@ export const authTenantSchema = z.object({
 });
 export type AuthTenant = z.infer<typeof authTenantSchema>;
 
+/** What the signed-in person may do. The API enforces it; screens use it to show or hide actions. */
+export const accessSchema = z.object({
+  roleName: z.string().nullable(),
+  permissions: z.array(z.string()),
+  /** Largest discount they may give alone, in basis points (500 = 5%). */
+  discountLimitBp: z.number().int(),
+  allBranches: z.boolean(),
+  branchIds: z.array(z.string()),
+});
+export type Access = z.infer<typeof accessSchema>;
+
 /** POST /v1/auth/login. For browser sign-in the refresh token is a cookie, so it is not in this body. */
 export const loginResponseSchema = z.object({
   accessToken: z.string(),
@@ -37,6 +48,7 @@ export const loginResponseSchema = z.object({
   expiresInSeconds: z.number().int(),
   user: authUserSchema,
   tenant: authTenantSchema,
+  access: accessSchema,
 });
 export type LoginResponse = z.infer<typeof loginResponseSchema>;
 
@@ -49,7 +61,11 @@ export const refreshResponseSchema = z.object({
 export type RefreshResponse = z.infer<typeof refreshResponseSchema>;
 
 /** GET /v1/auth/me. */
-export const meResponseSchema = z.object({ user: authUserSchema, tenant: authTenantSchema });
+export const meResponseSchema = z.object({
+  user: authUserSchema,
+  tenant: authTenantSchema,
+  access: accessSchema,
+});
 export type MeResponse = z.infer<typeof meResponseSchema>;
 
 /** A signed-in device, as listed on the account security screen. */

@@ -57,7 +57,7 @@ Target: OWASP ASVS L2, OWASP API Top 10 2023, India DPDP Act 2023, PCI scope avo
 - Mobile: certificate pinning optional, jailbreak/root signal (warn), secure storage (Keychain/Keystore), screenshot-block on sensitive screens, no secrets in app, obfuscation on release.
 
 ## 6. Audit & accountability
-> **Status:** the append-only `audit_log` table and writer exist (P1-1; UPDATE and DELETE are refused for the app role and, by trigger, for everyone). **The hash chain and the periodic anchor are not built yet** (planned for P1-6 hardening, they need a design for concurrent writes).
+> **Status:** the append-only `audit_log` table and writer exist (P1-1; UPDATE and DELETE are refused for the app role and, by trigger, for everyone). **The hash chain is built (P1-5, ADR 012):** rows are sealed in order (hash covers the row and the previous seal) and `GET /v1/audit/verify` names the first broken seal. **The periodic anchor outside the database (S3 Object Lock) is not built yet** and waits for deployment work; until then someone who can rewrite both the log and the chain could hide a change.
 
 `audit_log` append-only (DB trigger blocks UPDATE/DELETE; role has INSERT only). Events: auth (login/fail/reset), permission changes, price changes, stock adjustments/transfers, discounts above X%, approvals, cancel/refund, exports, impersonation, plan changes. Hash-chain (each row stores hash of previous) for tamper evidence; periodic anchor to S3 Object Lock.
 

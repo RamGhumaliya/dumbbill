@@ -102,6 +102,10 @@ src/
     team/                                              roles, members, invitations, approval PIN (see docs/api/team-and-permissions.md)
     business/                                          business profile, GSTIN rules, branches, first-steps checklist (see docs/api/business-and-branches.md)
     catalogue/                                         products, categories, price history, pictures, CSV import (see docs/api/catalogue.md)
+    inventory/                                         stock ledger, levels, weighted average cost, batches, counts, transfers, alerts (see docs/api/purchasing-and-stock.md)
+    purchasing/                                        suppliers, purchases, supplier returns (debit notes)
+    idempotency/                                       Idempotency-Key handling for money- and stock-creating POSTs
+    audit/                                             audit writer, viewer and the tamper-evident hash chain
     audit/                                             append-only audit log writer
     mail/                                              outgoing email (SMTP) and the account email texts
 prisma/

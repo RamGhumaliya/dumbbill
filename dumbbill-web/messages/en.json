@@ -6,7 +6,13 @@
     "skipToContent": "Skip to main content",
     "loading": "Loading",
     "tryAgain": "Try again",
-    "reference": "Reference: {code}"
+    "reference": "Reference: {code}",
+    "close": "Close",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saving": "Saving",
+    "loadMore": "Show more",
+    "noValue": "Not set"
   },
   "Theme": {
     "label": "Colour theme",
@@ -285,7 +291,11 @@
     "account": "Account",
     "branches": "Branches",
     "business": "Business profile",
-    "products": "Products"
+    "products": "Products",
+    "stock": "Stock",
+    "purchases": "Purchases",
+    "suppliers": "Suppliers",
+    "audit": "Audit log"
   },
   "Business": {
     "title": "Business profile",
@@ -377,6 +387,16 @@
           "title": "Add your products",
           "body": "Import a spreadsheet or add them one by one. Each needs a price (and HSN and GST if you have a GSTIN).",
           "action": "Add products"
+        },
+        "SUPPLIER": {
+          "title": "Add a supplier",
+          "body": "Who you buy from. You need one to record a purchase.",
+          "action": "Add a supplier"
+        },
+        "PURCHASE": {
+          "title": "Record your first purchase",
+          "body": "Enter a supplier's bill so your stock and its cost are right from day one.",
+          "action": "Record a purchase"
         }
       },
       "comingSoon": "Screen coming soon",
@@ -701,6 +721,466 @@
         "row": "Row {number}",
         "fixHint": "Fix these rows in your spreadsheet and import the file again: rows already added are skipped because they now exist."
       }
+    }
+  },
+  "Suppliers": {
+    "title": "Suppliers",
+    "subtitle": "The businesses you buy from, and what you owe each.",
+    "caption": "Suppliers of your business",
+    "loading": "Loading suppliers",
+    "loadFailed": "We could not load your suppliers.",
+    "retry": "Try again",
+    "add": "Add a supplier",
+    "search": "Search suppliers",
+    "searchPlaceholder": "Name, GSTIN or phone",
+    "show": "Show",
+    "filters": {
+      "active": "Active suppliers",
+      "inactive": "Switched-off suppliers",
+      "all": "All suppliers"
+    },
+    "columns": {
+      "name": "Supplier",
+      "gstin": "GSTIN",
+      "phone": "Phone",
+      "owed": "You owe",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "owedNote": "Bills minus debit-note credit. Payments are not recorded yet.",
+    "status": {
+      "active": "Active",
+      "off": "Switched off"
+    },
+    "edit": "Edit",
+    "editLabel": "Edit {name}",
+    "switchOff": "Switch off",
+    "switchOffLabel": "Switch off {name}",
+    "switchOn": "Switch on",
+    "switchOnLabel": "Switch on {name}",
+    "empty": {
+      "title": "No suppliers yet",
+      "body": "Add the first business you buy from.",
+      "filtered": "No supplier matches."
+    },
+    "toast": {
+      "created": "Supplier added.",
+      "saved": "Supplier saved.",
+      "off": "Supplier switched off.",
+      "on": "Supplier switched on."
+    },
+    "form": {
+      "addTitle": "Add a supplier",
+      "editTitle": "Edit {name}",
+      "description": "Used on purchases and debit notes.",
+      "name": "Supplier name",
+      "gstin": "GSTIN",
+      "gstinHint": "15 characters. Optional. Checked for typing mistakes.",
+      "phone": "Phone",
+      "email": "Email",
+      "addressLine": "Street address",
+      "city": "City",
+      "notes": "Notes",
+      "notesHint": "Payment terms, the rep's name, anything worth remembering.",
+      "save": "Save supplier",
+      "saving": "Saving",
+      "cancel": "Cancel"
+    },
+    "validation": {
+      "nameRequired": "Enter the supplier name.",
+      "gstinShape": "A GSTIN has 15 letters and digits, like 27AAPFU0939F1ZV.",
+      "phone": "Use 8 to 14 digits, with an optional + at the start.",
+      "email": "Enter an email address like orders@supplier.in."
+    },
+    "errors": {
+      "title": "Could not save",
+      "network": "We could not reach the server. Check your internet connection and try again.",
+      "forbidden": "You do not have permission to do this.",
+      "generic": "Something went wrong on our side. Please try again."
+    }
+  },
+  "Purchases": {
+    "title": "Purchases",
+    "subtitle": "Your suppliers' bills. Each one puts goods into stock at their real cost.",
+    "caption": "Purchases",
+    "loading": "Loading purchases",
+    "loadFailed": "We could not load your purchases.",
+    "retry": "Try again",
+    "record": "Record a purchase",
+    "returns": "Debit notes",
+    "columns": {
+      "invoice": "Supplier invoice",
+      "date": "Invoice date",
+      "supplier": "Supplier",
+      "branch": "Branch",
+      "lines": "Lines",
+      "total": "Total"
+    },
+    "linesValue": "{count, plural, one {# line} other {# lines}}",
+    "empty": {
+      "title": "No purchases yet",
+      "body": "Record your first supplier bill to put stock on the shelves."
+    },
+    "paging": {
+      "showing": "Showing {from}-{to} of {total}",
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "new": {
+      "title": "Record a purchase",
+      "subtitle": "Type the bill as it is on paper. The landed cost and the new average cost update as you type.",
+      "back": "Back to purchases"
+    },
+    "header": {
+      "supplier": "Supplier",
+      "supplierPlaceholder": "Choose a supplier",
+      "branch": "Branch",
+      "branchPlaceholder": "Choose a branch",
+      "invoiceRef": "Supplier's invoice number",
+      "invoiceDate": "Invoice date",
+      "note": "Note"
+    },
+    "grid": {
+      "caption": "Lines of the bill",
+      "product": "Product",
+      "productHint": "Type a name, or scan the barcode, and pick from the list.",
+      "productPlaceholder": "Name or barcode",
+      "qty": "Qty",
+      "unitCost": "Unit cost",
+      "batchNo": "Batch no.",
+      "expiry": "Expiry",
+      "landed": "Landed cost",
+      "newAverage": "New average",
+      "addRow": "Add a line",
+      "removeRow": "Remove line {number}",
+      "rowLabel": "Line {number}",
+      "noStockInfo": "Not shown",
+      "afterBuying": "After this purchase",
+      "stockNow": "{qty} now, average {average}"
+    },
+    "footer": {
+      "subtotal": "Items total",
+      "extra": "Freight and other costs",
+      "extraHint": "Shared over the lines in proportion to their value.",
+      "total": "You owe the supplier"
+    },
+    "submit": "Save purchase",
+    "submitting": "Saving",
+    "saved": "Purchase saved. Stock is updated.",
+    "detail": {
+      "title": "Purchase {ref}",
+      "subtitle": "{supplier} · {branch} · {date}",
+      "back": "Back to purchases",
+      "lines": "Lines",
+      "landedUnit": "Landed per unit",
+      "extra": "Freight and other costs",
+      "subtotal": "Items total",
+      "total": "Total owed",
+      "note": "Note",
+      "enteredBy": "Entered by {name}",
+      "return": "Send goods back"
+    },
+    "validation": {
+      "supplierRequired": "Choose a supplier.",
+      "branchRequired": "Choose a branch.",
+      "invoiceRequired": "Enter the supplier's invoice number.",
+      "dateRequired": "Enter the invoice date.",
+      "productRequired": "Pick a product from the list.",
+      "qty": "Enter a whole number of units, at least 1.",
+      "amount": "Enter an amount in rupees, for example 2499.",
+      "expiry": "Enter a date like 2027-09-30, today or later.",
+      "needOneLine": "Add at least one line."
+    },
+    "errors": {
+      "title": "Could not save",
+      "network": "We could not reach the server. Check your internet connection and try again.",
+      "forbidden": "You do not have permission to do this.",
+      "generic": "Something went wrong on our side. Please try again.",
+      "keyReused": "This form was already used for a different bill. Reload the page to start a fresh one.",
+      "notFound": "This purchase does not exist."
+    },
+    "returnsPage": {
+      "title": "Debit notes",
+      "subtitle": "Goods sent back to suppliers. Each takes stock out at its cost and lowers what you owe.",
+      "caption": "Debit notes",
+      "new": "Send goods back",
+      "back": "Back to purchases",
+      "columns": {
+        "number": "Debit note",
+        "date": "Date",
+        "supplier": "Supplier",
+        "branch": "Branch",
+        "reason": "Reason",
+        "credit": "Credit"
+      },
+      "empty": {
+        "title": "No debit notes yet",
+        "body": "When you send goods back to a supplier, the debit note appears here."
+      }
+    },
+    "returnForm": {
+      "title": "Send goods back to a supplier",
+      "subtitle": "Stock leaves at its average cost. The credit is what the supplier agrees to give you.",
+      "supplier": "Supplier",
+      "branch": "Branch",
+      "reason": "Reason",
+      "reasonHint": "For example Damaged in transit, Wrong flavour.",
+      "lines": "Goods",
+      "product": "Product",
+      "qty": "Qty",
+      "credit": "Credit per unit",
+      "creditTotal": "Total credit",
+      "addRow": "Add a line",
+      "removeRow": "Remove line {number}",
+      "submit": "Create debit note",
+      "submitting": "Saving",
+      "saved": "Debit note {number} created.",
+      "insufficient": "There is not enough stock for one of the lines. {detail}",
+      "validation": {
+        "reasonRequired": "Say why (at least 3 characters)."
+      }
+    }
+  },
+  "Stock": {
+    "title": "Stock",
+    "subtitle": "What each branch holds, how it moved, and what needs attention.",
+    "loading": "Loading stock",
+    "loadFailed": "We could not load stock.",
+    "retry": "Try again",
+    "branch": "Branch",
+    "noBranch": "You have no branch to show stock for yet.",
+    "tabs": {
+      "stock": "Stock",
+      "alerts": "Alerts",
+      "transfers": "Transfers"
+    },
+    "tabsLabel": "Stock sections",
+    "search": "Search products",
+    "searchPlaceholder": "Name, brand, barcode or SKU",
+    "lowOnly": "Only low stock",
+    "caption": "Stock at {branch}",
+    "columns": {
+      "product": "Product",
+      "qty": "In stock",
+      "level": "Low-stock level",
+      "wac": "Average cost",
+      "value": "Stock value",
+      "actions": "Actions"
+    },
+    "low": "Low",
+    "noLevel": "Not set",
+    "history": "History",
+    "historyLabel": "History of {name}",
+    "count": "Count",
+    "countLabel": "Count {name}",
+    "empty": {
+      "title": "No products to show",
+      "body": "Add products first, then record a purchase.",
+      "filtered": "No product matches."
+    },
+    "paging": {
+      "showing": "Showing {from}-{to} of {total}",
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "types": {
+      "PURCHASE": "Purchase",
+      "SALE": "Sale",
+      "SALE_RETURN": "Sale return",
+      "ADJUSTMENT_IN": "Count: found",
+      "ADJUSTMENT_OUT": "Count: missing",
+      "TRANSFER_OUT": "Transfer out",
+      "TRANSFER_IN": "Transfer in",
+      "TRANSFER_CANCEL": "Transfer cancelled",
+      "SUPPLIER_RETURN": "Sent back",
+      "EXPIRY_WRITE_OFF": "Expired write-off"
+    },
+    "reasons": {
+      "RECOUNT": "Recount",
+      "DAMAGE": "Damage",
+      "LOST": "Lost",
+      "OTHER": "Other"
+    },
+    "ledger": {
+      "title": "History of {name}",
+      "description": "Every movement at {branch}, newest first. Nothing here can be edited.",
+      "caption": "Stock movements",
+      "when": "When",
+      "type": "Movement",
+      "change": "Change",
+      "after": "After",
+      "batch": "Batch",
+      "why": "Why",
+      "by": "By",
+      "unitCost": "Unit cost",
+      "value": "Value change",
+      "average": "Average after",
+      "empty": "No movements yet.",
+      "loadFailed": "We could not load the history.",
+      "close": "Close"
+    },
+    "countDialog": {
+      "title": "Count {name}",
+      "description": "Type what you counted. The difference is recorded with your reason.",
+      "current": "The books say {qty}.",
+      "counted": "Counted quantity",
+      "reason": "Reason",
+      "note": "Note",
+      "level": "Low-stock level",
+      "levelHint": "Alert me at or below this many. 0 switches the alert off.",
+      "save": "Save",
+      "saved": "Stock counted.",
+      "levelSaved": "Low-stock level saved.",
+      "nothingToSave": "Nothing changed.",
+      "matches": "The count matches the books."
+    },
+    "alerts": {
+      "loading": "Loading alerts",
+      "loadFailed": "We could not load the alerts.",
+      "window": "Near expiry means within {days, plural, one {# day} other {# days}}.",
+      "low": {
+        "heading": "Low stock",
+        "caption": "Low stock",
+        "empty": "Nothing is running low.",
+        "product": "Product",
+        "branch": "Branch",
+        "qty": "In stock",
+        "level": "Level"
+      },
+      "near": {
+        "heading": "Expiring soon",
+        "caption": "Batches expiring soon",
+        "empty": "Nothing expires soon."
+      },
+      "expired": {
+        "heading": "Already expired",
+        "caption": "Expired batches",
+        "empty": "No expired stock on the shelves."
+      },
+      "product": "Product",
+      "branch": "Branch",
+      "batch": "Batch",
+      "expires": "Expires",
+      "left": "Left",
+      "daysLeft": "{days, plural, one {# day} other {# days}}",
+      "daysAgo": "{days, plural, one {# day ago} other {# days ago}}",
+      "writeOff": "Write off",
+      "writeOffLabel": "Write off {product} batch {batch}"
+    },
+    "writeOffDialog": {
+      "title": "Write off {product}?",
+      "description": "Batch {batch} expired on {date}. The units leave stock at their average cost.",
+      "qty": "How many",
+      "qtyHint": "{qty} left in this batch.",
+      "confirm": "Write off",
+      "saved": "Written off."
+    },
+    "transfers": {
+      "loading": "Loading transfers",
+      "loadFailed": "We could not load the transfers.",
+      "new": "Send goods to another branch",
+      "caption": "Transfers between branches",
+      "columns": {
+        "sent": "Sent",
+        "route": "From and to",
+        "goods": "Goods",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "route": "{from} to {to}",
+      "goodsValue": "{count, plural, one {# kind of product} other {# kinds of products}}, {units, plural, one {# unit} other {# units}}",
+      "status": {
+        "IN_TRANSIT": "In transit",
+        "RECEIVED": "Received",
+        "CANCELLED": "Cancelled"
+      },
+      "receive": "Receive",
+      "receiveLabel": "Receive transfer from {from}",
+      "cancel": "Cancel",
+      "cancelLabel": "Cancel transfer to {to}",
+      "received": "Transfer received.",
+      "cancelled": "Transfer cancelled. The goods are back.",
+      "sent": "Transfer sent.",
+      "empty": {
+        "title": "No transfers yet",
+        "body": "Send goods to another branch and they show here until they are received."
+      },
+      "form": {
+        "title": "Send goods to another branch",
+        "description": "The goods leave now and are in transit until the other branch receives them.",
+        "from": "From branch",
+        "to": "To branch",
+        "note": "Note",
+        "product": "Product",
+        "qty": "Qty",
+        "addRow": "Add a line",
+        "removeRow": "Remove line {number}",
+        "submit": "Send",
+        "insufficient": "There is not enough stock for one of the lines. {detail}",
+        "sameBranch": "Choose a different branch from the one the goods leave.",
+        "noOtherBranch": "You need a second active branch to transfer goods."
+      }
+    },
+    "validation": {
+      "qtyRequired": "Enter a whole number, 0 or more.",
+      "qtyOne": "Enter a whole number, at least 1.",
+      "level": "Enter a whole number, 0 or more.",
+      "productRequired": "Pick a product from the list."
+    },
+    "errors": {
+      "title": "Could not save",
+      "network": "We could not reach the server. Check your internet connection and try again.",
+      "forbidden": "You do not have permission to do this.",
+      "generic": "Something went wrong on our side. Please try again.",
+      "keyReused": "This form was already used for a different change. Close it and open it again.",
+      "conflict": "That was already done by someone else."
+    }
+  },
+  "Audit": {
+    "title": "Audit log",
+    "subtitle": "Who did what, when and from where. Nothing here can be edited or deleted.",
+    "caption": "Audit log",
+    "loading": "Loading the audit log",
+    "loadFailed": "We could not load the audit log.",
+    "retry": "Try again",
+    "filters": {
+      "action": "Event starts with",
+      "actionPlaceholder": "For example stock. or auth.login",
+      "entity": "About",
+      "entityPlaceholder": "For example product",
+      "from": "From",
+      "to": "Until",
+      "apply": "Apply filters",
+      "clear": "Clear"
+    },
+    "columns": {
+      "when": "When",
+      "who": "Who",
+      "what": "What",
+      "about": "About",
+      "details": "Details",
+      "from": "From"
+    },
+    "system": "The system",
+    "roleAt": "{name} ({role})",
+    "before": "Before",
+    "after": "After",
+    "empty": {
+      "title": "No entries match",
+      "body": "Try wider filters."
+    },
+    "paging": {
+      "showing": "Showing {from}-{to} of {total}",
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "verify": {
+      "button": "Check for tampering",
+      "checking": "Checking",
+      "ok": "The log is intact: all {sealed} entries match their seals.",
+      "broken": "The log has been tampered with. The first seal that fails is number {seq}: {problem}",
+      "failed": "We could not run the check.",
+      "help": "Every entry is sealed into a chain. If one is changed or removed, the check shows where."
     }
   }
 }

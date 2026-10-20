@@ -8,6 +8,9 @@ import { AuditModule } from './modules/audit/audit.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { BusinessModule } from './modules/business/business.module';
 import { CatalogueModule } from './modules/catalogue/catalogue.module';
+import { IdempotencyModule } from './modules/idempotency/idempotency.module';
+import { InventoryModule } from './modules/inventory/inventory.module';
+import { PurchasingModule } from './modules/purchasing/purchasing.module';
 import { HealthModule } from './modules/health/health.module';
 import { MailModule } from './modules/mail/mail.module';
 import { PermissionsModule } from './modules/permissions/permissions.module';
@@ -43,11 +46,14 @@ import { TenancyModule } from './modules/tenancy/tenancy.module';
     StorageModule, // uploaded files (server disk today)
     MailModule, // outgoing email (Mailpit locally)
     AuditModule, // append-only audit log writer
+    IdempotencyModule, // Idempotency-Key handling: a retry never does the work twice
     PermissionsModule, // who may do what: the global permission guard and branch scope
     AuthModule, // sign-up, sign-in, sessions, two-step login; also the global login guard
     TeamModule, // roles, members, invitations, approval PIN
     BusinessModule, // business profile (GSTIN, state), branches, first-steps checklist
     CatalogueModule, // products, categories, prices with history, pictures, CSV import
+    InventoryModule, // stock engine, levels, ledger, counts, alerts, transfers
+    PurchasingModule, // suppliers, purchases, supplier returns (debit notes)
     HealthModule, // /healthz and /readyz
   ],
 })

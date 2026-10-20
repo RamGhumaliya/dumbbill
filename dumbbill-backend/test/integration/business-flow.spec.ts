@@ -448,7 +448,14 @@ describe('the first-steps checklist', () => {
         res.body.steps.map((s: { key: string; done: boolean }) => [s.key, s.done]),
       );
     };
-    expect(await steps()).toEqual({ PROFILE: false, BRANCH: false, PRODUCTS: false, TEAM: false });
+    expect(await steps()).toEqual({
+      PROFILE: false,
+      BRANCH: false,
+      PRODUCTS: false,
+      SUPPLIER: false,
+      PURCHASE: false,
+      TEAM: false,
+    });
 
     await as(t, owner).put('/v1/business', PROFILE);
     expect((await steps()).PROFILE).toBe(true);
@@ -461,6 +468,13 @@ describe('the first-steps checklist', () => {
     expect((await steps()).BRANCH).toBe(true);
 
     await addTeamMember(t, owner, 'CASHIER');
-    expect(await steps()).toEqual({ PROFILE: true, BRANCH: true, PRODUCTS: false, TEAM: true });
+    expect(await steps()).toEqual({
+      PROFILE: true,
+      BRANCH: true,
+      PRODUCTS: false,
+      SUPPLIER: false,
+      PURCHASE: false,
+      TEAM: true,
+    });
   });
 });

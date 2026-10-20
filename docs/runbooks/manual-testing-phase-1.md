@@ -103,6 +103,29 @@ Use a business with a GSTIN (Business profile: Maharashtra, `27AAPFU0939F1ZV`) s
 
    It must fail with "price_history is append-only", even though you are using the owner password.
 
+## 3c. P1-5: suppliers, purchases, stock, transfers and audit (web, as the owner)
+
+Restart `pnpm dev` first. If the API says a SQL function is missing, run `pnpm db:reset` then `pnpm db:seed`. Use the products from 3b and a second branch (prefix `BAN`).
+
+1. **Supplier:** Suppliers, Add. Name `Nutri Distributors`, GSTIN `27AAPFU0939F1ZW` (wrong check letter): refused under the GSTIN box. Use `27AAPFU0939F1ZV`. The same name again: refused.
+2. **Purchase:** Purchases, New purchase. Supplier above, invoice no. `NDP/2410/0417`, today's date, freight `1500`. One line: the whey product, qty `10`, cost `2400`, batch `WH2410A`, expiry a year ahead. The line shows its landed cost live. Save. The purchase page lists the line with its share of freight.
+   - Same invoice number again: refused under the invoice box. Expiry yesterday: refused on the line.
+   - Save, then go Back and press Save again quickly (or retry after a network pause): only one purchase exists.
+3. **Average cost:** a second purchase of 10 at `3000`, new batch. The preview shows the new average before saving; Stock shows `20` with the average between the two prices.
+4. **Count:** Stock, Count on the product, counted `18`, reason Damage. Stock shows 18; History lists the movement with before and after.
+5. **Alerts:** set a low level of `25` on the product (Stock, Alerts tab): it shows as low. Buy a batch expiring in 30 days: it appears under near expiry.
+6. **Transfer:** Stock, Transfers: send 6 to `Baner shop`. Both branches' stock show it as in transit (not counted). Switch to Baner and Receive: 6 arrive at the sending branch's average cost (cost columns visible to the owner).
+7. **Supplier return:** Purchases, Returns, New: 2 units, credit `2400` each. The debit note is `DN-0001`; the supplier's balance falls.
+8. **Stock check:** `GET /v1/stock/verify` in Swagger answers `ok: true`.
+9. **Audit log:** Audit log in the menu lists these events with the role; open the count entry to see before and after. `GET /v1/audit/verify` answers `ok: true`. Then, as a deliberate break:
+
+   ```bash
+   docker compose exec postgres psql -U dumbbill -d dumbbill -c "alter table audit_log disable trigger audit_log_append_only; update audit_log set action = 'x' where id = (select id from audit_log order by created_at limit 1); alter table audit_log enable trigger audit_log_append_only"
+   ```
+
+   Verify now answers `ok: false` naming the first broken seal. (Dev database only.)
+10. **Cost secrecy:** as the cashier, Stock shows quantities only (no cost, value or History/Count buttons for them), Purchases, Suppliers and Audit are absent from the menu, and Swagger calls for the ledger, purchases and audit answer 403.
+
 ## 4. Audit check
 
 ```bash

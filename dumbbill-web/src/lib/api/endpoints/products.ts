@@ -45,6 +45,14 @@ export function getProduct(client: ApiClient, productId: string): Promise<Produc
   return client.request({ path: `/v1/products/${productId}`, schema: productSchema });
 }
 
+/** operationId getProductByBarcode. Permission: products.read. 404 when no active product has this barcode. */
+export function getProductByBarcode(client: ApiClient, barcode: string): Promise<Product> {
+  return client.request({
+    path: `/v1/products/by-barcode/${encodeURIComponent(barcode)}`,
+    schema: productSchema,
+  });
+}
+
 /** operationId createProduct. Permission: products.write AND pricing.write. */
 export function createProduct(client: ApiClient, body: CreateProductInput): Promise<Product> {
   return client.request({ method: 'POST', path: '/v1/products', body, schema: productSchema });

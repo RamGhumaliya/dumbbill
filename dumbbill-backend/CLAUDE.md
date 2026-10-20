@@ -50,7 +50,16 @@ Layers: controller (HTTP only) → service (use case) → domain (pure functions
 - **Tax rules live in one place each:** GST rates in `domain/gst-rates.ts` (the CA owns that list), field rules in `domain/product-rules.ts` (used by the API AND the CSV import), rupee text in `domain/money.ts`.
 - **Pictures** go through `images/product-images.ts` (decode, re-encode, size cap) and `FileStorage`; the storage key always comes from the business's own row, never from a request.
 - **Uniqueness:** check first (`assertUnique`) so the error names the field; the unique indexes are the safety net.
-- New append-only table? Add it to `append_only` inside `app_grant_defaults()` in its migration (price_history is there now).
+- New append-only table? Add it to `append_only` inside `app_grant_defaults()` in its migration (price_history, stock_ledger, audit_log, audit_chain are there now).
+
+## Purchasing, stock and the audit chain (P1-5). Reasoning: `../docs/adr/012-purchasing-stock-and-audit-chain.md`; app guide: `../docs/api/purchasing-and-stock.md`
+- **Only `StockEngine` writes the ledger or a stock level** (`inventory/stock-engine.ts`). Purchases, counts, transfers, returns (and the till later) call it inside their own `TenantTx`. Never insert into `stock_ledger`/`stock_levels` elsewhere. Lock positions first (`lockPositions`, product-id order) so the last unit cannot be sold twice and multi-product changes cannot deadlock.
+- **Costing is pure maths in `inventory/domain/costing.ts`**: a position is `{qty, valuePaise}` (TOTAL value, BigInt math, half-up rounding). Never store or round a per-unit cost on the way; derive it for display only. Change the maths only with its property tests.
+- **Idempotency:** every stock-changing or bill-creating POST calls `IdempotencyService` (claim inside the same transaction as the work, replay the saved answer, different body is `IDEMPOTENCY_KEY_REUSED`). A new money- or stock-creating POST must do the same and its test must cover replay, reuse and a parallel pair.
+- **Cost secrecy:** stock and ledger responses use the cashier DTO unless `canSeeCost(actor)`; keep the leak scanner in `stock-flow.spec.ts` green. Money/amounts never go into audit `metadata` (counts and references only).
+- **Audit chain:** `AuditChainService.seal()` hashes unsealed rows in order under a per-tenant advisory lock; `verify()` names the first broken seq. `stock_ledger`, `audit_log` and `audit_chain` are append-only for everyone (trigger + REVOKE). Changing the hashed fields breaks verification of existing data; add fields only with a migration plan.
+- Purchases and returns are never edited; a correction is a return or a count. Transfers are send then receive (in transit is in neither branch).
+- Tests: `test/unit/costing.spec.ts` (property tests), `test/integration/{purchasing,stock,audit}-flow.spec.ts`, `test/security/inventory-db-security.spec.ts`, helpers in `test/support/inventory-helpers.ts`.
 
 ## DTOs & docs
 - class-validator + class-transformer with `whitelist: true, forbidNonWhitelisted: true`.

@@ -16,12 +16,22 @@ export function OwnerNav() {
   const pathname = usePathname();
   const canManage = useCan('settings.manage');
   const canSeeProducts = useCan('products.read');
+  const canBuy = useCan('purchases.write');
+  const canReadAudit = useCan('audit.read');
 
   const links = [
     { href: '/', label: t('dashboard'), exact: true },
     ...(canSeeProducts ? [{ href: '/products', label: t('products'), exact: false }] : []),
+    ...(canSeeProducts ? [{ href: '/stock', label: t('stock'), exact: false }] : []),
+    ...(canBuy
+      ? [
+          { href: '/purchases', label: t('purchases'), exact: false },
+          { href: '/suppliers', label: t('suppliers'), exact: false },
+        ]
+      : []),
     { href: '/branches', label: t('branches'), exact: false },
     ...(canManage ? [{ href: '/settings/business', label: t('business'), exact: false }] : []),
+    ...(canReadAudit ? [{ href: '/audit', label: t('audit'), exact: false }] : []),
     { href: '/pos', label: t('pos'), exact: false },
   ];
 

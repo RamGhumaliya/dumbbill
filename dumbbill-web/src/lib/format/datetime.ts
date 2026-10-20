@@ -14,3 +14,11 @@ export function formatDateTime(iso: string): string {
   const date = new Date(iso);
   return Number.isNaN(date.getTime()) ? iso : formatter.format(date);
 }
+
+/**
+ * Today's date in India (IST, UTC+5:30) as "YYYY-MM-DD", whatever the computer's own time zone is.
+ * Shops reason about invoice and expiry dates in local calendar days, and the server checks them the same way.
+ */
+export function todayInIndia(now: Date = new Date()): string {
+  return new Date(now.getTime() + 330 * 60_000).toISOString().slice(0, 10);
+}

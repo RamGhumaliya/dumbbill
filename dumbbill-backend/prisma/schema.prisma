@@ -93,32 +93,34 @@ enum TenantStatus {
 /// One retailer business (a "tenant"). Everything else in the system belongs to exactly one tenant.
 /// RLS rule for this table: a request may only see the tenant whose id equals app.tenant_id.
 model Tenant {
-  id          String            @id @default(uuid(7)) @db.Uuid
-  name        String
-  status      TenantStatus      @default(TRIAL)
+  id             String            @id @default(uuid(7)) @db.Uuid
+  name           String
+  status         TenantStatus      @default(TRIAL)
   /// The plan the business is on. Null only briefly during signup.
-  planId      String?           @map("plan_id") @db.Uuid
-  plan        Plan?             @relation(fields: [planId], references: [id])
+  planId         String?           @map("plan_id") @db.Uuid
+  plan           Plan?             @relation(fields: [planId], references: [id])
   /// When the free trial ends (signup time + the plan's trial days). Billing (Phase 4) acts on it.
-  trialEndsAt DateTime?         @map("trial_ends_at") @db.Timestamptz()
+  trialEndsAt    DateTime?         @map("trial_ends_at") @db.Timestamptz()
   /// Business profile (P1-3). GSTIN is optional: a shop not registered for GST issues bills of supply, not tax invoices.
-  gstin       String?           @db.VarChar(15)
+  gstin          String?           @db.VarChar(15)
   /// Two-digit GST state code of the registered address; decides CGST+SGST (same state) vs IGST (other state).
-  stateCode   String?           @map("state_code") @db.VarChar(2)
-  addressLine String?           @map("address_line")
-  city        String?
-  pincode     String?           @db.VarChar(6)
-  phone       String?           @db.VarChar(15)
+  stateCode      String?           @map("state_code") @db.VarChar(2)
+  addressLine    String?           @map("address_line")
+  city           String?
+  pincode        String?           @db.VarChar(6)
+  phone          String?           @db.VarChar(15)
   /// Storage key of the logo image (never a public URL; the API streams it to signed-in people).
-  logoKey     String?           @map("logo_key")
-  createdAt   DateTime          @default(now()) @map("created_at") @db.Timestamptz()
-  updatedAt   DateTime          @updatedAt @map("updated_at") @db.Timestamptz()
-  users       User[]
-  sessions    Session[]
-  roles       Role[]
-  branches    Branch[]
-  categories  ProductCategory[]
-  products    Product[]
+  logoKey        String?           @map("logo_key")
+  /// How many days before a batch's expiry date it shows up as "near expiry" in the stock alerts (P1-5).
+  nearExpiryDays Int               @default(60) @map("near_expiry_days")
+  createdAt      DateTime          @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt      DateTime          @updatedAt @map("updated_at") @db.Timestamptz()
+  users          User[]
+  sessions       Session[]
+  roles          Role[]
+  branches       Branch[]
+  categories     ProductCategory[]
+  products       Product[]
 
   @@map("tenants")
 }
@@ -283,6 +285,11 @@ model AuditLog {
   userAgent   String?  @map("user_agent")
   /// The request id, so the audit row can be matched to the log lines of the same request.
   requestId   String?  @map("request_id")
+  /// The role the person held when they did it (roles can be renamed later, so the name is kept as it was).
+  actorRole   String?  @map("actor_role")
+  /// The state of the thing before and after the change, for events where that matters (a stock adjustment).
+  before      Json?
+  after       Json?
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
 
   @@index([tenantId, createdAt])
@@ -324,26 +331,30 @@ model Role {
 /// A shop location of a business. P1-2 only needs the bare minimum (so staff can be assigned to branches); P1-3
 /// adds address, GST number, invoice prefix, printer settings and the screens to manage them.
 model Branch {
-  id             String       @id @default(uuid(7)) @db.Uuid
-  tenantId       String       @map("tenant_id") @db.Uuid
-  tenant         Tenant       @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  id             String        @id @default(uuid(7)) @db.Uuid
+  tenantId       String        @map("tenant_id") @db.Uuid
+  tenant         Tenant        @relation(fields: [tenantId], references: [id], onDelete: Restrict)
   name           String
-  isActive       Boolean      @default(true) @map("is_active")
-  addressLine    String?      @map("address_line")
+  isActive       Boolean       @default(true) @map("is_active")
+  addressLine    String?       @map("address_line")
   city           String?
-  pincode        String?      @db.VarChar(6)
-  phone          String?      @db.VarChar(15)
+  pincode        String?       @db.VarChar(6)
+  phone          String?       @db.VarChar(15)
   /// GST state of THIS shop. Tax logic compares it with the customer's state (place of supply).
-  stateCode      String?      @map("state_code") @db.VarChar(2)
+  stateCode      String?       @map("state_code") @db.VarChar(2)
   /// A branch in another state has its own GSTIN; it must start with the branch's state code.
-  gstin          String?      @db.VarChar(15)
+  gstin          String?       @db.VarChar(15)
   /// Letters and digits printed at the start of every invoice number of this branch, for example "FF". Unique per business.
-  invoicePrefix  String       @map("invoice_prefix") @db.VarChar(6)
+  invoicePrefix  String        @map("invoice_prefix") @db.VarChar(6)
   /// Receipt paper width: 58 or 80 mm.
-  printerWidthMm Int          @default(80) @map("printer_width_mm")
-  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz()
-  updatedAt      DateTime     @updatedAt @map("updated_at") @db.Timestamptz()
+  printerWidthMm Int           @default(80) @map("printer_width_mm")
+  createdAt      DateTime      @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt      DateTime      @updatedAt @map("updated_at") @db.Timestamptz()
   users          UserBranch[]
+  purchases      Purchase[]
+  stockLevels    StockLevel[]
+  stockLedgers   StockLedger[]
+  stockBatchs    StockBatch[]
 
   @@unique([tenantId, name])
   @@unique([tenantId, invoicePrefix])
@@ -414,6 +425,10 @@ model Product {
   createdAt         DateTime         @default(now()) @map("created_at") @db.Timestamptz()
   updatedAt         DateTime         @updatedAt @map("updated_at") @db.Timestamptz()
   prices            PriceHistory[]
+  stockLevels       StockLevel[]
+  stockLedgers      StockLedger[]
+  stockBatchs       StockBatch[]
+  purchaseLines     PurchaseLine[]
 
   @@unique([tenantId, barcode])
   @@unique([tenantId, sku])
@@ -441,4 +456,316 @@ model PriceHistory {
 
   @@index([tenantId, productId, effectiveFrom(sort: Desc)])
   @@map("price_history")
+}
+
+// ---------------------------------------------------------------------------------------------
+// SUPPLIERS, PURCHASES, STOCK (P1-5)
+// ---------------------------------------------------------------------------------------------
+
+/// Why stock moved. Every movement is one row of the append-only stock ledger.
+enum LedgerType {
+  /// Goods received from a supplier (a purchase).
+  PURCHASE
+  /// Sold at the till (written by the POS in Phase 2).
+  SALE
+  /// A customer brought goods back (Phase 2): restocked at the cost they were sold at.
+  SALE_RETURN
+  /// A recount found MORE than the books say.
+  ADJUSTMENT_IN
+  /// A recount, damage or loss: LESS than the books say.
+  ADJUSTMENT_OUT
+  /// Left this branch for another (in transit).
+  TRANSFER_OUT
+  /// Arrived at this branch from another.
+  TRANSFER_IN
+  /// A transfer that was cancelled in transit: the goods go back to the sending branch.
+  TRANSFER_CANCEL
+  /// Goods sent back to the supplier (a debit note).
+  SUPPLIER_RETURN
+  /// Expired goods written off.
+  EXPIRY_WRITE_OFF
+}
+
+enum TransferStatus {
+  IN_TRANSIT
+  RECEIVED
+  CANCELLED
+}
+
+/// A business a shop buys from.
+model Supplier {
+  id          String           @id @default(uuid(7)) @db.Uuid
+  tenantId    String           @map("tenant_id") @db.Uuid
+  name        String
+  gstin       String?          @db.VarChar(15)
+  phone       String?          @db.VarChar(15)
+  email       String?
+  addressLine String?          @map("address_line")
+  city        String?
+  notes       String?
+  isActive    Boolean          @default(true) @map("is_active")
+  createdAt   DateTime         @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt   DateTime         @updatedAt @map("updated_at") @db.Timestamptz()
+  purchases   Purchase[]
+  returns     SupplierReturn[]
+
+  @@unique([tenantId, name])
+  @@index([tenantId])
+  @@map("suppliers")
+}
+
+/// A supplier's bill, entered when the goods arrive. IMMUTABLE once saved: a mistake is corrected with a supplier
+/// return or an adjustment, never by editing the purchase (the ledger it created is append-only too).
+model Purchase {
+  id             String         @id @default(uuid(7)) @db.Uuid
+  tenantId       String         @map("tenant_id") @db.Uuid
+  branchId       String         @map("branch_id") @db.Uuid
+  branch         Branch         @relation(fields: [branchId], references: [id], onDelete: Restrict)
+  supplierId     String         @map("supplier_id") @db.Uuid
+  supplier       Supplier       @relation(fields: [supplierId], references: [id], onDelete: Restrict)
+  /// The supplier's own invoice number. Unique per supplier, so the same bill cannot be entered twice.
+  invoiceRef     String         @map("invoice_ref")
+  invoiceDate    DateTime       @map("invoice_date") @db.Date
+  /// Freight and other extra costs on the bill, in paise. Spread over the lines in proportion to their value.
+  otherCostPaise Int            @default(0) @map("other_cost_paise")
+  /// Sum of qty x unit cost over the lines, before the extra costs.
+  subtotalPaise  Int            @map("subtotal_paise")
+  /// Subtotal plus extra costs: what the supplier is owed for this bill.
+  totalPaise     Int            @map("total_paise")
+  note           String?
+  createdBy      String?        @map("created_by") @db.Uuid
+  createdAt      DateTime       @default(now()) @map("created_at") @db.Timestamptz()
+  lines          PurchaseLine[]
+
+  @@unique([tenantId, supplierId, invoiceRef])
+  @@index([tenantId, createdAt])
+  @@map("purchases")
+}
+
+model PurchaseLine {
+  id                 String    @id @default(uuid(7)) @db.Uuid
+  tenantId           String    @map("tenant_id") @db.Uuid
+  purchaseId         String    @map("purchase_id") @db.Uuid
+  purchase           Purchase  @relation(fields: [purchaseId], references: [id], onDelete: Restrict)
+  productId          String    @map("product_id") @db.Uuid
+  product            Product   @relation(fields: [productId], references: [id], onDelete: Restrict)
+  qty                Int
+  /// What the supplier charges per unit, in paise.
+  unitCostPaise      Int       @map("unit_cost_paise")
+  /// This line's share of the extra costs, in paise (the shares add up exactly to the bill's extra cost).
+  allocatedCostPaise Int       @map("allocated_cost_paise")
+  /// qty x unit cost + allocated extra cost: what these units really cost the shop, landed.
+  lineTotalPaise     Int       @map("line_total_paise")
+  batchId            String?   @map("batch_id") @db.Uuid
+  batchNo            String?   @map("batch_no")
+  expiryDate         DateTime? @map("expiry_date") @db.Date
+
+  @@index([tenantId, purchaseId])
+  @@index([tenantId, productId])
+  @@map("purchase_lines")
+}
+
+/// A lot of one product at one branch, tracked for its expiry date. Costing is NOT per batch (it is one weighted average
+/// per product and branch); batches exist so expiry can be watched and so the oldest stock is used first.
+model StockBatch {
+  id           String    @id @default(uuid(7)) @db.Uuid
+  tenantId     String    @map("tenant_id") @db.Uuid
+  branchId     String    @map("branch_id") @db.Uuid
+  branch       Branch    @relation(fields: [branchId], references: [id], onDelete: Restrict)
+  productId    String    @map("product_id") @db.Uuid
+  product      Product   @relation(fields: [productId], references: [id], onDelete: Restrict)
+  batchNo      String?   @map("batch_no")
+  expiryDate   DateTime? @map("expiry_date") @db.Date
+  qtyRemaining Int       @map("qty_remaining")
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt    DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
+
+  @@index([tenantId, branchId, productId])
+  @@index([tenantId, expiryDate])
+  @@map("stock_batches")
+}
+
+/// How much of a product a branch holds, and what that stock is worth: a PROJECTION of the ledger (always equal to the sum
+/// of its rows; a test and a check endpoint prove it). The weighted average cost is value / qty.
+model StockLevel {
+  tenantId   String   @map("tenant_id") @db.Uuid
+  branchId   String   @map("branch_id") @db.Uuid
+  branch     Branch   @relation(fields: [branchId], references: [id], onDelete: Restrict)
+  productId  String   @map("product_id") @db.Uuid
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
+  qty        Int
+  /// Total value of the stock on hand in paise. Stored as a total (not a per-unit cost) so no rounding error builds up.
+  valuePaise BigInt   @map("value_paise")
+  /// Bumped on every change; lets a screen notice that someone else changed the stock.
+  version    Int      @default(0)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz()
+
+  @@id([branchId, productId])
+  @@index([tenantId])
+  @@map("stock_levels")
+}
+
+/// Every stock movement ever made. APPEND-ONLY: stock on hand is the sum of this table; corrections are new rows.
+model StockLedger {
+  id              String     @id @default(uuid(7)) @db.Uuid
+  tenantId        String     @map("tenant_id") @db.Uuid
+  branchId        String     @map("branch_id") @db.Uuid
+  branch          Branch     @relation(fields: [branchId], references: [id], onDelete: Restrict)
+  productId       String     @map("product_id") @db.Uuid
+  product         Product    @relation(fields: [productId], references: [id], onDelete: Restrict)
+  batchId         String?    @map("batch_id") @db.Uuid
+  type            LedgerType
+  /// Units added (positive) or removed (negative).
+  qtyDelta        Int        @map("qty_delta")
+  /// Value added (positive) or removed (negative), in paise. Sums to the stock level's value.
+  valueDeltaPaise BigInt     @map("value_delta_paise")
+  /// The cost of one unit in this movement (value / qty, rounded), for display. CONFIDENTIAL.
+  unitCostPaise   Int        @map("unit_cost_paise")
+  qtyAfter        Int        @map("qty_after")
+  valueAfterPaise BigInt     @map("value_after_paise")
+  /// The weighted average cost per unit after this movement, rounded. CONFIDENTIAL.
+  wacAfterPaise   Int        @map("wac_after_paise")
+  /// What caused it: PURCHASE, ADJUSTMENT, TRANSFER, SUPPLIER_RETURN, WRITE_OFF (and INVOICE from Phase 2).
+  refType         String     @map("ref_type")
+  refId           String?    @map("ref_id") @db.Uuid
+  reason          String?
+  note            String?
+  createdBy       String?    @map("created_by") @db.Uuid
+  createdAt       DateTime   @default(now()) @map("created_at") @db.Timestamptz()
+
+  @@index([tenantId, branchId, productId, createdAt])
+  @@index([tenantId, refType, refId])
+  @@map("stock_ledger")
+}
+
+/// Goods moving between two branches. Two steps: sent (leaves the first branch, in transit) then received (arrives at the
+/// second). The cost travels with the goods.
+model StockTransfer {
+  id           String              @id @default(uuid(7)) @db.Uuid
+  tenantId     String              @map("tenant_id") @db.Uuid
+  fromBranchId String              @map("from_branch_id") @db.Uuid
+  toBranchId   String              @map("to_branch_id") @db.Uuid
+  status       TransferStatus      @default(IN_TRANSIT)
+  note         String?
+  createdBy    String?             @map("created_by") @db.Uuid
+  createdAt    DateTime            @default(now()) @map("created_at") @db.Timestamptz()
+  receivedBy   String?             @map("received_by") @db.Uuid
+  receivedAt   DateTime?           @map("received_at") @db.Timestamptz()
+  cancelledBy  String?             @map("cancelled_by") @db.Uuid
+  cancelledAt  DateTime?           @map("cancelled_at") @db.Timestamptz()
+  lines        StockTransferLine[]
+
+  @@index([tenantId, status])
+  @@map("stock_transfers")
+}
+
+/// One slice of a transfer: a quantity of one product taken from one batch, with the value that travels with it.
+model StockTransferLine {
+  id         String        @id @default(uuid(7)) @db.Uuid
+  tenantId   String        @map("tenant_id") @db.Uuid
+  transferId String        @map("transfer_id") @db.Uuid
+  transfer   StockTransfer @relation(fields: [transferId], references: [id], onDelete: Restrict)
+  productId  String        @map("product_id") @db.Uuid
+  qty        Int
+  /// The value of these units at the sending branch's weighted average cost when they left, in paise.
+  valuePaise BigInt        @map("value_paise")
+  batchNo    String?       @map("batch_no")
+  expiryDate DateTime?     @map("expiry_date") @db.Date
+
+  @@index([tenantId, transferId])
+  @@map("stock_transfer_lines")
+}
+
+/// Goods sent back to a supplier, with the debit note that records the credit the supplier owes.
+model SupplierReturn {
+  id               String               @id @default(uuid(7)) @db.Uuid
+  tenantId         String               @map("tenant_id") @db.Uuid
+  branchId         String               @map("branch_id") @db.Uuid
+  supplierId       String               @map("supplier_id") @db.Uuid
+  supplier         Supplier             @relation(fields: [supplierId], references: [id], onDelete: Restrict)
+  /// "DN-0001": the debit note number, counted per business.
+  debitNoteNo      String               @map("debit_note_no")
+  reason           String
+  /// The credit the supplier gives for the goods, in paise (what the shop now owes them less).
+  creditTotalPaise Int                  @map("credit_total_paise")
+  note             String?
+  createdBy        String?              @map("created_by") @db.Uuid
+  createdAt        DateTime             @default(now()) @map("created_at") @db.Timestamptz()
+  lines            SupplierReturnLine[]
+
+  @@unique([tenantId, debitNoteNo])
+  @@index([tenantId, supplierId])
+  @@map("supplier_returns")
+}
+
+model SupplierReturnLine {
+  id              String         @id @default(uuid(7)) @db.Uuid
+  tenantId        String         @map("tenant_id") @db.Uuid
+  returnId        String         @map("return_id") @db.Uuid
+  supplierReturn  SupplierReturn @relation(fields: [returnId], references: [id], onDelete: Restrict)
+  productId       String         @map("product_id") @db.Uuid
+  batchId         String?        @map("batch_id") @db.Uuid
+  qty             Int
+  unitCreditPaise Int            @map("unit_credit_paise")
+  creditPaise     Int            @map("credit_paise")
+  /// What these units were worth in stock when they left, in paise. CONFIDENTIAL.
+  costValuePaise  BigInt         @map("cost_value_paise")
+
+  @@index([tenantId, returnId])
+  @@map("supplier_return_lines")
+}
+
+/// "Tell me when this runs low": the quantity at or below which a product at a branch shows in the low-stock alerts.
+model StockThreshold {
+  tenantId  String @map("tenant_id") @db.Uuid
+  branchId  String @map("branch_id") @db.Uuid
+  productId String @map("product_id") @db.Uuid
+  minQty    Int    @map("min_qty")
+
+  @@id([branchId, productId])
+  @@index([tenantId])
+  @@map("stock_thresholds")
+}
+
+/// Remembers the answer to a request that carried an Idempotency-Key, so a retry (a double tap, a lost connection)
+/// returns the SAME answer instead of doing the work twice.
+model IdempotencyKey {
+  tenantId       String   @map("tenant_id") @db.Uuid
+  /// Which operation the key was used for, for example "purchase.create".
+  scope          String
+  key            String
+  /// A fingerprint of the request body. The same key with a different body is a mistake, not a retry.
+  requestHash    String   @map("request_hash")
+  responseStatus Int      @map("response_status")
+  responseBody   Json     @map("response_body")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  @@id([tenantId, scope, key])
+  @@map("idempotency_keys")
+}
+
+/// A running number per business and kind of document ("DN" for debit notes), handed out without gaps or repeats.
+model DocumentCounter {
+  tenantId String @map("tenant_id") @db.Uuid
+  kind     String
+  nextNo   Int    @map("next_no")
+
+  @@id([tenantId, kind])
+  @@map("document_counters")
+}
+
+/// The tamper-evident chain over the audit log. Each audit row is "sealed" once: its hash covers its own content and the
+/// previous seal's hash, so changing or removing any earlier row breaks every later hash. APPEND-ONLY.
+model AuditChain {
+  tenantId String   @map("tenant_id") @db.Uuid
+  /// 1, 2, 3 ... in the order rows were sealed.
+  seq      Int
+  auditId  String   @unique @map("audit_id") @db.Uuid
+  /// The previous seal's hash ("" for the first).
+  prevHash String   @map("prev_hash")
+  hash     String
+  sealedAt DateTime @default(now()) @map("sealed_at") @db.Timestamptz()
+
+  @@id([tenantId, seq])
+  @@map("audit_chain")
 }

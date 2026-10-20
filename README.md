@@ -33,8 +33,9 @@ protein_retail_saas_product/
 | P1-2 Roles, permissions, team (backend, accept-invitation page) | Done (see `docs/api/team-and-permissions.md`, ADR 009) |
 | P1-3 Business profile, GSTIN, branches, first-steps checklist (backend and web) | Done (see `docs/api/business-and-branches.md`, ADR 010) |
 | P1-4 Catalogue and pricing: products, price history, pictures, CSV import (backend and web) | Done, not yet committed (see `docs/api/catalogue.md`, ADR 011) |
+| P1-5 Suppliers, purchases, stock ledger, weighted average cost, transfers, audit log and hash chain (backend and web) | Done, not yet committed (see `docs/api/purchasing-and-stock.md`, ADR 012) |
 | Phase 0 | Complete |
-| Phase 1 | In progress. Next: P1-5 suppliers, purchases, stock ledger and weighted average cost (`docs/05-ai-kit/prompts/phase-1-foundation.md`) |
+| Phase 1 | In progress. Next: P1-6 hardening and report (`docs/05-ai-kit/prompts/phase-1-foundation.md`) |
 
 The live checklist is `docs/06-tracking/progress-tracker.md`.
 

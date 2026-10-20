@@ -23,6 +23,11 @@ export interface AuditEvent {
   entityId?: string;
   /** Small extra facts. NEVER put passwords, tokens, secrets or cost figures here. */
   metadata?: Record<string, string | number | boolean | null>;
+  /** The name of the role the actor held at the time (roles can be renamed later, so it is kept as it was). */
+  actorRole?: string | null;
+  /** The state of the thing before and after, for changes where that matters (a stock count). Same rules as `metadata`. */
+  before?: Record<string, string | number | boolean | null>;
+  after?: Record<string, string | number | boolean | null>;
 }
 
 /**
@@ -56,6 +61,9 @@ export class AuditService {
         // A very long User-Agent is cut: it is only a hint for humans.
         userAgent: info.userAgent?.slice(0, 300) ?? null,
         requestId: getRequestContext()?.requestId ?? null,
+        actorRole: event.actorRole ?? null,
+        before: (event.before ?? undefined) as Prisma.InputJsonValue | undefined,
+        after: (event.after ?? undefined) as Prisma.InputJsonValue | undefined,
       },
     });
   }

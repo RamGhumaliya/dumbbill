@@ -45,6 +45,14 @@ Only `dev` and `prod`: `.env.development` and `.env.production` (templates commi
 - Keyboard: price buttons carry `data-price-cell` for Arrow Up/Down; a button's accessible name must contain its visible text (axe `label-content-name-mismatch`).
 - The column choice is remembered in `localStorage` as a per-person convenience only; always wrap in try/catch.
 
+## Purchasing, stock and audit screens (P1-5). Guide: `../docs/api/purchasing-and-stock.md`
+
+- Screens live in `src/components/{purchasing,stock,audit}/`; product choice uses `ProductPicker` (datalist; it resolves a pasted full label back to the product).
+- **One Idempotency-Key per form instance** (made when the form opens, resent on retry, renewed only after success). Never build a key per click.
+- **Cost columns, value and the average exist only with `products.cost.read`** (`useCan`); tabs and buttons for counts, history and transfers follow `stock.adjust` / `stock.transfer`. The server refuses regardless.
+- Purchase entry preview maths is `src/lib/inventory/costing.ts`, which mirrors the server's; the server's answer is the truth. Change both together (shared worked examples in the unit tests).
+- Map server errors on `lines[i].field` to row `i`; see `purchase-form.tsx`.
+
 ## Rules
 
 - API layer: one typed function per endpoint, zod-validate responses at the boundary, central error handling for problem+json (show `requestId` to user on errors). Tokens in memory; refresh via httpOnly cookie (built in P1-1, see the sign-in rules above).

@@ -11,10 +11,15 @@ import { useCan } from '@/lib/auth/use-can';
  * Where each first step is done. A step without a screen yet (the team screens arrive later) has no link and says so,
  * rather than sending the owner to a page that does not exist.
  */
-const STEP_LINKS: Record<'PROFILE' | 'BRANCH' | 'PRODUCTS' | 'TEAM', string | null> = {
+const STEP_LINKS: Record<
+  'PROFILE' | 'BRANCH' | 'PRODUCTS' | 'SUPPLIER' | 'PURCHASE' | 'TEAM',
+  string | null
+> = {
   PROFILE: '/settings/business',
   BRANCH: '/branches',
   PRODUCTS: '/products',
+  SUPPLIER: '/suppliers',
+  PURCHASE: '/purchases/new',
   TEAM: null,
 };
 

@@ -20,6 +20,19 @@ These were not specified in the plan, so a default was chosen. All are editable 
 5. **Approval PIN rules:** 6 digits, 5 wrong tries lock it for the person trying (1 minute, doubling), obvious PINs refused.
 6. **Branches:** a default "Main branch" is made at signup; its details are filled in during P1-3 (below).
 
+## Decisions made while building P1-5 (please confirm or change)
+1. **Costing is weighted average, one average per product per branch**, kept as an exact total value so rounding never builds up. FIFO can come later (batches are already tracked).
+2. **Stock cannot go below zero.** A shop-level "allow negative stock" policy is not built; decide before the till (Phase 2).
+3. **Purchases are never edited.** Mistakes are fixed with a supplier return (debit note) or a stock count. A bill is capped at Rs 2 crore.
+4. **Freight and other bill costs are spread over the lines by value** (landed cost), in whole paise that add up exactly.
+5. **Expired stock cannot be bought:** a batch already expired is refused on a purchase. Expired batches are written off at the average cost; damaged goods use a count with the reason DAMAGE.
+6. **Near-expiry window** defaults to 60 days per business (1 to 365, `settings.manage`).
+7. **Supplier payments are not recorded.** The balance owed is bills minus debit-note credit. Say if payments belong in Phase 1.
+8. **The daily low-stock/expiry e-mail digest is not built** (needs a job runner). The alerts screen and `GET /v1/stock/alerts` exist.
+9. **Transfers are two steps** (send, then the other branch receives); goods in transit are in neither branch's stock; cost travels with them.
+10. **The audit log is hash-chained** (tamper-evident, checked by `GET /v1/audit/verify`). Anchoring the latest hash outside the database (S3 Object Lock) waits for deployment work.
+11. **Idempotency-Key is required** on purchases, returns, counts, write-offs and transfers. Old keys are not yet cleaned up.
+
 ## Decisions made while building P1-4 (please confirm or change)
 1. **GST rates a product may carry:** 0, 0.25, 3, 5, 18 and 40 percent (the slabs after the September 2025 reform). The retailer's CA must confirm the list before the first real invoice; it lives in one file (`domain/gst-rates.ts`). Old 12% and 28% are refused until the list is widened.
 2. **HSN and GST are required only when the business has a GSTIN.** The category templates' HSN and GST (see `category-templates.ts`) are suggestions that pre-fill the form; the CA decides the real values per product.

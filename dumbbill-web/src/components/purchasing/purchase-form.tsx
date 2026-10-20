@@ -4,7 +4,7 @@ import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/rea
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Controller, FormProvider, useFieldArray, type FieldPath } from 'react-hook-form';
 import { z } from 'zod';
 import {
@@ -21,7 +21,7 @@ import { CloseIcon } from '@/components/ui/icons';
 import { ApiError, businessApi, getBrowserApiClient, inventoryApi } from '@/lib/api';
 import type { Product } from '@/lib/api/schemas/products';
 import { todayInIndia } from '@/lib/format/datetime';
-import { parseRupeesToPaise } from '@/lib/format/money';
+import { formatPaise, parseRupeesToPaise } from '@/lib/format/money';
 import { useApiForm } from '@/lib/forms/use-api-form';
 import { allocateExtraCost, landedLineValue, previewAverageCost } from '@/lib/inventory/costing';
 import { describeFailure, type FailureView } from '../business/business-errors';
@@ -108,7 +108,7 @@ export function PurchaseForm() {
   const [picked, setPicked] = useState<Record<number, Product | null>>({});
   const [failure, setFailure] = useState<FailureView | null>(null);
   // ONE key for this form: a retry of the same bill reuses it, so the bill is never entered twice.
-  const idempotencyKey = useRef<string>(crypto.randomUUID());
+  const [idempotencyKey] = useState(() => crypto.randomUUID());
 
   const suppliers = useQuery({
     queryKey: ['suppliers', 'list', { q: '', status: 'active' }],
@@ -183,7 +183,7 @@ export function PurchaseForm() {
             expiryDate: line.expiry === '' ? null : line.expiry,
           })),
         },
-        idempotencyKey.current,
+        idempotencyKey,
       ),
   });
 
@@ -445,7 +445,7 @@ export function PurchaseForm() {
                             <span className="text-caption text-muted">
                               {t('grid.stockNow', {
                                 qty: heldRow.qty,
-                                average: formatRupees(heldRow.wacPaise as number),
+                                average: formatPaise(heldRow.wacPaise as number),
                               })}
                             </span>
                           </span>
@@ -538,11 +538,6 @@ export function PurchaseForm() {
       </form>
     </FormProvider>
   );
-}
-
-/** Rupees for the small "now" note under the preview, without pulling in a component for plain text. */
-function formatRupees(paise: number): string {
-  return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(paise / 100);
 }
 
 /** Move keyboard focus to a cell of the grid. */

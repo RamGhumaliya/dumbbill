@@ -40,6 +40,17 @@ export function formatPaise(paise: number, options: FormatPaiseOptions = {}): st
   return rupees.format(paise / 100);
 }
 
+const percent = new Intl.NumberFormat('en-IN', {
+  style: 'percent',
+  minimumFractionDigits: 1,
+  maximumFractionDigits: 1,
+});
+
+/** Format basis points (1 bp = 0.01%) as a percentage with one decimal, for example 2550 -> "25.5%". */
+export function formatBasisPoints(basisPoints: number): string {
+  return percent.format(basisPoints / 10_000);
+}
+
 /** Largest amount a price box accepts: Rs 1 crore, in paise. The API enforces the same guard. */
 export const MAX_PRICE_PAISE = 10_000_000_00;
 

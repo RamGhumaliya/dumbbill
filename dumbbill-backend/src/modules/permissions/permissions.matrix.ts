@@ -178,7 +178,8 @@ export const ROLE_PRESETS: Record<SystemRoleKey, RolePreset> = {
   },
   ADMIN: {
     name: 'Admin',
-    description: 'Manages stock, prices and reports across the shop.',
+    description:
+      'Manages stock, prices, reports, the team and the business settings across the shop.',
     permissions: [
       'products.read',
       'products.write',
@@ -196,6 +197,9 @@ export const ROLE_PRESETS: Record<SystemRoleKey, RolePreset> = {
       'reports.profit',
       'loyalty.manage',
       'audit.read',
+      // Owner's decision (Phase 1 review): a trusted manager runs the team and the settings too.
+      'team.manage',
+      'settings.manage',
     ],
     discountLimitBp: 2_000,
     allBranches: true,

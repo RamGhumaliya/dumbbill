@@ -149,6 +149,33 @@ describe('the tamper-evident chain', () => {
     expect(seqs).toEqual(seqs.map((_, i) => i + 1));
   });
 
+  it('seals and verifies a large backlog in one call, and still points at a change deep inside it', async () => {
+    // 2,300 waiting entries: more than four sealing batches and more than two verify pages, so paging is exercised.
+    const shop = await makeShop(t);
+    const base = Date.now() - 3_000_000;
+    await t.db.owner.auditLog.createMany({
+      data: Array.from({ length: 2_300 }, (_, i) => ({
+        tenantId: shop.owner.tenantId,
+        action: 'bulk.entry',
+        entity: 'test',
+        entityId: String(i),
+        createdAt: new Date(base + i),
+      })),
+    });
+    const verified = (await as(t, shop.owner).get('/v1/audit/verify')).body;
+    expect(verified).toMatchObject({ ok: true, unsealed: 0, firstBrokenSeq: null });
+    expect(verified.sealed).toBeGreaterThanOrEqual(2_300);
+
+    const deep = await t.db.owner.auditChain.findFirstOrThrow({
+      where: { tenantId: shop.owner.tenantId, seq: 1_600 },
+    });
+    await withoutProtection(async () => {
+      await t.db.owner.auditLog.update({ where: { id: deep.auditId }, data: { action: 'edited' } });
+    });
+    const tampered = (await as(t, shop.owner).get('/v1/audit/verify')).body;
+    expect(tampered).toMatchObject({ ok: false, firstBrokenSeq: 1_600 });
+  });
+
   it('several people viewing the log at the same moment seal each entry once and keep the chain intact', async () => {
     const shop = await makeShop(t);
     for (let i = 0; i < 4; i += 1) await newSupplier(t, shop.admin);

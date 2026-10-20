@@ -1,6 +1,8 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
+import type { NextFunction, Request, Response } from 'express';
 import { ConfigService } from '@nestjs/config';
 import cookieParser from 'cookie-parser';
+import helmet from 'helmet';
 import { Logger } from 'nestjs-pino';
 import { ProblemDetailsFilter } from './common/errors/problem-details.filter';
 import { validationExceptionFactory } from './common/errors/validation';
@@ -27,6 +29,17 @@ export function configureApp(app: INestApplication, reporter: ErrorReporter = re
   // and every visitor looks like the proxy. The default 0 trusts nothing.
   const hops = config?.get<number>('TRUST_PROXY_HOPS') ?? 0;
   if (hops > 0) app.getHttpAdapter().getInstance().set('trust proxy', hops);
+
+  // Security headers on every answer (no sniffing, no framing, no referrer leaks, HSTS). The API only returns JSON and
+  // images, so its content policy forbids everything; the Swagger pages under /docs need their own scripts and styles,
+  // so they get the other headers without the policy.
+  const strict = helmet({
+    contentSecurityPolicy: { directives: { defaultSrc: ["'none'"], frameAncestors: ["'none'"] } },
+  });
+  const forDocs = helmet({ contentSecurityPolicy: false });
+  app.use((request: Request, response: Response, next: NextFunction) =>
+    (request.path.startsWith('/docs') ? forDocs : strict)(request, response, next),
+  );
 
   // Browsers may call the API only from the web origins we list (never `*`, which cannot be combined with
   // cookies). `credentials: true` lets the browser send the refresh cookie; the allowed headers include the CSRF

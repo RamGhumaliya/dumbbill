@@ -63,10 +63,21 @@ function normalise(key: string): string {
 /** Any name ENDING in one of these is treated as secret too, so `csrfToken` or `dbPassword` are caught. */
 const SECRET_SUFFIXES = ['password', 'token', 'secret'] as const;
 
+/**
+ * Money-in-the-business fragments: real field names are `unitCostPaise`, `wacPaise`, `landedUnitCostPaise`,
+ * `marginBp`, so exact names would miss them. WAC = weighted average cost, COGS = cost of goods sold.
+ */
+const COST_FRAGMENTS = ['cost', 'cogs', 'margin', 'profit'] as const;
+
 /** Is this field name on the secret list? Exported so tests and tools use the same rule. */
 export function isSecretKey(key: string): boolean {
   const name = normalise(key);
-  return SECRET_SET.has(name) || SECRET_SUFFIXES.some((suffix) => name.endsWith(suffix));
+  return (
+    SECRET_SET.has(name) ||
+    SECRET_SUFFIXES.some((suffix) => name.endsWith(suffix)) ||
+    name.startsWith('wac') ||
+    COST_FRAGMENTS.some((fragment) => name.includes(fragment))
+  );
 }
 
 /** Is this field a piece of personal data that should be shown only in shortened form? */

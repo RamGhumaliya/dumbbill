@@ -325,12 +325,13 @@ describe('permissions are enforced by the API, not the screen', () => {
     expect((await as(t, manager).get('/v1/team/members')).status).toBe(200);
   });
 
-  it('a cashier can do what a cashier is for (pick an approver) and the Admin preset cannot manage the team', async () => {
+  it('a cashier can do what a cashier is for (pick an approver) but cannot manage the team, while the Admin preset can', async () => {
     const owner = await createBusiness(t);
     const cashier = await addTeamMember(t, owner, 'CASHIER');
     const admin = await addTeamMember(t, owner, 'ADMIN');
     expect((await as(t, cashier).get('/v1/team/approvers')).status).toBe(200);
-    expect((await as(t, admin).get('/v1/team/members')).status).toBe(403);
+    expect((await as(t, cashier).get('/v1/team/members')).status).toBe(403);
+    expect((await as(t, admin).get('/v1/team/members')).status).toBe(200);
   });
 
   it('a change of role applies to the very next request, with the SAME access token', async () => {
@@ -458,14 +459,14 @@ describe('switching a person off', () => {
 });
 
 describe('nobody can escalate or touch the owner', () => {
-  /** An admin who may manage the team (the owner granted team.manage) but has no `settings.manage` or `invoice`-less powers of the owner. */
+  /** An admin who may manage the team but was denied `settings.manage` by the owner, so there is something they cannot give away. */
   async function manager(): Promise<{ owner: Person; manager: Person; cashier: Person }> {
     const owner = await createBusiness(t);
     const mgr = await addTeamMember(
       t,
       owner,
       'ADMIN',
-      { extraPermissions: ['team.manage'], discountLimitBp: 1000 },
+      { deniedPermissions: ['settings.manage'], discountLimitBp: 1000 },
       'mgr',
     );
     const cashier = await addTeamMember(t, owner, 'CASHIER');
@@ -510,7 +511,7 @@ describe('nobody can escalate or touch the owner', () => {
 
   it('a manager cannot hand out a permission they do not hold', async () => {
     const { manager: mgr, cashier } = await manager();
-    // The Admin preset has no settings.manage, so a manager built on it cannot give it away.
+    // This manager was denied settings.manage, so they cannot give it away.
     const giveSettings = await as(t, mgr).patch(`/v1/team/members/${cashier.userId}`, {
       extraPermissions: ['settings.manage'],
     });
@@ -588,6 +589,41 @@ describe('nobody can escalate or touch the owner', () => {
     });
     expect(allBranchesRole.status).toBe(403);
     expect(allBranchesRole.body.detail).toMatch(/every branch/);
+  });
+
+  it('a manager cannot put someone into a branch the manager cannot use', async () => {
+    const owner = await createBusiness(t);
+    const first = await t.db.owner.branch.findFirstOrThrow({ where: { tenantId: owner.tenantId } });
+    const second = await t.db.owner.branch.create({
+      data: { ...first, id: undefined, name: 'Second branch', invoicePrefix: 'SEC' },
+    });
+    const customRole = await as(t, owner).post('/v1/team/roles', {
+      name: 'Branch manager',
+      permissions: ['team.manage', 'pos.sell'],
+      allBranches: false,
+    });
+    const mgr = await addTeamMember(
+      t,
+      owner,
+      'CASHIER',
+      { roleId: customRole.body.id, branchIds: [first.id] },
+      'bm',
+    );
+    const cashier = await addTeamMember(t, owner, 'CASHIER');
+    const elsewhere = await as(t, mgr).patch(`/v1/team/members/${cashier.userId}`, {
+      branchIds: [second.id],
+    });
+    expect(elsewhere.status).toBe(403);
+    expect(elsewhere.body.detail).toMatch(/branches you can use/);
+    expect(
+      (await as(t, mgr).patch(`/v1/team/members/${cashier.userId}`, { branchIds: [first.id] }))
+        .status,
+    ).toBe(200);
+    // The owner can still put people anywhere.
+    expect(
+      (await as(t, owner).patch(`/v1/team/members/${cashier.userId}`, { branchIds: [second.id] }))
+        .status,
+    ).toBe(200);
   });
 
   it('the owner can hand out anything', async () => {

@@ -97,10 +97,16 @@ export class PurchasesService {
     const offset = query.offset ?? 0;
     const scope = new BranchScope(actor);
     return this.tenantTx.run(async (tx) => {
+      // A branch that is not this business's looks like it does not exist (404); one the person may not use is 403.
+      // A quiet empty list would hide a wrong id and differ from every other branch-bound route.
+      if (query.branchId) {
+        const branch = await tx.branch.findUnique({ where: { id: query.branchId } });
+        if (!branch) throw new DomainError('NOT_FOUND', 'This branch does not exist.');
+        scope.assert(branch.id);
+      }
       const where: Prisma.PurchaseWhereInput = {
         ...(query.supplierId ? { supplierId: query.supplierId } : {}),
-        // Only the branches the person may use; asking for one outside that finds nothing.
-        branchId: branchFilter(scope, query.branchId),
+        branchId: query.branchId ?? scope.filter(),
       };
       const [rows, total] = await Promise.all([
         tx.purchase.findMany({
@@ -333,15 +339,6 @@ export class PurchasesService {
         })),
     };
   }
-}
-
-/** The branch condition for a list: the one asked for (if allowed), otherwise every branch the person may use. */
-function branchFilter(
-  scope: BranchScope,
-  asked: string | undefined,
-): string | { in: string[] } | undefined {
-  if (!asked) return scope.filter();
-  return scope.allows(asked) ? asked : { in: [] };
 }
 
 function invoiceTaken(): DomainError {

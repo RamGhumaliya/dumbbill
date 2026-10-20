@@ -106,3 +106,22 @@ describe('log redaction', () => {
     });
   });
 });
+
+describe('cost fields in logs (real field names from the API)', () => {
+  it.each([
+    'unitCostPaise',
+    'purchaseCostPaise',
+    'landedUnitCostPaise',
+    'wacPaise',
+    'marginBp',
+    'grossProfitPaise',
+  ])('hides %s', (name) => {
+    expect(isSecretKey(name)).toBe(true);
+    expect(scrub({ [name]: 12_345 })).toEqual({ [name]: REDACTED });
+  });
+
+  it('still shows ordinary fields', () => {
+    expect(isSecretKey('qty')).toBe(false);
+    expect(isSecretKey('pricePaise')).toBe(false);
+  });
+});

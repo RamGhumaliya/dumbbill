@@ -61,6 +61,12 @@ Layers: controller (HTTP only) → service (use case) → domain (pure functions
 - Purchases and returns are never edited; a correction is a return or a count. Transfers are send then receive (in transit is in neither branch).
 - Tests: `test/unit/costing.spec.ts` (property tests), `test/integration/{purchasing,stock,audit}-flow.spec.ts`, `test/security/inventory-db-security.spec.ts`, helpers in `test/support/inventory-helpers.ts`.
 
+## Generated security sweeps (P1-6)
+- Three tests are generated from the running app and need no edit for a new route in most cases: `idor-sweep.spec.ts` (another business's ids), `role-route-matrix.spec.ts` (writes `docs/api/permission-matrix.md`), `cashier-leak-sweep.spec.ts` (no cost-like field on any cashier-readable route). Route discovery is `test/support/route-discovery.ts`.
+- A NEW route with an id in its path fails the completeness check in `idor-sweep.spec.ts` until you add a probe for it. A new permission route changes the matrix: run `UPDATE_DOCS=1 pnpm test:int -- role-route-matrix`, then READ the diff (a new `yes` in the Cashier column is a decision).
+- A body or query field that holds another record's id must answer 404 / 400 / 403 for a stranger's id, never 200 with data: add it to the reference probes there.
+- Demo data: `pnpm db:seed:shops` (see `docs/runbooks/database-and-seeding.md`). It calls the real services; keep `src/demo` in step with them (`test/unit/demo-data.spec.ts` checks the data against the product's own rules).
+
 ## DTOs & docs
 - class-validator + class-transformer with `whitelist: true, forbidNonWhitelisted: true`.
 - Separate response DTO classes per audience (`ProductCashierDto` vs `ProductAdminDto`). Never return Prisma entities.

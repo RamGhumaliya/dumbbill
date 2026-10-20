@@ -95,6 +95,24 @@ describe('seed safety rules', () => {
     ).toBeNull();
   });
 
+  it('refuses demo data when the app connection is remote even though the owner connection is local', () => {
+    // The loader writes through APP_DATABASE_URL, so that is the address that must be checked too.
+    expect(
+      checkSeedAllowed(
+        'demo',
+        { NODE_ENV: 'development', DATABASE_URL: local, APP_DATABASE_URL: remote },
+        false,
+      ),
+    ).toMatch(/local/);
+    expect(
+      checkSeedAllowed(
+        'demo',
+        { NODE_ENV: 'development', DATABASE_URL: local, APP_DATABASE_URL: local },
+        false,
+      ),
+    ).toBeNull();
+  });
+
   it('refuses demo data when the database address cannot be read', () => {
     expect(
       checkSeedAllowed('demo', { NODE_ENV: 'development', DATABASE_URL: 'not a url' }, false),

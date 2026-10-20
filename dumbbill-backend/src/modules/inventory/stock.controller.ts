@@ -244,11 +244,15 @@ export class StockController {
     operationId: 'getStockAlerts',
     summary: 'Low stock and expiry alerts',
     description:
-      'Products at or below their low-stock level, batches that expire within the near-expiry window (default 60 days), and batches already expired that still hold units. Only branches you may use.\n\nPermission: stock.adjust',
+      'Products at or below their low-stock level, batches that expire within the near-expiry window (default 60 days), and batches already expired that still hold units. Only branches you may use. Asking for a branch you may not use is refused (403); a branch id that does not belong to this business is 404.\n\nPermission: stock.adjust',
   })
   @ApiOkResponse({ type: AlertsDto, description: 'What needs attention.' })
+  @ApiProblemResponse('VALIDATION_FAILED', {
+    errors: [{ field: 'branchId', message: 'branchId must be a UUID' }],
+  })
+  @ApiProblemResponse('NOT_FOUND', { detail: 'This branch does not exist.' })
   @ApiProblemResponse('UNAUTHENTICATED')
-  @ApiProblemResponse('FORBIDDEN')
+  @ApiProblemResponse('FORBIDDEN', { detail: 'You do not have access to this branch.' })
   @ApiProblemResponse('INTERNAL_ERROR')
   getStockAlerts(@Req() request: Request, @Query() query: AlertsQueryDto): Promise<AlertsDto> {
     return this.stock.alerts(accessOf(request), query);

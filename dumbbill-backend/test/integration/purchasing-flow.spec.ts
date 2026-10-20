@@ -496,9 +496,10 @@ describe('recording a purchase', () => {
       (await as(t, limited).get('/v1/purchases')).body.items.map((p: { id: string }) => p.id),
     ).toEqual([first.id]);
     expect((await as(t, limited).get(`/v1/purchases/${second.id}`)).status).toBe(403);
-    expect(
-      (await as(t, limited).get(`/v1/purchases?branchId=${shop.secondBranchId}`)).body.total,
-    ).toBe(0);
+    // Asking for a branch outside their scope is refused, not answered with an empty list.
+    expect((await as(t, limited).get(`/v1/purchases?branchId=${shop.secondBranchId}`)).status).toBe(
+      403,
+    );
   });
 });
 

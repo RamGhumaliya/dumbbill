@@ -60,7 +60,7 @@ function NewTransferDialog({
   const [lines, setLines] = useState<DraftLine[]>([{ key: 0, product: null, qty: '' }]);
   const [problem, setProblem] = useState<string | undefined>();
   const [failure, setFailure] = useState<FailureView | null>(null);
-  const idempotencyKey = useRef<string>(crypto.randomUUID());
+  const [idempotencyKey] = useState(() => crypto.randomUUID());
 
   const send = useMutation({
     mutationFn: () =>
@@ -75,7 +75,7 @@ function NewTransferDialog({
             qty: Number(line.qty),
           })),
         },
-        idempotencyKey.current,
+        idempotencyKey,
       ),
   });
 

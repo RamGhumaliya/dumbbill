@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Controller, useFieldArray } from 'react-hook-form';
 import { z } from 'zod';
 import {
@@ -66,7 +66,7 @@ export function ReturnForm() {
   });
   const lines = useFieldArray({ control: form.control, name: 'lines' });
   const [failure, setFailure] = useState<FailureView | null>(null);
-  const idempotencyKey = useRef<string>(crypto.randomUUID());
+  const [idempotencyKey] = useState(() => crypto.randomUUID());
 
   const suppliers = useQuery({
     queryKey: ['suppliers', 'list', { q: '', status: 'active' }],
@@ -98,7 +98,7 @@ export function ReturnForm() {
             unitCreditPaise: parseRupeesToPaise(line.credit) as number,
           })),
         },
-        idempotencyKey.current,
+        idempotencyKey,
       ),
   });
 

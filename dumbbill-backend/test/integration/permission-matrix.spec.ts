@@ -1,10 +1,8 @@
-import { Controller, Get, RequestMethod } from '@nestjs/common';
-import { METHOD_METADATA, PATH_METADATA } from '@nestjs/common/constants';
-import { DiscoveryService, MetadataScanner, ModulesContainer, Reflector } from '@nestjs/core';
+import { Controller, Get } from '@nestjs/common';
 import { ALL_PERMISSION_KEYS } from '../../src/modules/permissions/permissions.matrix';
 import { createApiDocument } from '../../src/swagger';
-import { readRouteAccess, RouteAccess } from '../../src/modules/permissions/permission.decorators';
 import { AuthTestApp, createAuthTestApp } from '../support/auth-test-app';
+import { concrete, discoverRoutes as discoverAllRoutes } from '../support/route-discovery';
 import { addTeamMember, as, createBusiness, Person } from '../support/team-helpers';
 
 /**
@@ -39,60 +37,8 @@ let admin: Person;
 let cashier: Person;
 let nobody: Person;
 
-interface RouteInfo {
-  method: string;
-  /** The Express-style path, for example `/v1/team/members/:memberId`. */
-  path: string;
-  controller: string;
-  handler: string;
-  rule: RouteAccess;
-}
-
-const METHOD_NAMES: Record<number, string> = {
-  [RequestMethod.GET]: 'GET',
-  [RequestMethod.POST]: 'POST',
-  [RequestMethod.PUT]: 'PUT',
-  [RequestMethod.PATCH]: 'PATCH',
-  [RequestMethod.DELETE]: 'DELETE',
-};
-
-/** Every route of the application with what it declares. */
-function discoverRoutes(): RouteInfo[] {
-  const discovery = new DiscoveryService(t.app.get(ModulesContainer, { strict: false }));
-  const scanner = new MetadataScanner();
-  const reflector = t.app.get(Reflector);
-  const routes: RouteInfo[] = [];
-  for (const wrapper of discovery.getControllers()) {
-    const controller = wrapper.metatype;
-    if (!controller || !wrapper.instance) continue;
-    const base = (Reflect.getMetadata(PATH_METADATA, controller) as string | undefined) ?? '';
-    for (const name of scanner.getAllMethodNames(
-      Object.getPrototypeOf(wrapper.instance) as object,
-    )) {
-      const handler = (wrapper.instance as Record<string, (...args: unknown[]) => unknown>)[name]!;
-      const method = Reflect.getMetadata(METHOD_METADATA, handler) as number | undefined;
-      if (method === undefined) continue;
-      const sub = (Reflect.getMetadata(PATH_METADATA, handler) as string | undefined) ?? '';
-      // A route declared with `@Get()` or `@Get('/')` has no trailing slash once Express registers it.
-      const path = `/${[base, sub].filter(Boolean).join('/')}`
-        .replace(/\/+/g, '/')
-        .replace(/(.)\/$/, '$1');
-      routes.push({
-        method: METHOD_NAMES[method] ?? String(method),
-        path,
-        controller: controller.name,
-        handler: name,
-        rule: readRouteAccess(reflector, [handler, controller]),
-      });
-    }
-  }
-  return routes;
-}
-
-/** Fill the `:params` of a path with a valid-looking id, so the request gets past routing. */
-function concrete(path: string): string {
-  return path.replace(/:[A-Za-z]+/g, '0192a3b4-5c6d-7e8f-9a0b-1c2d3e4f5a6b');
-}
+/** Every route of the running test app (see test/support/route-discovery.ts). */
+const discoverRoutes = () => discoverAllRoutes(t.app);
 
 beforeAll(async () => {
   t = await createAuthTestApp({ extraControllers: [ForgottenController] });

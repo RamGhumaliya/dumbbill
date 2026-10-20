@@ -3,24 +3,47 @@
 Answered questions are recorded in `docs/README.md` (Locked decisions).
 
 ## Still open (none block development)
+
 1. **Brand checks for "Dumbbill":** trademark search (India, class 9/42), domain (dumbbill.in / .com / .app), Play Store and App Store name availability, social handles.
 2. **Pricing numbers** for Starter / Growth / Pro (limits are seeded: 1/3, 3/10, 10/30). Plans are data-driven.
 3. **Pilot retailers:** names and contact for the 1–2 shops, and which printer and scanner models they use (needed for the printer matrix in Phase 2).
 4. **CA:** who will validate the GST invoice and report, and by when (before Phase 2 ends).
 
 ## Deferred by the owner
+
 Deployment, AWS account, domain purchase, Razorpay/SES/FCM/Sentry accounts, store accounts, release automation, support console. Checklist will be `docs/accounts-checklist.md` (P0-7).
 
 ## Decisions made while building P1-2 (please confirm or change)
+
 These were not specified in the plan, so a default was chosen. All are editable per business or easy to change in code.
+
 1. **Starting discount limits:** Cashier 5% (from the plan), Admin 20% (chosen), Owner unlimited. Tell us if Admin should differ.
-2. **Admin does not manage the team or business settings by default** (`team.manage`, `settings.manage` are owner-only until the owner grants them).
+2. **Admin manages the team and the business settings by default** (`team.manage`, `settings.manage`). Owner's decision in the Phase 1 review; before it these were owner-only. Businesses created earlier keep their saved Admin role until the owner edits it.
 3. **One owner per business** for now. Transferring ownership or adding a second owner is not built.
 4. **Invitation links last 7 days.** An address that already has an account anywhere cannot be invited, and the answer never says why.
 5. **Approval PIN rules:** 6 digits, 5 wrong tries lock it for the person trying (1 minute, doubling), obvious PINs refused.
 6. **Branches:** a default "Main branch" is made at signup; its details are filled in during P1-3 (below).
 
+## Answered in the Phase 1 review (owner, 20 Oct 2026)
+
+1. **Negative stock:** a per-shop setting, default block (a sale that would take stock below zero is refused). Built with the till in Phase 2.
+2. **Supplier payments:** later, with reports. The balance stays bills minus debit notes for now.
+3. **Virus scan on uploads:** not required for now (pictures are decoded and re-saved). Revisit if PDFs or documents are ever accepted.
+4. **Job runner:** BullMQ on the existing Redis, decided with the first job that needs it (Phase 2).
+5. **Admin discount limit:** stays 20%. **Admin team and settings rights:** Admin gets both by default (see P1-2 decision 2).
+6. **Before the till:** build the web team screens and the QR code for two-step setup.
+7. **GST rate list:** keep 0, 0.25, 3, 5, 18 and 40% until the CA confirms it.
+
+## Decisions made while building P1-6 (please confirm or change)
+
+1. **Demo businesses are loaded by `pnpm db:seed:shops`,** a separate command (it runs the real services, which the Prisma seed runner cannot), and the demo password is the same for everyone (`Dumbbill-demo-2026`). It refuses production and remote databases. A year of **sales** is not loaded because invoices do not exist yet.
+2. **Another business's branch is a 404 everywhere,** including the stock alerts filter, and a branch outside a person's scope is a 403 (the alerts route used to answer "nothing to report").
+3. **The route-by-role table is a committed document** (`docs/api/permission-matrix.md`) that a test keeps in step with the code. Widening a role then shows up as a diff in review.
+4. **Before Phase 2:** the four questions this item used to list (negative stock, supplier payments, job runner, virus scan) were answered in the Phase 1 review, above.
+5. **Not yet decided, found by the security review (S4):** whether the Swagger pages (`/docs`) stay public in production, and whether production must refuse to start without `TRUST_PROXY_HOPS` (see the Phase 1 report, D-14 and D-15).
+
 ## Decisions made while building P1-5 (please confirm or change)
+
 1. **Costing is weighted average, one average per product per branch**, kept as an exact total value so rounding never builds up. FIFO can come later (batches are already tracked).
 2. **Stock cannot go below zero.** A shop-level "allow negative stock" policy is not built; decide before the till (Phase 2).
 3. **Purchases are never edited.** Mistakes are fixed with a supplier return (debit note) or a stock count. A bill is capped at Rs 2 crore.
@@ -34,6 +57,7 @@ These were not specified in the plan, so a default was chosen. All are editable 
 11. **Idempotency-Key is required** on purchases, returns, counts, write-offs and transfers. Old keys are not yet cleaned up.
 
 ## Decisions made while building P1-4 (please confirm or change)
+
 1. **GST rates a product may carry:** 0, 0.25, 3, 5, 18 and 40 percent (the slabs after the September 2025 reform). The retailer's CA must confirm the list before the first real invoice; it lives in one file (`domain/gst-rates.ts`). Old 12% and 28% are refused until the list is widened.
 2. **HSN and GST are required only when the business has a GSTIN.** The category templates' HSN and GST (see `category-templates.ts`) are suggestions that pre-fill the form; the CA decides the real values per product.
 3. **A variant is its own product** (own barcode, SKU, price). Barcode, SKU and name + brand + variant are each unique inside a business.
@@ -44,6 +68,7 @@ These were not specified in the plan, so a default was chosen. All are editable 
 8. **Not built (say if you want any in Phase 1):** barcode generator, bulk edit, CSV export, per-branch prices, product images in the CSV.
 
 ## Decisions made while building P1-3 (please confirm or change)
+
 1. **GSTIN is optional**, with a warning that only bills of supply can be issued without one (journey J1). It is checked for shape, check character and state, **not** against the GST portal.
 2. **One PAN per business:** every branch GSTIN must carry the same PAN (characters 3 to 12) as the business GSTIN. A shop trading under two legal entities should be two businesses.
 3. **Invoice prefix:** 1 to 6 capital letters or digits, unique inside a business; a new business starts with `MAIN` on its first branch. It will be locked after the first invoice is issued (Phase 2).
@@ -51,4 +76,3 @@ These were not specified in the plan, so a default was chosen. All are editable 
 5. **Reading the profile and branches needs only a login** (the till prints them); changing them needs `settings.manage` (owner only by default).
 6. **Logo:** PNG, JPEG or WebP, at most 2 MB, kept on the server's disk and shown only to signed-in people.
 7. **Existing businesses** keep working: their branch got the prefix `B1`; the owner edits state and address in the branch screen (the checklist nudges them).
-

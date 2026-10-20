@@ -114,13 +114,20 @@ describe('the built-in roles', () => {
     expect(ROLE_PRESETS.ADMIN).toMatchObject({ discountLimitBp: 2000, allBranches: true });
   });
 
-  it('ADMIN does not manage the team or the business settings unless the owner adds it', () => {
-    expect(ROLE_PRESETS.ADMIN.permissions).not.toContain('team.manage');
-    expect(ROLE_PRESETS.ADMIN.permissions).not.toContain('settings.manage');
+  it('ADMIN manages the team and the business settings (the owner chose this in the Phase 1 review)', () => {
+    expect(ROLE_PRESETS.ADMIN.permissions).toEqual(
+      expect.arrayContaining(['team.manage', 'settings.manage']),
+    );
   });
 
-  it('give the same permission sets as the snapshot in the migration that backfilled existing businesses', () => {
-    // If a preset changes on purpose, the migration snapshot stays (it records history); this test just makes the
+  it('CASHIER never gets the team, settings or cost permissions', () => {
+    for (const key of ['team.manage', 'settings.manage', 'products.cost.read', 'reports.profit'])
+      expect(ROLE_PRESETS.CASHIER.permissions).not.toContain(key);
+  });
+
+  it('ADMIN is the migration snapshot plus the team and settings permissions added on purpose', () => {
+    // The migration that backfilled existing businesses recorded the original list and stays as history; businesses
+    // created before the change keep their saved Admin role until the owner edits it. This test makes any further
     // difference visible so it is a conscious decision.
     expect([...ROLE_PRESETS.ADMIN.permissions].sort()).toEqual(
       [
@@ -140,6 +147,8 @@ describe('the built-in roles', () => {
         'reports.profit',
         'loyalty.manage',
         'audit.read',
+        'team.manage',
+        'settings.manage',
       ].sort(),
     );
   });

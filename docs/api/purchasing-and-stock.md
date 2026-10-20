@@ -4,14 +4,14 @@ For web and mobile developers. The Swagger manual (`/docs`, tags **Suppliers**, 
 
 ## Who may call what
 
-| Endpoints | Permission |
-|---|---|
-| `GET /v1/stock` | `products.read` (quantities only; cost fields need `products.cost.read`) |
-| `GET /v1/stock/ledger`, `POST /v1/stock/adjustments`, `POST /v1/stock/write-offs`, `PUT /v1/stock/thresholds`, `GET /v1/stock/alerts`, `GET /v1/stock/verify` | `stock.adjust` |
-| `POST /v1/stock/rebuild`, `GET/PUT /v1/stock/settings` | `settings.manage` |
-| `POST/GET /v1/stock/transfers`, `GET /v1/stock/transfers/{id}`, `POST .../receive`, `POST .../cancel` | `stock.transfer` |
-| `/v1/suppliers/*`, `/v1/purchases/*`, `/v1/supplier-returns/*` | `purchases.write` |
-| `GET /v1/audit`, `GET /v1/audit/verify` | `audit.read` |
+| Endpoints                                                                                                                                                     | Permission                                                               |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| `GET /v1/stock`                                                                                                                                               | `products.read` (quantities only; cost fields need `products.cost.read`) |
+| `GET /v1/stock/ledger`, `POST /v1/stock/adjustments`, `POST /v1/stock/write-offs`, `PUT /v1/stock/thresholds`, `GET /v1/stock/alerts`, `GET /v1/stock/verify` | `stock.adjust`                                                           |
+| `POST /v1/stock/rebuild`, `GET/PUT /v1/stock/settings`                                                                                                        | `settings.manage`                                                        |
+| `POST/GET /v1/stock/transfers`, `GET /v1/stock/transfers/{id}`, `POST .../receive`, `POST .../cancel`                                                         | `stock.transfer`                                                         |
+| `/v1/suppliers/*`, `/v1/purchases/*`, `/v1/supplier-returns/*`                                                                                                | `purchases.write`                                                        |
+| `GET /v1/audit`, `GET /v1/audit/verify`                                                                                                                       | `audit.read`                                                             |
 
 Every branch-bound call also needs the person to be allowed to use that branch (`403` otherwise). Another business's records are `404`.
 
@@ -69,6 +69,8 @@ POST /v1/purchases   Idempotency-Key: 7f9c2a40-3c7e-4b52-9a39-0b1d1f6e2c11
 
 ## Audit log
 
-`GET /v1/audit` filters: `action` (event name prefix, e.g. `stock.`), `entity`, `actorUserId`, `from`, `to` (ISO times), `limit` (max 100), `offset`. Each entry has the actor, the **role they held at the time**, address and device, `metadata`, and `before`/`after` where recorded. `GET /v1/audit/verify` checks the tamper-evident chain: `{ ok, sealed, unsealed, firstBrokenSeq, problem }`. Entries are sealed whenever the log is viewed or verified.
+`GET /v1/audit` filters: `action` (event name prefix, e.g. `stock.`), `entity`, `actorUserId`, `from`, `to` (ISO times), `limit` (max 100), `offset`. Each entry has the actor, the **role they held at the time**, address and device, `metadata`, and `before`/`after` where recorded. `GET /v1/audit/verify` checks the tamper-evident chain: `{ ok, sealed, unsealed, firstBrokenSeq, problem }`. The walk reads the chain a page at a time, each page in its own short transaction, and `sealed` is the number of links walked. Entries are sealed whenever the log is viewed or verified.
 
 Events added in P1-5: `supplier.created|updated|deactivated|activated`, `purchase.created`, `supplier_return.created`, `stock.adjusted`, `stock.expiry_written_off`, `stock.threshold_set`, `stock.settings_changed`, `stock.rebuilt`, `stock.transfer_sent|received|cancelled`. None carries an amount.
+
+**Branch filters.** `branchId` on the purchases list, stock levels, ledger and alerts answers 404 for a branch that is not this business's and 403 for one the person may not use; it never answers an empty list. A stock count may carry `unitCostPaise` (the value of found units when there is no average yet) only if the person holds `products.cost.read`; otherwise 403.

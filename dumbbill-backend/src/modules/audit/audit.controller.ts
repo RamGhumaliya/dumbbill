@@ -104,7 +104,7 @@ export class AuditController {
   @ApiProblemResponse('FORBIDDEN')
   @ApiProblemResponse('INTERNAL_ERROR')
   async verifyAuditLog(): Promise<AuditVerifyDto> {
-    await this.chain.seal();
+    await this.chain.sealAll();
     return this.chain.verify();
   }
 }

@@ -592,6 +592,17 @@ export class MembersService {
         'You cannot give access to every branch because you do not have it yourself.',
       );
     }
+    // Nor can a branch be handed out that the giver cannot use: a manager of branch A must not put someone into B.
+    if (Array.isArray(after.branchScope) && Array.isArray(actor.branchScope)) {
+      const had = new Set(Array.isArray(before?.branchScope) ? before.branchScope : []);
+      const mine = new Set(actor.branchScope);
+      if (after.branchScope.some((branchId) => !had.has(branchId) && !mine.has(branchId))) {
+        throw new DomainError(
+          'FORBIDDEN',
+          'You can only give access to branches you can use yourself.',
+        );
+      }
+    }
   }
 
   private async sendInvitation(

@@ -2,7 +2,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { Alert, Button, Dialog, Field, Input, Select, useToast } from '@/components/ui';
 import { ApiError, getBrowserApiClient, inventoryApi } from '@/lib/api';
 import {
@@ -42,7 +42,7 @@ export function CountDialog({
   const [level, setLevel] = useState(row.minQty === null ? '' : String(row.minQty));
   const [errors, setErrors] = useState<{ counted?: string; level?: string }>({});
   const [failure, setFailure] = useState<FailureView | null>(null);
-  const idempotencyKey = useRef<string>(crypto.randomUUID());
+  const [idempotencyKey] = useState(() => crypto.randomUUID());
 
   const save = useMutation({
     mutationFn: async () => {
@@ -58,7 +58,7 @@ export function CountDialog({
             reason,
             note: note.trim() === '' ? null : note.trim(),
           },
-          idempotencyKey.current,
+          idempotencyKey,
         );
         changed = true;
       }

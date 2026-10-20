@@ -24,7 +24,12 @@ import {
 import { ApiError, getBrowserApiClient, productsApi } from '@/lib/api';
 import type { Product } from '@/lib/api/schemas/products';
 import { useCan } from '@/lib/auth/use-can';
-import { formatPaise, paiseToRupeeText, parseRupeesToPaise } from '@/lib/format/money';
+import {
+  formatBasisPoints,
+  formatPaise,
+  paiseToRupeeText,
+  parseRupeesToPaise,
+} from '@/lib/format/money';
 import { describeFailure, type FailureView } from '../business/business-errors';
 import { PriceDialog } from './price-dialog';
 
@@ -377,7 +382,7 @@ export function ProductsScreen() {
                 t('noValue')
               ) : (
                 <span className={p.belowCost ? 'font-medium text-danger' : undefined}>
-                  {(p.marginBp / 100).toFixed(1)}%
+                  {formatBasisPoints(p.marginBp)}
                   {p.belowCost && <span className="sr-only"> ({t('status.belowCost')})</span>}
                 </span>
               ),

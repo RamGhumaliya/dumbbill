@@ -221,6 +221,11 @@ export class StockService {
     idempotencyKey: string | undefined,
     info: RequestInfo,
   ): Promise<{ status: number; body: StockChangeDto; replayed: boolean }> {
+    // A cost typed into a count becomes the average cost of the found units, so it is cost data like any other:
+    // only people allowed to set cost may send one (same rule as creating a product).
+    if (dto.unitCostPaise !== undefined && !canSeeCost(actor)) {
+      throw new DomainError('FORBIDDEN', 'You do not have permission to set a cost.');
+    }
     return this.tenantTx.run((tx) =>
       this.idempotency.run(tx, actor.tenantId, 'stock.adjust', idempotencyKey, dto, async () => {
         const branch = await usableBranch(tx, actor, dto.branchId);
@@ -451,29 +456,34 @@ export class StockService {
   async alerts(actor: LoadedAccess, query: AlertsQueryDto): Promise<AlertsDto> {
     const scope = new BranchScope(actor);
     return this.tenantTx.run(async (tx) => {
-      const branchWhere = query.branchId
-        ? scope.allows(query.branchId)
-          ? query.branchId
-          : { in: [] as string[] }
-        : scope.filter();
+      // A named branch is checked like everywhere else: another business's branch is a 404, one this person's role does
+      // not cover is a 403. (Quietly answering "nothing to report" would hide the difference and mislead a typo.)
+      if (query.branchId) await this.readableBranch(tx, actor, query.branchId);
+      const branchWhere = query.branchId ?? scope.filter();
       const tenant = await tx.tenant.findFirstOrThrow({ select: { nearExpiryDays: true } });
       const today = todayInIndia(this.clock);
       const horizon = new Date(`${today}T00:00:00.000Z`);
       horizon.setUTCDate(horizon.getUTCDate() + tenant.nearExpiryDays);
 
-      const [thresholds, batches, branches] = await Promise.all([
+      // Expired and soon-to-expire batches are capped separately: a pile of old expired batches must not push the
+      // ones about to expire off the list.
+      const batchWhere = { branchId: branchWhere, qtyRemaining: { gt: 0 } };
+      const todayDate = new Date(`${today}T00:00:00.000Z`);
+      const [thresholds, expiredBatches, nearBatches, branches] = await Promise.all([
         tx.stockThreshold.findMany({ where: { branchId: branchWhere, minQty: { gt: 0 } } }),
         tx.stockBatch.findMany({
-          where: {
-            branchId: branchWhere,
-            qtyRemaining: { gt: 0 },
-            expiryDate: { not: null, lte: horizon },
-          },
+          where: { ...batchWhere, expiryDate: { not: null, lt: todayDate } },
+          orderBy: [{ expiryDate: 'desc' }, { id: 'asc' }],
+          take: 300,
+        }),
+        tx.stockBatch.findMany({
+          where: { ...batchWhere, expiryDate: { gte: todayDate, lte: horizon } },
           orderBy: [{ expiryDate: 'asc' }, { id: 'asc' }],
           take: 300,
         }),
         tx.branch.findMany(),
       ]);
+      const batches = [...expiredBatches, ...nearBatches];
       const levels = await tx.stockLevel.findMany({
         where: {
           productId: { in: thresholds.map((row) => row.productId) },

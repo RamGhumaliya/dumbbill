@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import {
   Alert,
   Button,
@@ -25,14 +25,14 @@ function WriteOffDialog({ alert, onClose }: { alert: ExpiryAlert; onClose: () =>
   const [qty, setQty] = useState(String(alert.qtyRemaining));
   const [problem, setProblem] = useState<string | undefined>();
   const [failure, setFailure] = useState<FailureView | null>(null);
-  const idempotencyKey = useRef<string>(crypto.randomUUID());
+  const [idempotencyKey] = useState(() => crypto.randomUUID());
 
   const writeOff = useMutation({
     mutationFn: () =>
       inventoryApi.writeOffExpiredStock(
         getBrowserApiClient(),
         { branchId: alert.branchId, batchId: alert.batchId, qty: Number(qty) },
-        idempotencyKey.current,
+        idempotencyKey,
       ),
   });
 

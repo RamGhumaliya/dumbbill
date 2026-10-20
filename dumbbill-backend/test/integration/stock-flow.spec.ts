@@ -291,6 +291,31 @@ describe('counting stock (adjustments)', () => {
     expect((await stockOf(t, shop.admin, shop.mainBranchId, c)).valuePaise).toBe(0);
   });
 
+  it('a count cannot set a cost unless the person may set costs', async () => {
+    // Without this a person who may only count stock could inflate the average cost, and so every later profit figure.
+    const shop = await makeShop(t);
+    const product = await newProduct(t, shop.admin);
+    const counter = await addTeamMember(t, shop.owner, 'CASHIER', {
+      branchIds: [shop.mainBranchId],
+      extraPermissions: ['stock.adjust'],
+    });
+    const attempt = await postWithKey(t, counter, '/v1/stock/adjustments', {
+      branchId: shop.mainBranchId,
+      productId: product,
+      countedQty: 1,
+      reason: 'RECOUNT',
+      unitCostPaise: 999_999,
+    });
+    expect(attempt.status).toBe(403);
+    const plain = await postWithKey(t, counter, '/v1/stock/adjustments', {
+      branchId: shop.mainBranchId,
+      productId: product,
+      countedQty: 1,
+      reason: 'RECOUNT',
+    });
+    expect(plain.status).toBe(201);
+  });
+
   it('a count that matches the books is refused, and a count can bring stock to exactly zero', async () => {
     const { shop, product } = await stocked(5, 1_000);
     const same = await adjust(shop, 'admin', {
@@ -700,16 +725,17 @@ describe('alerts and settings', () => {
     expect(alerts.expired[0]).toMatchObject({ batchNo: 'OLD', daysLeft: -3, qtyRemaining: 3 });
 
     expect((await as(t, limited).get('/v1/stock/alerts')).body.expired).toEqual([]);
+    // Naming a branch outside their scope is refused clearly (403), not answered with a quiet "nothing to report".
     expect(
-      (await as(t, limited).get(`/v1/stock/alerts?branchId=${shop.secondBranchId}`)).body.expired,
-    ).toEqual([]);
+      (await as(t, limited).get(`/v1/stock/alerts?branchId=${shop.secondBranchId}`)).status,
+    ).toBe(403);
   });
 
   it('settings need settings.manage and a sensible number', async () => {
     const { shop } = await stocked(1, 100);
-    expect((await as(t, shop.admin).put('/v1/stock/settings', { nearExpiryDays: 30 })).status).toBe(
-      403,
-    );
+    expect(
+      (await as(t, shop.cashier).put('/v1/stock/settings', { nearExpiryDays: 30 })).status,
+    ).toBe(403);
     expect((await as(t, shop.owner).put('/v1/stock/settings', { nearExpiryDays: 0 })).status).toBe(
       400,
     );
@@ -1148,8 +1174,8 @@ describe('the ledger invariant (US-STK-01)', () => {
       valuePaise: 50_000,
     });
     expect(await auditActions(shop.owner.tenantId)).toContain('stock.rebuilt');
-    // Only the owner-level permission may rebuild.
-    expect((await as(t, shop.admin).post('/v1/stock/rebuild')).status).toBe(403);
+    // Only the settings-level permission may rebuild.
+    expect((await as(t, shop.cashier).post('/v1/stock/rebuild')).status).toBe(403);
   });
 
   it('the ledger cannot be edited or deleted: even the table owner is refused', async () => {

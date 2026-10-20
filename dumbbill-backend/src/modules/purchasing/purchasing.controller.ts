@@ -272,14 +272,16 @@ export class PurchasesController {
   @ApiOperation({
     operationId: 'listPurchases',
     summary: 'List purchases',
-    description: 'Newest first. Only branches the caller may use.\n\nPermission: purchases.write',
+    description:
+      'Newest first. Only branches the caller may use. Filtering by a branch the caller may not use is refused (403); a branch id that does not belong to this business is 404.\n\nPermission: purchases.write',
   })
   @ApiOkResponse({ type: PurchaseListDto, description: 'A page of purchases.' })
   @ApiProblemResponse('VALIDATION_FAILED', {
     errors: [{ field: 'limit', message: 'limit must not be greater than 200' }],
   })
+  @ApiProblemResponse('NOT_FOUND', { detail: 'This branch does not exist.' })
   @ApiProblemResponse('UNAUTHENTICATED')
-  @ApiProblemResponse('FORBIDDEN')
+  @ApiProblemResponse('FORBIDDEN', { detail: 'You do not have access to this branch.' })
   @ApiProblemResponse('INTERNAL_ERROR')
   listPurchases(
     @Req() request: Request,

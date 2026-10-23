@@ -4,10 +4,12 @@ NestJS (TypeScript strict) · Prisma · PostgreSQL (RLS) · class-validator · B
 Read `../CLAUDE.md`, `../docs/03-engineering/{architecture,security,standards,observability,api-docs-standard}.md`.
 
 ## Structure
+
 `src/modules/<module>/{controller,service,dto,domain,repository}` · `src/common/{guards,interceptors,filters,logging}` · `prisma/{schema.prisma,migrations,sql/rls}` · `test/{unit,integration,security}`.
 Layers: controller (HTTP only) → service (use case) → domain (pure functions: pricing, tax, WAC, loyalty) → repository (Prisma).
 
 ## Prisma + RLS (critical). Full reasoning: `../docs/adr/002-prisma-rls.md`
+
 - Two database connections: `DATABASE_URL` is the **owner** (migrations, seeds; tooling only) and `APP_DATABASE_URL` is the restricted **`dumbbill_app`** role the API runs as (no superuser, **NOBYPASSRLS**, cannot change structure). Never point the API at the owner.
 - **Business code reaches the database only through `TenantTx`**: `this.tenantTx.run(tx => tx.product.findMany())`. It opens a transaction and sets `app.tenant_id` / `app.user_id` with `set_config(..., true)` (transaction-local, so nothing leaks between pooled requests). Use `runAs({ tenantId }, ...)` only in jobs, webhooks and tests.
 - **Never inject or import `PrismaService` in business code** and never `new PrismaClient()` in `src/`. ESLint blocks it (allowed only in `modules/prisma`, `modules/tenancy` and the health probe). Do not use plain `SET` or session-level `set_config`.
@@ -17,6 +19,7 @@ Layers: controller (HTTP only) → service (use case) → domain (pure functions
 - Dev owner is a superuser and bypasses RLS: always test as `dumbbill_app`.
 
 ## Authentication (P1-1). Full reasoning: `../docs/adr/006-auth-and-sessions.md`; app guide: `../docs/api/auth-flow.md`
+
 - **Deny by default:** a global `AuthGuard` protects every route. Open a route only with `@Public()` and write `Permission: public` in its Swagger description. Protected routes get the signed-in user with `@CurrentUser()`; never read ids for the tenant or user from the request body.
 - **`TenantTx.runAs()` sets the in-process tenant context too**, so code inside it (the audit writer, the logger) knows the business. Signup, login and job code use `runAs`; request code uses `run`.
 - **Tokens:** access token = 15-minute EdDSA JWT with audience `dumbbill-staff` (customers get their own audience in Phase 3). Refresh and emailed tokens are `<tenantId>.<secret>`, only SHA-256 hashes stored, used once. Never log or return a token hash, password hash or TOTP secret; response DTOs are separate classes for that reason.
@@ -27,6 +30,7 @@ Layers: controller (HTTP only) → service (use case) → domain (pure functions
 - Sign-in tests use `test/support/auth-test-app.ts` (real app and database; fake clock, Redis, mail and breach check). Move time with `clock.advanceSeconds()`, give each caller a `freshIp()`, and read emails from `mailer`.
 
 ## Permissions and the team (P1-2). Reasoning: `../docs/adr/009-roles-and-permissions.md`; app guide: `../docs/api/team-and-permissions.md`
+
 - **Every route declares exactly one of** `@Public()`, `@Authenticated()` or `@Permission('area.action', ...)` (all listed permissions are required). Nothing declared = refused for everyone and the build fails (`test/integration/permission-matrix.spec.ts`, generated from the real routes). The Swagger `Permission:` line must match; the test checks it.
 - **Permission names exist in ONE place**: `src/modules/permissions/permissions.matrix.ts`. Never type a permission string anywhere else; never write `if (role === 'admin')`. To add a capability, add one line to the catalogue (and decide which built-in roles get it in `ROLE_PRESETS`).
 - A person's access is **re-read on every request** (`AccessService`); the controller gets it as `request.access` (`LoadedAccess`). Do not copy permissions into tokens or caches.
@@ -37,6 +41,7 @@ Layers: controller (HTTP only) → service (use case) → domain (pure functions
 - Team and permission tests use `test/support/team-helpers.ts` (`createBusiness`, `addTeamMember`, `as(person).get(...)`). Run integration tests with `--runInBand` (`pnpm test:int` does): files share one database server, and parallel runs race on role creation.
 
 ## Business profile and branches (P1-3). Reasoning: `../docs/adr/010-business-profile-and-branches.md`; app guide: `../docs/api/business-and-branches.md`
+
 - **GSTIN rules live in one pure file**, `src/modules/business/domain/gstin.ts` (shape, check character). State and PAN agreement are checked by `place-rules.ts` for the business AND every branch; the database has matching `CHECK` constraints. Never validate a GSTIN anywhere else.
 - **Reading needs a login, changing needs `settings.manage`.** Branch lists are filtered by `BranchScope`; a branch of another business is a 404.
 - **The plan limit counts ACTIVE branches** (`BranchesService.assertRoomForAnother`, `PLAN_LIMIT_REACHED`). Branches are switched off, never deleted; the last active branch cannot be switched off.
@@ -45,6 +50,7 @@ Layers: controller (HTTP only) → service (use case) → domain (pure functions
 - Business and branch tests: `test/integration/business-flow.spec.ts` (uses a second `GROWTH` plan to allow several branches), `test/security/business-db-security.spec.ts`. The test app seeds the real GST state list.
 
 ## Catalogue and pricing (P1-4). Reasoning: `../docs/adr/011-catalogue-and-pricing.md`; app guide: `../docs/api/catalogue.md`
+
 - **Cost secrecy is a TYPE decision.** `ProductCashierDto` has no cost, margin or profit field; `ProductAdminDto` adds them and is returned only when the caller holds `products.cost.read` (`describeMany` in `products.service.ts`). Never add a cost-like field to the cashier type, never put cost in an audit `metadata` or a log (record field NAMES only), and make any new product endpoint go through `describeMany`. `test/integration/catalogue-flow.spec.ts` (the leak scanner) fails the build otherwise.
 - **A price is never edited.** There is no price column on `products`; prices live in the append-only `price_history` (app role has no UPDATE/DELETE, a trigger refuses everyone). The price in force = newest row with `effective_from <= now` (read through the injected `Clock`, so tests can move time). New price rows come only from `changePrice` (reason required, no start in the past, price not above MRP) and from creation and import ("Initial price").
 - **Tax rules live in one place each:** GST rates in `domain/gst-rates.ts` (the CA owns that list), field rules in `domain/product-rules.ts` (used by the API AND the CSV import), rupee text in `domain/money.ts`.
@@ -53,6 +59,7 @@ Layers: controller (HTTP only) → service (use case) → domain (pure functions
 - New append-only table? Add it to `append_only` inside `app_grant_defaults()` in its migration (price_history, stock_ledger, audit_log, audit_chain are there now).
 
 ## Purchasing, stock and the audit chain (P1-5). Reasoning: `../docs/adr/012-purchasing-stock-and-audit-chain.md`; app guide: `../docs/api/purchasing-and-stock.md`
+
 - **Only `StockEngine` writes the ledger or a stock level** (`inventory/stock-engine.ts`). Purchases, counts, transfers, returns (and the till later) call it inside their own `TenantTx`. Never insert into `stock_ledger`/`stock_levels` elsewhere. Lock positions first (`lockPositions`, product-id order) so the last unit cannot be sold twice and multi-product changes cannot deadlock.
 - **Costing is pure maths in `inventory/domain/costing.ts`**: a position is `{qty, valuePaise}` (TOTAL value, BigInt math, half-up rounding). Never store or round a per-unit cost on the way; derive it for display only. Change the maths only with its property tests.
 - **Idempotency:** every stock-changing or bill-creating POST calls `IdempotencyService` (claim inside the same transaction as the work, replay the saved answer, different body is `IDEMPOTENCY_KEY_REUSED`). A new money- or stock-creating POST must do the same and its test must cover replay, reuse and a parallel pair.
@@ -62,17 +69,20 @@ Layers: controller (HTTP only) → service (use case) → domain (pure functions
 - Tests: `test/unit/costing.spec.ts` (property tests), `test/integration/{purchasing,stock,audit}-flow.spec.ts`, `test/security/inventory-db-security.spec.ts`, helpers in `test/support/inventory-helpers.ts`.
 
 ## Generated security sweeps (P1-6)
+
 - Three tests are generated from the running app and need no edit for a new route in most cases: `idor-sweep.spec.ts` (another business's ids), `role-route-matrix.spec.ts` (writes `docs/api/permission-matrix.md`), `cashier-leak-sweep.spec.ts` (no cost-like field on any cashier-readable route). Route discovery is `test/support/route-discovery.ts`.
 - A NEW route with an id in its path fails the completeness check in `idor-sweep.spec.ts` until you add a probe for it. A new permission route changes the matrix: run `UPDATE_DOCS=1 pnpm test:int -- role-route-matrix`, then READ the diff (a new `yes` in the Cashier column is a decision).
 - A body or query field that holds another record's id must answer 404 / 400 / 403 for a stranger's id, never 200 with data: add it to the reference probes there.
 - Demo data: `pnpm db:seed:shops` (see `docs/runbooks/database-and-seeding.md`). It calls the real services; keep `src/demo` in step with them (`test/unit/demo-data.spec.ts` checks the data against the product's own rules).
 
 ## DTOs & docs
+
 - class-validator + class-transformer with `whitelist: true, forbidNonWhitelisted: true`.
 - Separate response DTO classes per audience (`ProductCashierDto` vs `ProductAdminDto`). Never return Prisma entities.
 - Every endpoint: `@ApiTags`, `@ApiOperation` (summary + description), `@ApiBearerAuth`, all request examples, `@ApiResponse` for every success and error code with example bodies, permission noted. Errors follow RFC 9457 problem+json with stable `code`.
 
 ## Errors, logging and tracing (details: `../docs/runbooks/logging-and-errors.md`)
+
 - Throw `DomainError('<CODE>', 'helpful detail')` for problems the caller can fix; codes live in `src/common/errors/error-codes.ts` (add a line there, then `pnpm docs:errors` and commit `docs/api/error-codes.md`). Let real bugs throw normally: the global filter turns them into a safe 500, logs the stack and reports to Sentry.
 - Never put secrets or customer data in an error message: messages are logged unscrubbed.
 - Log with the injected nestjs-pino `Logger`, putting the message INSIDE the object: `this.logger.log({ msg: 'Invoice created', invoiceId })`. Never `console.log`. Do not log request bodies. Redaction is a safety net, not permission.
@@ -80,7 +90,16 @@ Layers: controller (HTTP only) → service (use case) → domain (pure functions
 - Response header `X-Request-Id` and body `requestId` are set automatically; do not invent other ids.
 
 ## Must-have tests
+
 IDOR sweep over all routes, RBAC matrix, cashier-leak scanner, idempotency, stock concurrency, loyalty race, money property tests. Already in place: log redaction, error contract, Swagger completeness, RLS coverage, tenant isolation.
 
+## Bill calculator (P2-1). Reasoning: `../docs/adr/013-bill-calculator.md`; golden file: `../docs/04-qa/gst-golden/`
+
+- **All bill arithmetic lives in `src/modules/pos/domain/`** (`pricing.ts`, `discount-limit.ts`, `rounding.ts`): pure functions, integer paise, BigInt for multiplications. Checkout code builds a `BillInput` from the catalogue and calls `calculateBill`; it never does its own tax, discount or rounding sums, and never trusts a client total.
+- **Rounding rules are fixed and pending CA review.** Change one only in `docs/04-qa/gst-golden/generate_golden.py` first, regenerate `cases.json`, copy it to `dumbbill-web/tests/fixtures/gst-golden/`, then change the code (backend AND `dumbbill-web/src/lib/pos/pricing.ts`) and the ADR together. `test/unit/pricing.spec.ts` fails if the two copies of the file differ.
+- A new rule needs: a golden cart, a property or example test, and a sabotage check that the test fails when the rule is broken.
+- `PricingError` is domain-only; the checkout maps its `code` to the API error answers.
+
 ## Comments (mandatory)
-Follow the "Comments" section of `../CLAUDE.md`: file purpose, a doc comment on every exported symbol, and the *why* behind business rules, security choices and non-obvious code, in plain English.
+
+Follow the "Comments" section of `../CLAUDE.md`: file purpose, a doc comment on every exported symbol, and the _why_ behind business rules, security choices and non-obvious code, in plain English.

@@ -62,6 +62,11 @@ Only `dev` and `prod`: `.env.development` and `.env.production` (templates commi
 - **QR codes** use the `QrCode` component (drawn in the browser, never through an outside service, because the text contains a secret) and the fixed `qr-ink` / `qr-paper` tokens. Always show the same information as typed text next to it.
 - Switching ON two-step needs the password and the first code (`authApi.enableTotp`).
 
+## Bill preview (P2-1)
+
+- `src/lib/pos/pricing.ts` is a hand-written MIRROR of the server's bill calculator, used only for the instant preview and offline billing. The server's figures are the truth and replace the preview as soon as they arrive. It is held to the same golden file as the backend (`tests/fixtures/gst-golden/cases.json`, a copy of `docs/04-qa/gst-golden/cases.json`); change both calculators and the file together.
+- Never do tax, discount or rounding sums in a component; call `calculateBill` and show its figures with `MoneyText`.
+
 ## Rules
 
 - API layer: one typed function per endpoint, zod-validate responses at the boundary, central error handling for problem+json (show `requestId` to user on errors). Tokens in memory; refresh via httpOnly cookie (built in P1-1, see the sign-in rules above).

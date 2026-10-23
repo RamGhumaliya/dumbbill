@@ -36,7 +36,8 @@ protein_retail_saas_product/
 | P1-5 Suppliers, purchases, stock ledger, weighted average cost, transfers, audit log and hash chain (backend and web) | Done, not yet committed (see `docs/api/purchasing-and-stock.md`, ADR 012)                           |
 | P1-6 Hardening: cross-business sweep, route-by-role table, cashier leak sweep, demo businesses, Phase 1 report        | Done, not yet committed (see `docs/06-tracking/phase-1-report.md`, `docs/api/permission-matrix.md`) |
 | Phase 0                                                                                                               | Complete                                                                                            |
-| P1-7 Team screens, two-step QR code, password to switch on two-step (backend and web)                                 | Done (see `docs/api/team-and-permissions.md`)                                    |
+| P1-7 Team screens, two-step QR code, password to switch on two-step (backend and web)                                 | Done (see `docs/api/team-and-permissions.md`)                                                       |
+| P2-1 Bill calculator: pricing, discounts, GST, golden file (backend, web preview)                                     | Done, awaiting CA review (see `docs/adr/013-bill-calculator.md`, `docs/04-qa/gst-golden/`)          |
 | Phase 1                                                                                                               | Built and reviewed (reviewer, security-auditor, `pnpm audit`). Next: Phase 2, the till              |
 
 The live checklist is `docs/06-tracking/progress-tracker.md`.

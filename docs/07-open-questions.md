@@ -34,6 +34,19 @@ These were not specified in the plan, so a default was chosen. All are editable 
 6. **Before the till:** build the web team screens and the QR code for two-step setup.
 7. **GST rate list:** keep 0, 0.25, 3, 5, 18 and 40% until the CA confirms it.
 
+## Decisions made while building P2-1 (please confirm or change; the CA must confirm the first five)
+
+1. **Rounding:** every division rounds once, to the nearest paisa, exact halves **up**. The invoice total rounds to the nearest rupee, half up, with a separate round-off line (-49 to +50 paise).
+2. **Tax per line**, on what the line has left after discounts (not per invoice).
+3. **CGST/SGST split of an odd paisa:** CGST = half rounded down, SGST = the rest (so they can differ by one paisa). The alternative is to make them equal and adjust the total.
+4. **A bill-level discount is shared across lines** in proportion to what each has left, so it lowers each line's taxable value (leftover paise to the biggest remainders, earlier line on a tie).
+5. **A bill of supply carries no tax at all**, whatever rate the product has.
+6. **The discount limit is checked on the whole bill and on each line's own discount**, not on a line's share of a bill discount.
+7. **Prices are treated as tax-inclusive or exclusive by an input**; the business setting that chooses it (default inclusive, as MRPs are) is added with the checkout.
+8. The sample HSN codes in the golden carts are examples only; the CA should confirm real ones.
+
+The questions for the CA are listed in `docs/04-qa/gst-golden/README.md`.
+
 ## Decisions made while building P1-7 (please confirm or change)
 
 1. **The abilities of a person are edited as one list of tick boxes** that starts from the chosen role. Changing the role starts the list again from that role. The screen sends the difference to the role as "extras" and "taken away" (that is how the server stores it).

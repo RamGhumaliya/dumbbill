@@ -55,7 +55,9 @@ Update after each prompt. Gate = all items ✅ and reviewer + security-auditor s
 
 ## Phase 2 – POS (weeks 4–7)
 
-| P2-1 | Pricing/discount/GST engine | ⬜ |
+| P2-1 | Pricing/discount/GST engine | ✅ 23 Oct 2026 (awaiting CA review of the rounding rules) |
+
+**P2-1 result (US-POS-02, US-POS-04).** Pure integer-paise functions in `dumbbill-backend/src/modules/pos/domain`: line pricing, item discount then bill discount shared across lines (largest remainder, earlier line wins a tie), inclusive and exclusive tax per line, CGST/SGST or IGST by place of supply, round-off line to the rupee, HSN summary, tax invoice and bill of supply, and a discount-limit check (whole bill and each line's own discount) for the approval flow. A **golden file** of 15 carts (`docs/04-qa/gst-golden/cases.json`) whose answers come from an independent script, with a README of the rules and questions for the CA; the web preview (`dumbbill-web/src/lib/pos/pricing.ts`) mirrors the calculator and is held to the same file. Property tests (fast-check) for the money invariants. Evidence: backend 359 unit tests (53 new), web 18 new unit tests; sabotage check (rounding to floor, CGST taking the larger half) made 13 and 11 tests fail; lint, typecheck, format clean. Decisions and the CA questions: `docs/adr/013-bill-calculator.md`. No routes yet: the checkout (P2-2) calls it.
 | P2-2 | Checkout API | ⬜ |
 | P2-3 | POS UI | ⬜ |
 | P2-4 | Invoice, print, WhatsApp | ⬜ |

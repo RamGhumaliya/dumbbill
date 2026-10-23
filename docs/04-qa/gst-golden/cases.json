@@ -1,0 +1,1329 @@
+[
+  {
+    "name": "Whey 2 kg at Rs 2,999 inclusive of 18% GST, same state (the everyday sale)",
+    "input": {
+      "documentType": "TAX_INVOICE",
+      "priceBasis": "TAX_INCLUSIVE",
+      "supply": "INTRA_STATE",
+      "lines": [
+        {
+          "hsn": "21069099",
+          "gstRateBp": 1800,
+          "qty": 1,
+          "unitPricePaise": 299900
+        }
+      ]
+    },
+    "expected": {
+      "documentType": "TAX_INVOICE",
+      "priceBasis": "TAX_INCLUSIVE",
+      "supply": "INTRA_STATE",
+      "lines": [
+        {
+          "grossPaise": 299900,
+          "itemDiscountPaise": 0,
+          "billDiscountPaise": 0,
+          "netPaise": 299900,
+          "taxableValuePaise": 254153,
+          "gstRateBp": 1800,
+          "cgstPaise": 22873,
+          "sgstPaise": 22874,
+          "igstPaise": 0,
+          "taxPaise": 45747,
+          "totalPaise": 299900
+        }
+      ],
+      "grossPaise": 299900,
+      "itemDiscountPaise": 0,
+      "billDiscountPaise": 0,
+      "discountPaise": 0,
+      "taxableValuePaise": 254153,
+      "cgstPaise": 22873,
+      "sgstPaise": 22874,
+      "igstPaise": 0,
+      "taxPaise": 45747,
+      "subtotalPaise": 299900,
+      "roundOffPaise": 0,
+      "totalPaise": 299900,
+      "hsnSummary": [
+        {
+          "hsn": "21069099",
+          "gstRateBp": 1800,
+          "qty": 1,
+          "taxableValuePaise": 254153,
+          "cgstPaise": 22873,
+          "sgstPaise": 22874,
+          "igstPaise": 0,
+          "taxPaise": 45747
+        }
+      ]
+    }
+  },
+  {
+    "name": "Two shaker bottles at Rs 1,000 each, GST 18% added on top, same state",
+    "input": {
+      "documentType": "TAX_INVOICE",
+      "priceBasis": "TAX_EXCLUSIVE",
+      "supply": "INTRA_STATE",
+      "lines": [
+        {
+          "hsn": "39241090",
+          "gstRateBp": 1800,
+          "qty": 2,
+          "unitPricePaise": 100000
+        }
+      ]
+    },
+    "expected": {
+      "documentType": "TAX_INVOICE",
+      "priceBasis": "TAX_EXCLUSIVE",
+      "supply": "INTRA_STATE",
+      "lines": [
+        {
+          "grossPaise": 200000,
+          "itemDiscountPaise": 0,
+          "billDiscountPaise": 0,
+          "netPaise": 200000,
+          "taxableValuePaise": 200000,
+          "gstRateBp": 1800,
+          "cgstPaise": 18000,
+          "sgstPaise": 18000,
+          "igstPaise": 0,
+          "taxPaise": 36000,
+          "totalPaise": 236000
+        }
+      ],
+      "grossPaise": 200000,
+      "itemDiscountPaise": 0,
+      "billDiscountPaise": 0,
+      "discountPaise": 0,
+      "taxableValuePaise": 200000,
+      "cgstPaise": 18000,
+      "sgstPaise": 18000,
+      "igstPaise": 0,
+      "taxPaise": 36000,
+      "subtotalPaise": 236000,
+      "roundOffPaise": 0,
+      "totalPaise": 236000,
+      "hsnSummary": [
+        {
+          "hsn": "39241090",
+          "gstRateBp": 1800,
+          "qty": 2,
+          "taxableValuePaise": 200000,
+          "cgstPaise": 18000,
+          "sgstPaise": 18000,
+          "igstPaise": 0,
+          "taxPaise": 36000
+        }
+      ]
+    }
+  },
+  {
+    "name": "Three protein bars at Rs 499 inclusive of 5% GST, same state (odd paisa in the tax goes to SGST)",
+    "input": {
+      "documentType": "TAX_INVOICE",
+      "priceBasis": "TAX_INCLUSIVE",
+      "supply": "INTRA_STATE",
+      "lines": [
+        {
+          "hsn": "19059090",
+          "gstRateBp": 500,
+          "qty": 3,
+          "unitPricePaise": 49900
+        }
+      ]
+    },
+    "expected": {
+      "documentType": "TAX_INVOICE",
+      "priceBasis": "TAX_INCLUSIVE",
+      "supply": "INTRA_STATE",
+      "lines": [
+        {
+          "grossPaise": 149700,
+          "itemDiscountPaise": 0,
+          "billDiscountPaise": 0,
+          "netPaise": 149700,
+          "taxableValuePaise": 142571,
+          "gstRateBp": 500,
+          "cgstPaise": 3564,
+          "sgstPaise": 3565,
+          "igstPaise": 0,
+          "taxPaise": 7129,
+          "totalPaise": 149700
+        }
+      ],
+      "grossPaise": 149700,
+      "itemDiscountPaise": 0,
+      "billDiscountPaise": 0,
+      "discountPaise": 0,
+      "taxableValuePaise": 142571,
+      "cgstPaise": 3564,
+      "sgstPaise": 3565,
+      "igstPaise": 0,
+      "taxPaise": 7129,
+      "subtotalPaise": 149700,
+      "roundOffPaise": 0,
+      "totalPaise": 149700,
+      "hsnSummary": [
+        {
+          "hsn": "19059090",
+          "gstRateBp": 500,
+          "qty": 3,
+          "taxableValuePaise": 142571,
+          "cgstPaise": 3564,
+          "sgstPaise": 3565,
+          "igstPaise": 0,
+          "taxPaise": 7129
+        }
+      ]
+    }
+  },
+  {
+    "name": "Same whey sale to a customer in another state: one IGST instead of CGST + SGST",
+    "input": {
+      "documentType": "TAX_INVOICE",
+      "priceBasis": "TAX_INCLUSIVE",
+      "supply": "INTER_STATE",
+      "lines": [
+        {
+          "hsn": "21069099",
+          "gstRateBp": 1800,
+          "qty": 1,
+          "unitPricePaise": 299900
+        }
+      ]
+    },
+    "expected": {
+      "documentType": "TAX_INVOICE",
+      "priceBasis": "TAX_INCLUSIVE",
+      "supply": "INTER_STATE",
+      "lines": [
+        {
+          "grossPaise": 299900,
+          "itemDiscountPaise": 0,
+          "billDiscountPaise": 0,
+          "netPaise": 299900,
+          "taxableValuePaise": 254153,
+          "gstRateBp": 1800,
+          "cgstPaise": 0,
+          "sgstPaise": 0,
+          "igstPaise": 45747,
+          "taxPaise": 45747,
+          "totalPaise": 299900
+        }
+      ],
+      "grossPaise": 299900,
+      "itemDiscountPaise": 0,
+      "billDiscountPaise": 0,
+      "discountPaise": 0,
+      "taxableValuePaise": 254153,
+      "cgstPaise": 0,
+      "sgstPaise": 0,
+      "igstPaise": 45747,
+      "taxPaise": 45747,
+      "subtotalPaise": 299900,
+      "roundOffPaise": 0,
+      "totalPaise": 299900,
+      "hsnSummary": [
+        {
+          "hsn": "21069099",
+          "gstRateBp": 1800,
+          "qty": 1,
+          "taxableValuePaise": 254153,
+          "cgstPaise": 0,
+          "sgstPaise": 0,
+          "igstPaise": 45747,
+          "taxPaise": 45747
+        }
+      ]
+    }
+  },
+  {
+    "name": "Two wheys with 10% off the line, inclusive 18%",
+    "input": {
+      "documentType": "TAX_INVOICE",
+      "priceBasis": "TAX_INCLUSIVE",
+      "supply": "INTRA_STATE",
+      "lines": [
+        {
+          "hsn": "21069099",
+          "gstRateBp": 1800,
+          "qty": 2,
+          "unitPricePaise": 299900,
+          "discount": {
+            "kind": "PERCENT",
+            "basisPoints": 1000
+          }
+        }
+      ]
+    },
+    "expected": {
+      "documentType": "TAX_INVOICE",
+      "priceBasis": "TAX_INCLUSIVE",
+      "supply": "INTRA_STATE",
+      "lines": [
+        {
+          "grossPaise": 599800,
+          "itemDiscountPaise": 59980,
+          "billDiscountPaise": 0,
+          "netPaise": 539820,
+          "taxableValuePaise": 457475,
+          "gstRateBp": 1800,
+          "cgstPaise": 41172,
+          "sgstPaise": 41173,
+          "igstPaise": 0,
+          "taxPaise": 82345,
+          "totalPaise": 539820
+        }
+      ],
+      "grossPaise": 599800,
+      "itemDiscountPaise": 59980,
+      "billDiscountPaise": 0,
+      "discountPaise": 59980,
+      "taxableValuePaise": 457475,
+      "cgstPaise": 41172,
+      "sgstPaise": 41173,
+      "igstPaise": 0,
+      "taxPaise": 82345,
+      "subtotalPaise": 539820,
+      "roundOffPaise": -20,
+      "totalPaise": 539800,
+      "hsnSummary": [
+        {
+          "hsn": "21069099",
+          "gstRateBp": 1800,
+          "qty": 2,
+          "taxableValuePaise": 457475,
+          "cgstPaise": 41172,
+          "sgstPaise": 41173,
+          "igstPaise": 0,
+          "taxPaise": 82345
+        }
+      ]
+    }
+  },
+  {
+    "name": "Rs 150 off the whole bill shared over a 5% line and two 18% lines (leftover paise rule)",
+    "input": {
+      "documentType": "TAX_INVOICE",
+      "priceBasis": "TAX_INCLUSIVE",
+      "supply": "INTRA_STATE",
+      "lines": [
+        {
+          "hsn": "19059090",
+          "gstRateBp": 500,
+          "qty": 1,
+          "unitPricePaise": 49900
+        },
+        {
+          "hsn": "21069099",
+          "gstRateBp": 1800,
+          "qty": 1,
+          "unitPricePaise": 299900
+        },
+        {
+          "hsn": "39241090",
+          "gstRateBp": 1800,
+          "qty": 2,
+          "unitPricePaise": 34900
+        }
+      ],
+      "billDiscount": {
+        "kind": "AMOUNT",
+        "paise": 15000
+      }
+    },
+    "expected": {
+      "documentType": "TAX_INVOICE",
+      "priceBasis": "TAX_INCLUSIVE",
+      "supply": "INTRA_STATE",
+      "lines": [
+        {
+          "grossPaise": 49900,
+          "itemDiscountPaise": 0,
+          "billDiscountPaise": 1784,
+          "netPaise": 48116,
+          "taxableValuePaise": 45825,
+          "gstRateBp": 500,
+          "cgstPaise": 1145,
+          "sgstPaise": 1146,
+          "igstPaise": 0,
+          "taxPaise": 2291,
+          "totalPaise": 48116
+        },
+        {
+          "grossPaise": 299900,
+          "itemDiscountPaise": 0,
+          "billDiscountPaise": 10721,
+          "netPaise": 289179,
+          "taxableValuePaise": 245067,
+          "gstRateBp": 1800,
+          "cgstPaise": 22056,
+          "sgstPaise": 22056,
+          "igstPaise": 0,
+          "taxPaise": 44112,
+          "totalPaise": 289179
+        },
+        {
+          "grossPaise": 69800,
+          "itemDiscountPaise": 0,
+          "billDiscountPaise": 2495,
+          "netPaise": 67305,
+          "taxableValuePaise": 57038,
+          "gstRateBp": 1800,
+          "cgstPaise": 5133,
+          "sgstPaise": 5134,
+          "igstPaise": 0,
+          "taxPaise": 10267,
+          "totalPaise": 67305
+        }
+      ],
+      "grossPaise": 419600,
+      "itemDiscountPaise": 0,
+      "billDiscountPaise": 15000,
+      "discountPaise": 15000,
+      "taxableValuePaise": 347930,
+      "cgstPaise": 28334,
+      "sgstPaise": 28336,
+      "igstPaise": 0,
+      "taxPaise": 56670,
+      "subtotalPaise": 404600,
+      "roundOffPaise": 0,
+      "totalPaise": 404600,
+      "hsnSummary": [
+        {
+          "hsn": "19059090",
+          "gstRateBp": 500,
+          "qty": 1,
+          "taxableValuePaise": 45825,
+          "cgstPaise": 1145,
+          "sgstPaise": 1146,
+          "igstPaise": 0,
+          "taxPaise": 2291
+        },
+        {
+          "hsn": "21069099",
+          "gstRateBp": 1800,
+          "qty": 1,
+          "taxableValuePaise": 245067,
+          "cgstPaise": 22056,
+          "sgstPaise": 22056,
+          "igstPaise": 0,
+          "taxPaise": 44112
+        },
+        {
+          "hsn": "39241090",
+          "gstRateBp": 1800,
+          "qty": 2,
+          "taxableValuePaise": 57038,
+          "cgstPaise": 5133,
+          "sgstPaise": 5134,
+          "igstPaise": 0,
+          "taxPaise": 10267
+        }
+      ]
+    }
+  },
+  {
+    "name": "7.5% off the whole bill over four lines, GST added on top",
+    "input": {
+      "documentType": "TAX_INVOICE",
+      "priceBasis": "TAX_EXCLUSIVE",
+      "supply": "INTRA_STATE",
+      "lines": [
+        {
+          "hsn": "21069099",
+          "gstRateBp": 1800,
+          "qty": 1,
+          "unitPricePaise": 249900
+        },
+        {
+          "hsn": "19059090",
+          "gstRateBp": 500,
+          "qty": 4,
+          "unitPricePaise": 12000
+        },
+        {
+          "hsn": "39241090",
+          "gstRateBp": 1800,
+          "qty": 1,
+          "unitPricePaise": 29900
+        },
+        {
+          "hsn": "61091000",
+          "gstRateBp": 500,
+          "qty": 2,
+          "unitPricePaise": 59900
+        }
+      ],
+      "billDiscount": {
+        "kind": "PERCENT",
+        "basisPoints": 750
+      }
+    },
+    "expected": {
+      "documentType": "TAX_INVOICE",
+      "priceBasis": "TAX_EXCLUSIVE",
+      "supply": "INTRA_STATE",
+      "lines": [
+        {
+          "grossPaise": 249900,
+          "itemDiscountPaise": 0,
+          "billDiscountPaise": 18743,
+          "netPaise": 231157,
+          "taxableValuePaise": 231157,
+          "gstRateBp": 1800,
+          "cgstPaise": 20804,
+          "sgstPaise": 20804,
+          "igstPaise": 0,
+          "taxPaise": 41608,
+          "totalPaise": 272765
+        },
+        {
+          "grossPaise": 48000,
+          "itemDiscountPaise": 0,
+          "billDiscountPaise": 3600,
+          "netPaise": 44400,
+          "taxableValuePaise": 44400,
+          "gstRateBp": 500,
+          "cgstPaise": 1110,
+          "sgstPaise": 1110,
+          "igstPaise": 0,
+          "taxPaise": 2220,
+          "totalPaise": 46620
+        },
+        {
+          "grossPaise": 29900,
+          "itemDiscountPaise": 0,
+          "billDiscountPaise": 2242,
+          "netPaise": 27658,
+          "taxableValuePaise": 27658,
+          "gstRateBp": 1800,
+          "cgstPaise": 2489,
+          "sgstPaise": 2489,
+          "igstPaise": 0,
+          "taxPaise": 4978,
+          "totalPaise": 32636
+        },
+        {
+          "grossPaise": 119800,
+          "itemDiscountPaise": 0,
+          "billDiscountPaise": 8985,
+          "netPaise": 110815,
+          "taxableValuePaise": 110815,
+          "gstRateBp": 500,
+          "cgstPaise": 2770,
+          "sgstPaise": 2771,
+          "igstPaise": 0,
+          "taxPaise": 5541,
+          "totalPaise": 116356
+        }
+      ],
+      "grossPaise": 447600,
+      "itemDiscountPaise": 0,
+      "billDiscountPaise": 33570,
+      "discountPaise": 33570,
+      "taxableValuePaise": 414030,
+      "cgstPaise": 27173,
+      "sgstPaise": 27174,
+      "igstPaise": 0,
+      "taxPaise": 54347,
+      "subtotalPaise": 468377,
+      "roundOffPaise": 23,
+      "totalPaise": 468400,
+      "hsnSummary": [
+        {
+          "hsn": "19059090",
+          "gstRateBp": 500,
+          "qty": 4,
+          "taxableValuePaise": 44400,
+          "cgstPaise": 1110,
+          "sgstPaise": 1110,
+          "igstPaise": 0,
+          "taxPaise": 2220
+        },
+        {
+          "hsn": "21069099",
+          "gstRateBp": 1800,
+          "qty": 1,
+          "taxableValuePaise": 231157,
+          "cgstPaise": 20804,
+          "sgstPaise": 20804,
+          "igstPaise": 0,
+          "taxPaise": 41608
+        },
+        {
+          "hsn": "39241090",
+          "gstRateBp": 1800,
+          "qty": 1,
+          "taxableValuePaise": 27658,
+          "cgstPaise": 2489,
+          "sgstPaise": 2489,
+          "igstPaise": 0,
+          "taxPaise": 4978
+        },
+        {
+          "hsn": "61091000",
+          "gstRateBp": 500,
+          "qty": 2,
+          "taxableValuePaise": 110815,
+          "cgstPaise": 2770,
+          "sgstPaise": 2771,
+          "igstPaise": 0,
+          "taxPaise": 5541
+        }
+      ]
+    }
+  },
+  {
+    "name": "Bill of supply from a shop not registered for GST: rates are ignored, no tax",
+    "input": {
+      "documentType": "BILL_OF_SUPPLY",
+      "priceBasis": "TAX_INCLUSIVE",
+      "supply": "INTRA_STATE",
+      "lines": [
+        {
+          "hsn": null,
+          "gstRateBp": 1800,
+          "qty": 1,
+          "unitPricePaise": 299900
+        },
+        {
+          "hsn": null,
+          "gstRateBp": 500,
+          "qty": 3,
+          "unitPricePaise": 49900
+        }
+      ]
+    },
+    "expected": {
+      "documentType": "BILL_OF_SUPPLY",
+      "priceBasis": "TAX_INCLUSIVE",
+      "supply": "INTRA_STATE",
+      "lines": [
+        {
+          "grossPaise": 299900,
+          "itemDiscountPaise": 0,
+          "billDiscountPaise": 0,
+          "netPaise": 299900,
+          "taxableValuePaise": 299900,
+          "gstRateBp": 0,
+          "cgstPaise": 0,
+          "sgstPaise": 0,
+          "igstPaise": 0,
+          "taxPaise": 0,
+          "totalPaise": 299900
+        },
+        {
+          "grossPaise": 149700,
+          "itemDiscountPaise": 0,
+          "billDiscountPaise": 0,
+          "netPaise": 149700,
+          "taxableValuePaise": 149700,
+          "gstRateBp": 0,
+          "cgstPaise": 0,
+          "sgstPaise": 0,
+          "igstPaise": 0,
+          "taxPaise": 0,
+          "totalPaise": 149700
+        }
+      ],
+      "grossPaise": 449600,
+      "itemDiscountPaise": 0,
+      "billDiscountPaise": 0,
+      "discountPaise": 0,
+      "taxableValuePaise": 449600,
+      "cgstPaise": 0,
+      "sgstPaise": 0,
+      "igstPaise": 0,
+      "taxPaise": 0,
+      "subtotalPaise": 449600,
+      "roundOffPaise": 0,
+      "totalPaise": 449600,
+      "hsnSummary": [
+        {
+          "hsn": "",
+          "gstRateBp": 0,
+          "qty": 4,
+          "taxableValuePaise": 449600,
+          "cgstPaise": 0,
+          "sgstPaise": 0,
+          "igstPaise": 0,
+          "taxPaise": 0
+        }
+      ]
+    }
+  },
+  {
+    "name": "Round-off up: a total ending in exactly 50 paise rounds UP to the rupee",
+    "input": {
+      "documentType": "TAX_INVOICE",
+      "priceBasis": "TAX_INCLUSIVE",
+      "supply": "INTRA_STATE",
+      "lines": [
+        {
+          "hsn": "39241090",
+          "gstRateBp": 0,
+          "qty": 1,
+          "unitPricePaise": 10050
+        }
+      ]
+    },
+    "expected": {
+      "documentType": "TAX_INVOICE",
+      "priceBasis": "TAX_INCLUSIVE",
+      "supply": "INTRA_STATE",
+      "lines": [
+        {
+          "grossPaise": 10050,
+          "itemDiscountPaise": 0,
+          "billDiscountPaise": 0,
+          "netPaise": 10050,
+          "taxableValuePaise": 10050,
+          "gstRateBp": 0,
+          "cgstPaise": 0,
+          "sgstPaise": 0,
+          "igstPaise": 0,
+          "taxPaise": 0,
+          "totalPaise": 10050
+        }
+      ],
+      "grossPaise": 10050,
+      "itemDiscountPaise": 0,
+      "billDiscountPaise": 0,
+      "discountPaise": 0,
+      "taxableValuePaise": 10050,
+      "cgstPaise": 0,
+      "sgstPaise": 0,
+      "igstPaise": 0,
+      "taxPaise": 0,
+      "subtotalPaise": 10050,
+      "roundOffPaise": 50,
+      "totalPaise": 10100,
+      "hsnSummary": [
+        {
+          "hsn": "39241090",
+          "gstRateBp": 0,
+          "qty": 1,
+          "taxableValuePaise": 10050,
+          "cgstPaise": 0,
+          "sgstPaise": 0,
+          "igstPaise": 0,
+          "taxPaise": 0
+        }
+      ]
+    }
+  },
+  {
+    "name": "Round-off down: a total ending in 49 paise rounds DOWN",
+    "input": {
+      "documentType": "TAX_INVOICE",
+      "priceBasis": "TAX_INCLUSIVE",
+      "supply": "INTRA_STATE",
+      "lines": [
+        {
+          "hsn": "39241090",
+          "gstRateBp": 0,
+          "qty": 1,
+          "unitPricePaise": 10049
+        }
+      ]
+    },
+    "expected": {
+      "documentType": "TAX_INVOICE",
+      "priceBasis": "TAX_INCLUSIVE",
+      "supply": "INTRA_STATE",
+      "lines": [
+        {
+          "grossPaise": 10049,
+          "itemDiscountPaise": 0,
+          "billDiscountPaise": 0,
+          "netPaise": 10049,
+          "taxableValuePaise": 10049,
+          "gstRateBp": 0,
+          "cgstPaise": 0,
+          "sgstPaise": 0,
+          "igstPaise": 0,
+          "taxPaise": 0,
+          "totalPaise": 10049
+        }
+      ],
+      "grossPaise": 10049,
+      "itemDiscountPaise": 0,
+      "billDiscountPaise": 0,
+      "discountPaise": 0,
+      "taxableValuePaise": 10049,
+      "cgstPaise": 0,
+      "sgstPaise": 0,
+      "igstPaise": 0,
+      "taxPaise": 0,
+      "subtotalPaise": 10049,
+      "roundOffPaise": -49,
+      "totalPaise": 10000,
+      "hsnSummary": [
+        {
+          "hsn": "39241090",
+          "gstRateBp": 0,
+          "qty": 1,
+          "taxableValuePaise": 10049,
+          "cgstPaise": 0,
+          "sgstPaise": 0,
+          "igstPaise": 0,
+          "taxPaise": 0
+        }
+      ]
+    }
+  },
+  {
+    "name": "A 0% line and a 5% line on one bill",
+    "input": {
+      "documentType": "TAX_INVOICE",
+      "priceBasis": "TAX_INCLUSIVE",
+      "supply": "INTRA_STATE",
+      "lines": [
+        {
+          "hsn": "61091000",
+          "gstRateBp": 0,
+          "qty": 1,
+          "unitPricePaise": 19900
+        },
+        {
+          "hsn": "19059090",
+          "gstRateBp": 500,
+          "qty": 2,
+          "unitPricePaise": 24900
+        }
+      ]
+    },
+    "expected": {
+      "documentType": "TAX_INVOICE",
+      "priceBasis": "TAX_INCLUSIVE",
+      "supply": "INTRA_STATE",
+      "lines": [
+        {
+          "grossPaise": 19900,
+          "itemDiscountPaise": 0,
+          "billDiscountPaise": 0,
+          "netPaise": 19900,
+          "taxableValuePaise": 19900,
+          "gstRateBp": 0,
+          "cgstPaise": 0,
+          "sgstPaise": 0,
+          "igstPaise": 0,
+          "taxPaise": 0,
+          "totalPaise": 19900
+        },
+        {
+          "grossPaise": 49800,
+          "itemDiscountPaise": 0,
+          "billDiscountPaise": 0,
+          "netPaise": 49800,
+          "taxableValuePaise": 47429,
+          "gstRateBp": 500,
+          "cgstPaise": 1185,
+          "sgstPaise": 1186,
+          "igstPaise": 0,
+          "taxPaise": 2371,
+          "totalPaise": 49800
+        }
+      ],
+      "grossPaise": 69700,
+      "itemDiscountPaise": 0,
+      "billDiscountPaise": 0,
+      "discountPaise": 0,
+      "taxableValuePaise": 67329,
+      "cgstPaise": 1185,
+      "sgstPaise": 1186,
+      "igstPaise": 0,
+      "taxPaise": 2371,
+      "subtotalPaise": 69700,
+      "roundOffPaise": 0,
+      "totalPaise": 69700,
+      "hsnSummary": [
+        {
+          "hsn": "19059090",
+          "gstRateBp": 500,
+          "qty": 2,
+          "taxableValuePaise": 47429,
+          "cgstPaise": 1185,
+          "sgstPaise": 1186,
+          "igstPaise": 0,
+          "taxPaise": 2371
+        },
+        {
+          "hsn": "61091000",
+          "gstRateBp": 0,
+          "qty": 1,
+          "taxableValuePaise": 19900,
+          "cgstPaise": 0,
+          "sgstPaise": 0,
+          "igstPaise": 0,
+          "taxPaise": 0
+        }
+      ]
+    }
+  },
+  {
+    "name": "A line given away free (100% off) next to a paid line",
+    "input": {
+      "documentType": "TAX_INVOICE",
+      "priceBasis": "TAX_INCLUSIVE",
+      "supply": "INTRA_STATE",
+      "lines": [
+        {
+          "hsn": "39241090",
+          "gstRateBp": 1800,
+          "qty": 1,
+          "unitPricePaise": 24900,
+          "discount": {
+            "kind": "PERCENT",
+            "basisPoints": 10000
+          }
+        },
+        {
+          "hsn": "21069099",
+          "gstRateBp": 1800,
+          "qty": 1,
+          "unitPricePaise": 199900
+        }
+      ]
+    },
+    "expected": {
+      "documentType": "TAX_INVOICE",
+      "priceBasis": "TAX_INCLUSIVE",
+      "supply": "INTRA_STATE",
+      "lines": [
+        {
+          "grossPaise": 24900,
+          "itemDiscountPaise": 24900,
+          "billDiscountPaise": 0,
+          "netPaise": 0,
+          "taxableValuePaise": 0,
+          "gstRateBp": 1800,
+          "cgstPaise": 0,
+          "sgstPaise": 0,
+          "igstPaise": 0,
+          "taxPaise": 0,
+          "totalPaise": 0
+        },
+        {
+          "grossPaise": 199900,
+          "itemDiscountPaise": 0,
+          "billDiscountPaise": 0,
+          "netPaise": 199900,
+          "taxableValuePaise": 169407,
+          "gstRateBp": 1800,
+          "cgstPaise": 15246,
+          "sgstPaise": 15247,
+          "igstPaise": 0,
+          "taxPaise": 30493,
+          "totalPaise": 199900
+        }
+      ],
+      "grossPaise": 224800,
+      "itemDiscountPaise": 24900,
+      "billDiscountPaise": 0,
+      "discountPaise": 24900,
+      "taxableValuePaise": 169407,
+      "cgstPaise": 15246,
+      "sgstPaise": 15247,
+      "igstPaise": 0,
+      "taxPaise": 30493,
+      "subtotalPaise": 199900,
+      "roundOffPaise": 0,
+      "totalPaise": 199900,
+      "hsnSummary": [
+        {
+          "hsn": "21069099",
+          "gstRateBp": 1800,
+          "qty": 1,
+          "taxableValuePaise": 169407,
+          "cgstPaise": 15246,
+          "sgstPaise": 15247,
+          "igstPaise": 0,
+          "taxPaise": 30493
+        },
+        {
+          "hsn": "39241090",
+          "gstRateBp": 1800,
+          "qty": 1,
+          "taxableValuePaise": 0,
+          "cgstPaise": 0,
+          "sgstPaise": 0,
+          "igstPaise": 0,
+          "taxPaise": 0
+        }
+      ]
+    }
+  },
+  {
+    "name": "Two lines sharing an HSN code and rate are one row of the HSN summary",
+    "input": {
+      "documentType": "TAX_INVOICE",
+      "priceBasis": "TAX_INCLUSIVE",
+      "supply": "INTRA_STATE",
+      "lines": [
+        {
+          "hsn": "21069099",
+          "gstRateBp": 1800,
+          "qty": 1,
+          "unitPricePaise": 299900
+        },
+        {
+          "hsn": "19059090",
+          "gstRateBp": 500,
+          "qty": 2,
+          "unitPricePaise": 49900
+        },
+        {
+          "hsn": "21069099",
+          "gstRateBp": 1800,
+          "qty": 2,
+          "unitPricePaise": 149900
+        }
+      ]
+    },
+    "expected": {
+      "documentType": "TAX_INVOICE",
+      "priceBasis": "TAX_INCLUSIVE",
+      "supply": "INTRA_STATE",
+      "lines": [
+        {
+          "grossPaise": 299900,
+          "itemDiscountPaise": 0,
+          "billDiscountPaise": 0,
+          "netPaise": 299900,
+          "taxableValuePaise": 254153,
+          "gstRateBp": 1800,
+          "cgstPaise": 22873,
+          "sgstPaise": 22874,
+          "igstPaise": 0,
+          "taxPaise": 45747,
+          "totalPaise": 299900
+        },
+        {
+          "grossPaise": 99800,
+          "itemDiscountPaise": 0,
+          "billDiscountPaise": 0,
+          "netPaise": 99800,
+          "taxableValuePaise": 95048,
+          "gstRateBp": 500,
+          "cgstPaise": 2376,
+          "sgstPaise": 2376,
+          "igstPaise": 0,
+          "taxPaise": 4752,
+          "totalPaise": 99800
+        },
+        {
+          "grossPaise": 299800,
+          "itemDiscountPaise": 0,
+          "billDiscountPaise": 0,
+          "netPaise": 299800,
+          "taxableValuePaise": 254068,
+          "gstRateBp": 1800,
+          "cgstPaise": 22866,
+          "sgstPaise": 22866,
+          "igstPaise": 0,
+          "taxPaise": 45732,
+          "totalPaise": 299800
+        }
+      ],
+      "grossPaise": 699500,
+      "itemDiscountPaise": 0,
+      "billDiscountPaise": 0,
+      "discountPaise": 0,
+      "taxableValuePaise": 603269,
+      "cgstPaise": 48115,
+      "sgstPaise": 48116,
+      "igstPaise": 0,
+      "taxPaise": 96231,
+      "subtotalPaise": 699500,
+      "roundOffPaise": 0,
+      "totalPaise": 699500,
+      "hsnSummary": [
+        {
+          "hsn": "19059090",
+          "gstRateBp": 500,
+          "qty": 2,
+          "taxableValuePaise": 95048,
+          "cgstPaise": 2376,
+          "sgstPaise": 2376,
+          "igstPaise": 0,
+          "taxPaise": 4752
+        },
+        {
+          "hsn": "21069099",
+          "gstRateBp": 1800,
+          "qty": 3,
+          "taxableValuePaise": 508221,
+          "cgstPaise": 45739,
+          "sgstPaise": 45740,
+          "igstPaise": 0,
+          "taxPaise": 91479
+        }
+      ]
+    }
+  },
+  {
+    "name": "Tax of an odd number of paise: CGST 240, SGST 241",
+    "input": {
+      "documentType": "TAX_INVOICE",
+      "priceBasis": "TAX_INCLUSIVE",
+      "supply": "INTRA_STATE",
+      "lines": [
+        {
+          "hsn": "19059090",
+          "gstRateBp": 500,
+          "qty": 1,
+          "unitPricePaise": 10100
+        }
+      ]
+    },
+    "expected": {
+      "documentType": "TAX_INVOICE",
+      "priceBasis": "TAX_INCLUSIVE",
+      "supply": "INTRA_STATE",
+      "lines": [
+        {
+          "grossPaise": 10100,
+          "itemDiscountPaise": 0,
+          "billDiscountPaise": 0,
+          "netPaise": 10100,
+          "taxableValuePaise": 9619,
+          "gstRateBp": 500,
+          "cgstPaise": 240,
+          "sgstPaise": 241,
+          "igstPaise": 0,
+          "taxPaise": 481,
+          "totalPaise": 10100
+        }
+      ],
+      "grossPaise": 10100,
+      "itemDiscountPaise": 0,
+      "billDiscountPaise": 0,
+      "discountPaise": 0,
+      "taxableValuePaise": 9619,
+      "cgstPaise": 240,
+      "sgstPaise": 241,
+      "igstPaise": 0,
+      "taxPaise": 481,
+      "subtotalPaise": 10100,
+      "roundOffPaise": 0,
+      "totalPaise": 10100,
+      "hsnSummary": [
+        {
+          "hsn": "19059090",
+          "gstRateBp": 500,
+          "qty": 1,
+          "taxableValuePaise": 9619,
+          "cgstPaise": 240,
+          "sgstPaise": 241,
+          "igstPaise": 0,
+          "taxPaise": 481
+        }
+      ]
+    }
+  },
+  {
+    "name": "Item discounts and a bill percentage together on six lines",
+    "input": {
+      "documentType": "TAX_INVOICE",
+      "priceBasis": "TAX_INCLUSIVE",
+      "supply": "INTRA_STATE",
+      "lines": [
+        {
+          "hsn": "21069099",
+          "gstRateBp": 1800,
+          "qty": 1,
+          "unitPricePaise": 299900,
+          "discount": {
+            "kind": "PERCENT",
+            "basisPoints": 500
+          }
+        },
+        {
+          "hsn": "21069099",
+          "gstRateBp": 1800,
+          "qty": 1,
+          "unitPricePaise": 189900
+        },
+        {
+          "hsn": "19059090",
+          "gstRateBp": 500,
+          "qty": 6,
+          "unitPricePaise": 7500,
+          "discount": {
+            "kind": "AMOUNT",
+            "paise": 1000
+          }
+        },
+        {
+          "hsn": "39241090",
+          "gstRateBp": 1800,
+          "qty": 3,
+          "unitPricePaise": 19900
+        },
+        {
+          "hsn": "61091000",
+          "gstRateBp": 500,
+          "qty": 1,
+          "unitPricePaise": 79900,
+          "discount": {
+            "kind": "PERCENT",
+            "basisPoints": 1500
+          }
+        },
+        {
+          "hsn": "19059090",
+          "gstRateBp": 500,
+          "qty": 1,
+          "unitPricePaise": 4900
+        }
+      ],
+      "billDiscount": {
+        "kind": "PERCENT",
+        "basisPoints": 250
+      }
+    },
+    "expected": {
+      "documentType": "TAX_INVOICE",
+      "priceBasis": "TAX_INCLUSIVE",
+      "supply": "INTRA_STATE",
+      "lines": [
+        {
+          "grossPaise": 299900,
+          "itemDiscountPaise": 14995,
+          "billDiscountPaise": 7123,
+          "netPaise": 277782,
+          "taxableValuePaise": 235408,
+          "gstRateBp": 1800,
+          "cgstPaise": 21187,
+          "sgstPaise": 21187,
+          "igstPaise": 0,
+          "taxPaise": 42374,
+          "totalPaise": 277782
+        },
+        {
+          "grossPaise": 189900,
+          "itemDiscountPaise": 0,
+          "billDiscountPaise": 4748,
+          "netPaise": 185152,
+          "taxableValuePaise": 156908,
+          "gstRateBp": 1800,
+          "cgstPaise": 14122,
+          "sgstPaise": 14122,
+          "igstPaise": 0,
+          "taxPaise": 28244,
+          "totalPaise": 185152
+        },
+        {
+          "grossPaise": 45000,
+          "itemDiscountPaise": 1000,
+          "billDiscountPaise": 1100,
+          "netPaise": 42900,
+          "taxableValuePaise": 40857,
+          "gstRateBp": 500,
+          "cgstPaise": 1021,
+          "sgstPaise": 1022,
+          "igstPaise": 0,
+          "taxPaise": 2043,
+          "totalPaise": 42900
+        },
+        {
+          "grossPaise": 59700,
+          "itemDiscountPaise": 0,
+          "billDiscountPaise": 1492,
+          "netPaise": 58208,
+          "taxableValuePaise": 49329,
+          "gstRateBp": 1800,
+          "cgstPaise": 4439,
+          "sgstPaise": 4440,
+          "igstPaise": 0,
+          "taxPaise": 8879,
+          "totalPaise": 58208
+        },
+        {
+          "grossPaise": 79900,
+          "itemDiscountPaise": 11985,
+          "billDiscountPaise": 1698,
+          "netPaise": 66217,
+          "taxableValuePaise": 63064,
+          "gstRateBp": 500,
+          "cgstPaise": 1576,
+          "sgstPaise": 1577,
+          "igstPaise": 0,
+          "taxPaise": 3153,
+          "totalPaise": 66217
+        },
+        {
+          "grossPaise": 4900,
+          "itemDiscountPaise": 0,
+          "billDiscountPaise": 122,
+          "netPaise": 4778,
+          "taxableValuePaise": 4550,
+          "gstRateBp": 500,
+          "cgstPaise": 114,
+          "sgstPaise": 114,
+          "igstPaise": 0,
+          "taxPaise": 228,
+          "totalPaise": 4778
+        }
+      ],
+      "grossPaise": 679300,
+      "itemDiscountPaise": 27980,
+      "billDiscountPaise": 16283,
+      "discountPaise": 44263,
+      "taxableValuePaise": 550116,
+      "cgstPaise": 42459,
+      "sgstPaise": 42462,
+      "igstPaise": 0,
+      "taxPaise": 84921,
+      "subtotalPaise": 635037,
+      "roundOffPaise": -37,
+      "totalPaise": 635000,
+      "hsnSummary": [
+        {
+          "hsn": "19059090",
+          "gstRateBp": 500,
+          "qty": 7,
+          "taxableValuePaise": 45407,
+          "cgstPaise": 1135,
+          "sgstPaise": 1136,
+          "igstPaise": 0,
+          "taxPaise": 2271
+        },
+        {
+          "hsn": "21069099",
+          "gstRateBp": 1800,
+          "qty": 2,
+          "taxableValuePaise": 392316,
+          "cgstPaise": 35309,
+          "sgstPaise": 35309,
+          "igstPaise": 0,
+          "taxPaise": 70618
+        },
+        {
+          "hsn": "39241090",
+          "gstRateBp": 1800,
+          "qty": 3,
+          "taxableValuePaise": 49329,
+          "cgstPaise": 4439,
+          "sgstPaise": 4440,
+          "igstPaise": 0,
+          "taxPaise": 8879
+        },
+        {
+          "hsn": "61091000",
+          "gstRateBp": 500,
+          "qty": 1,
+          "taxableValuePaise": 63064,
+          "cgstPaise": 1576,
+          "sgstPaise": 1577,
+          "igstPaise": 0,
+          "taxPaise": 3153
+        }
+      ]
+    }
+  }
+]

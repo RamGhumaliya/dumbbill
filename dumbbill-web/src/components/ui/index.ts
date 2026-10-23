@@ -32,6 +32,7 @@ export { Input } from './input';
 export { Kbd } from './kbd';
 export { MoneyText, type MoneyTextProps } from './money-text';
 export { PasswordInput, type PasswordInputProps } from './password-input';
+export { QrCode, type QrCodeProps } from './qr-code';
 export { Popover, PopoverClose, PopoverContent, PopoverTrigger } from './popover';
 export { Select, type SelectOption, type SelectProps } from './select';
 export { Skeleton } from './skeleton';

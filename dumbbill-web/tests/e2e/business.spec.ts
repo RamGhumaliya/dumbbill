@@ -419,9 +419,12 @@ test.describe('the first-steps checklist on the home screen', () => {
       'href',
       '/branches',
     );
-    // The profile step is done, so it offers no button; the team screen does not exist yet, so it says so.
+    // The profile step is done, so it offers no button; the team step now links to the team screen.
     await expect(page.getByRole('link', { name: 'Fill in the profile' })).toHaveCount(0);
-    await expect(page.getByText('Screen coming soon')).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Invite someone' })).toHaveAttribute(
+      'href',
+      '/team',
+    );
   });
 
   test('shrinks to one line when everything is done', async ({ page, context }) => {

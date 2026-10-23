@@ -5,7 +5,7 @@ This is the integration guide for the **Auth** section of the API (`/docs` in Sw
 ## The idea in one minute
 
 - You sign in with email and password. You get a **15-minute access token**. Send it on every request: `Authorization: Bearer <accessToken>`.
-- You also get a **refresh token** (30 days). It is used **once** to get a new access token *and a new refresh token*. The one you just used is dead.
+- You also get a **refresh token** (30 days). It is used **once** to get a new access token _and a new refresh token_. The one you just used is dead.
 - Browser apps never see the refresh token: it is an **httpOnly cookie**. Mobile apps keep it in secure storage (Keychain / Keystore).
 - When the refresh fails with `INVALID_REFRESH_TOKEN`, the session is over. Clear everything and show the login screen.
 
@@ -30,8 +30,19 @@ POST /v1/auth/login           { email, password, clientType: "WEB" | "MOBILE" } 
   "tokenType": "Bearer",
   "expiresInSeconds": 900,
   "refreshToken": "0192a3b4-....<43 characters>",
-  "user":   { "id": "...", "email": "ravi@fitfuel.in", "fullName": "Ravi Mehta", "isOwner": true, "totpEnabled": false },
-  "tenant": { "id": "...", "name": "FitFuel Nutrition", "status": "TRIAL", "trialEndsAt": "2026-11-01T09:30:00.000Z" }
+  "user": {
+    "id": "...",
+    "email": "ravi@fitfuel.in",
+    "fullName": "Ravi Mehta",
+    "isOwner": true,
+    "totpEnabled": false
+  },
+  "tenant": {
+    "id": "...",
+    "name": "FitFuel Nutrition",
+    "status": "TRIAL",
+    "trialEndsAt": "2026-11-01T09:30:00.000Z"
+  }
 }
 ```
 
@@ -45,7 +56,7 @@ POST /v1/auth/login           { email, password, clientType: "WEB" | "MOBILE" } 
 4. If the refresh answers `401 INVALID_REFRESH_TOKEN`, delete both tokens and go to the login screen.
 5. Sign out: `POST /v1/auth/logout { "refreshToken": "<stored>" }`, then delete both tokens.
 
-The answer to a refresh has **no** `refreshToken` in one rare case: two refreshes ran at the same instant (for example from two parallel requests that both got a 401). Keep the token you have *if the answer has none*, and **serialise refreshes** (one at a time, other requests wait for it) so this does not happen. The mobile network layer (`core/network/interceptors.dart`) already shares one renewal between parallel calls; the real refresher that calls this endpoint replaces the placeholder (`auth_refresher.dart`) when the mobile login screens are built.
+The answer to a refresh has **no** `refreshToken` in one rare case: two refreshes ran at the same instant (for example from two parallel requests that both got a 401). Keep the token you have _if the answer has none_, and **serialise refreshes** (one at a time, other requests wait for it) so this does not happen. The mobile network layer (`core/network/interceptors.dart`) already shares one renewal between parallel calls; the real refresher that calls this endpoint replaces the placeholder (`auth_refresher.dart`) when the mobile login screens are built.
 
 ## Browser (Next.js)
 
@@ -57,7 +68,7 @@ The answer to a refresh has **no** `refreshToken` in one rare case: two refreshe
 4. Same for any `401`: refresh once, retry once.
 5. Sign out: `POST /v1/auth/logout` with `credentials: "include"` and the `X-CSRF-Token` header.
 
-**Why the CSRF header?** Browsers attach cookies to requests automatically, even ones started by a malicious website. `SameSite=Strict` already stops that; the header is a second lock. Another site can make your browser *send* the cookie but cannot *read* `dumbbill_csrf`, so it cannot fill the header. A refresh or logout through the cookie without a matching header answers `403 CSRF_FAILED`.
+**Why the CSRF header?** Browsers attach cookies to requests automatically, even ones started by a malicious website. `SameSite=Strict` already stops that; the header is a second lock. Another site can make your browser _send_ the cookie but cannot _read_ `dumbbill_csrf`, so it cannot fill the header. A refresh or logout through the cookie without a matching header answers `403 CSRF_FAILED`.
 
 CORS: the API answers browsers only for the origins in `CORS_ALLOWED_ORIGINS`, with credentials. The web app and API must be on the same site (for example `app.dumbbill.in` and `api.dumbbill.in`, with `COOKIE_DOMAIN=.dumbbill.in`), because `SameSite=Strict` cookies are not sent between different sites.
 
@@ -69,7 +80,7 @@ POST /v1/auth/login { email, password, clientType, totpCode: "492039" } -> 200
 POST /v1/auth/login { ..., recoveryCode: "K7F2M-9QXPA" }               -> 200     (phone lost; each code works once)
 ```
 
-Switching it on: `POST /v1/auth/totp/setup` returns `secret` and `otpAuthUri` (render the URI as a QR code), then `POST /v1/auth/totp/enable { code }` confirms the first code and returns **8 recovery codes, shown once**. Ask the person to save them. Switching off needs the password and a code: `POST /v1/auth/totp/disable { password, code }`.
+Switching it on: `POST /v1/auth/totp/setup` returns `secret` and `otpAuthUri` (render the URI as a QR code), then `POST /v1/auth/totp/enable { currentPassword, code }` confirms the password and the first code and returns **8 recovery codes, shown once**. Ask the person to save them. Switching off needs the password and a code: `POST /v1/auth/totp/disable { password, code }`.
 
 ## Passwords
 
@@ -85,18 +96,18 @@ Switching it on: `POST /v1/auth/totp/setup` returns `secret` and `otpAuthUri` (r
 
 ## Error codes you will meet
 
-| Code | Status | What to do |
-|---|---|---|
-| `INVALID_CREDENTIALS` | 401 | One generic message: "Email or password is incorrect". Never say which. |
-| `EMAIL_NOT_VERIFIED` | 403 | "Confirm your email", offer Resend. |
-| `TOTP_REQUIRED` | 401 | Show the code box, repeat the login with `totpCode`. |
-| `INVALID_TOTP_CODE` | 401 | "That code is not right". |
-| `RATE_LIMITED` | 429 | Read the `Retry-After` header (seconds) and show a countdown. After 5 wrong passwords the account is locked for 1 minute, doubling to a 15-minute maximum. |
-| `INVALID_REFRESH_TOKEN` | 401 | Session over: clear tokens, go to login. |
-| `UNAUTHENTICATED` | 401 | Try one refresh, then login. |
-| `CSRF_FAILED` | 403 | Re-read the `dumbbill_csrf` cookie and retry once. |
-| `INVALID_TOKEN` | 400 | The emailed link is used or expired: offer to send a new one. |
-| `WEAK_PASSWORD` | 422 | Show `errors[]` under the password field. |
+| Code                    | Status | What to do                                                                                                                                                 |
+| ----------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `INVALID_CREDENTIALS`   | 401    | One generic message: "Email or password is incorrect". Never say which.                                                                                    |
+| `EMAIL_NOT_VERIFIED`    | 403    | "Confirm your email", offer Resend.                                                                                                                        |
+| `TOTP_REQUIRED`         | 401    | Show the code box, repeat the login with `totpCode`.                                                                                                       |
+| `INVALID_TOTP_CODE`     | 401    | "That code is not right".                                                                                                                                  |
+| `RATE_LIMITED`          | 429    | Read the `Retry-After` header (seconds) and show a countdown. After 5 wrong passwords the account is locked for 1 minute, doubling to a 15-minute maximum. |
+| `INVALID_REFRESH_TOKEN` | 401    | Session over: clear tokens, go to login.                                                                                                                   |
+| `UNAUTHENTICATED`       | 401    | Try one refresh, then login.                                                                                                                               |
+| `CSRF_FAILED`           | 403    | Re-read the `dumbbill_csrf` cookie and retry once.                                                                                                         |
+| `INVALID_TOKEN`         | 400    | The emailed link is used or expired: offer to send a new one.                                                                                              |
+| `WEAK_PASSWORD`         | 422    | Show `errors[]` under the password field.                                                                                                                  |
 
 The full catalogue with UI hints is `docs/api/error-codes.md`.
 

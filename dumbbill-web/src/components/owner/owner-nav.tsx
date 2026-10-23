@@ -18,6 +18,7 @@ export function OwnerNav() {
   const canSeeProducts = useCan('products.read');
   const canBuy = useCan('purchases.write');
   const canReadAudit = useCan('audit.read');
+  const canManageTeam = useCan('team.manage');
 
   const links = [
     { href: '/', label: t('dashboard'), exact: true },
@@ -31,6 +32,7 @@ export function OwnerNav() {
       : []),
     { href: '/branches', label: t('branches'), exact: false },
     ...(canManage ? [{ href: '/settings/business', label: t('business'), exact: false }] : []),
+    ...(canManageTeam ? [{ href: '/team', label: t('team'), exact: false }] : []),
     ...(canReadAudit ? [{ href: '/audit', label: t('audit'), exact: false }] : []),
     { href: '/pos', label: t('pos'), exact: false },
   ];

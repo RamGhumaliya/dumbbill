@@ -187,6 +187,16 @@ export class ChangePasswordDto {
 
 export class TotpCodeDto {
   @ApiProperty({
+    description:
+      'The account password. Required so that a stolen session cannot switch two-step login on and lock the owner out.',
+    maxLength: 200,
+  })
+  @IsString()
+  @MinLength(1)
+  @MaxLength(200)
+  currentPassword!: string;
+
+  @ApiProperty({
     description: 'The current 6-digit code from the authenticator app.',
     example: '492039',
   })

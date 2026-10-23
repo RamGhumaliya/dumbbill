@@ -53,6 +53,15 @@ Only `dev` and `prod`: `.env.development` and `.env.production` (templates commi
 - Purchase entry preview maths is `src/lib/inventory/costing.ts`, which mirrors the server's; the server's answer is the truth. Change both together (shared worked examples in the unit tests).
 - Map server errors on `lines[i].field` to row `i`; see `purchase-form.tsx`.
 
+## Team screens and two-step setup (P1-7). Guide: `../docs/api/team-and-permissions.md`
+
+- Screens live in `src/components/team/`, loaded in the browser behind `AuthGate`; the menu link and the checklist link follow `useCan('team.manage')`, but the API refuses regardless.
+- **Permission names and wording come from the server** (`getTeamOptions().permissions`). Never type a permission key in a screen to decide wording; add new capabilities in the backend catalogue and they appear here by themselves.
+- A person's abilities are ONE list of tick boxes starting from the role; send the difference with `diffFromRole` (extras and taken-away). Show the server's `detail` for `FORBIDDEN`, `CONFLICT`, `PLAN_LIMIT_REACHED` (`describeTeamFailure`); it names what is wrong.
+- The owner and the signed-in person get no edit or switch-off buttons.
+- **QR codes** use the `QrCode` component (drawn in the browser, never through an outside service, because the text contains a secret) and the fixed `qr-ink` / `qr-paper` tokens. Always show the same information as typed text next to it.
+- Switching ON two-step needs the password and the first code (`authApi.enableTotp`).
+
 ## Rules
 
 - API layer: one typed function per endpoint, zod-validate responses at the boundary, central error handling for problem+json (show `requestId` to user on errors). Tokens in memory; refresh via httpOnly cookie (built in P1-1, see the sign-in rules above).

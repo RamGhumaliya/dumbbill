@@ -641,7 +641,7 @@ test.describe('account security', () => {
     });
   });
 
-  test('sets up two-step sign-in: key, first code, recovery codes shown once, then it is on', async ({
+  test('sets up two-step sign-in: QR code and key, password, first code, recovery codes shown once, then it is on', async ({
     page,
     context,
   }) => {
@@ -650,11 +650,14 @@ test.describe('account security', () => {
     api.on('POST /v1/auth/totp/setup', {
       json: {
         secret: 'JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP',
-        otpAuthUri: 'otpauth://totp/Dumbbill:x?secret=JBSW',
+        otpAuthUri:
+          'otpauth://totp/Dumbbill:ravi%40fitfuel.in?secret=JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP&issuer=Dumbbill',
       },
     });
-    api.on('POST /v1/auth/totp/enable', (call) =>
-      (call.body as { code: string }).code === '123456'
+    api.on('POST /v1/auth/totp/enable', (call) => {
+      const body = call.body as { code: string; currentPassword: string };
+      if (body.currentPassword !== 'Right-password-1!') return { problem: 'INVALID_CREDENTIALS' };
+      return body.code === '123456'
         ? {
             json: {
               recoveryCodes: [
@@ -669,13 +672,28 @@ test.describe('account security', () => {
               ],
             },
           }
-        : { problem: 'INVALID_TOTP_CODE' },
-    );
+        : { problem: 'INVALID_TOTP_CODE' };
+    });
 
     await page.goto('/account/security');
     await page.getByRole('button', { name: 'Set up two-step sign-in' }).click();
     await expect(page.getByText('JBSW Y3DP EHPK 3PXP JBSW Y3DP EHPK 3PXP')).toBeVisible();
+    // The QR code is drawn in the page (no image is fetched from anywhere) and has real squares in it.
+    const qr = page.getByRole('img', { name: 'QR code for your authenticator app' });
+    await expect(qr).toBeVisible();
+    expect((await qr.locator('path').getAttribute('d'))?.length ?? 0).toBeGreaterThan(200);
 
+    // Without the password nothing is sent to switch it on.
+    await field(page, '6-digit code').fill('123456');
+    await page.getByRole('button', { name: 'Switch on' }).click();
+    await expect(page.getByText(/Enter your password|password/i).first()).toBeVisible();
+    expect(api.count('POST /v1/auth/totp/enable')).toBe(0);
+
+    await field(page, 'Your password').fill('Wrong-password-1!');
+    await page.getByRole('button', { name: 'Switch on' }).click();
+    await expect(page.getByText('That is not your current password.')).toBeVisible();
+
+    await field(page, 'Your password').fill('Right-password-1!');
     await field(page, '6-digit code').fill('000000');
     await page.getByRole('button', { name: 'Switch on' }).click();
     await expect(
@@ -685,6 +703,10 @@ test.describe('account security', () => {
     await field(page, '6-digit code').fill('123456');
     await page.getByRole('button', { name: 'Switch on' }).click();
     await expect(page.getByText('Save your recovery codes')).toBeVisible();
+    expect(api.last('POST /v1/auth/totp/enable')?.body).toEqual({
+      code: '123456',
+      currentPassword: 'Right-password-1!',
+    });
     await expect(page.getByText('K7F2M-9QXPA')).toBeVisible();
 
     await page.getByRole('button', { name: 'I have saved them' }).click();

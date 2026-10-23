@@ -13,7 +13,7 @@ import {
 } from './domain/totp';
 import { PasswordHasher } from './password/password-hasher.service';
 import { RateLimiter } from './rate-limit/rate-limiter.service';
-import { TotpDisableDto } from './dto/auth-requests.dto';
+import { TotpCodeDto, TotpDisableDto } from './dto/auth-requests.dto';
 
 /** What the second step of sign-in found. */
 export type FactorResult = 'ok' | 'missing' | 'invalid';
@@ -60,8 +60,12 @@ export class TwoFactorService {
     });
   }
 
-  /** Finish setup: check the first code, switch two-step on, and return the recovery codes (shown once). */
-  async enable(userId: string, code: string, info: RequestInfo): Promise<string[]> {
+  /**
+   * Finish setup: check the password and the first code, switch two-step on, and return the recovery codes (shown once).
+   * The password is required because switching on a second factor the owner does not hold would lock them out; a stolen
+   * access token alone must not be able to do that.
+   */
+  async enable(userId: string, input: TotpCodeDto, info: RequestInfo): Promise<string[]> {
     await this.limiter.hit('totp:user', userId, 10, 15 * 60);
     const recoveryCodes = generateRecoveryCodes();
     await this.tenantTx.run(async (tx) => {
@@ -71,9 +75,13 @@ export class TwoFactorService {
       if (!user.totpSecretEnc) {
         throw new DomainError('BUSINESS_RULE_VIOLATION', 'Start the setup first to get a secret.');
       }
+      const passwordOk = user.passwordHash
+        ? (await this.hasher.verify(user.passwordHash, input.currentPassword)).valid
+        : false;
+      if (!passwordOk) throw new DomainError('INVALID_CREDENTIALS', 'The password is not correct.');
       const step = verifyTotp(
         this.cipher.decrypt(user.totpSecretEnc),
-        code,
+        input.code,
         this.clock.now(),
         null,
       );

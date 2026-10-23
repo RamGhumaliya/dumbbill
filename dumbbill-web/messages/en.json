@@ -183,9 +183,11 @@
         "onBody": "Two-step sign-in is on. You are asked for a code from your authenticator app when you sign in.",
         "start": "Set up two-step sign-in",
         "starting": "Preparing",
-        "step1": "Open an authenticator app (Google Authenticator, Microsoft Authenticator, Authy or 1Password), choose to add an account by typing a key, and enter this key:",
+        "step1": "Open an authenticator app (Google Authenticator, Microsoft Authenticator, Authy or 1Password) and scan this code. On the phone that holds the app, choose to add an account by typing a key and enter the key under the code instead.",
+        "qrLabel": "QR code for your authenticator app",
         "secretLabel": "Setup key",
-        "step2": "Then type the 6-digit code the app shows to switch it on.",
+        "step2": "Then enter your password and the 6-digit code the app shows to switch it on.",
+        "enablePassword": "Your password",
         "code": "6-digit code",
         "enable": "Switch on",
         "enabling": "Checking",
@@ -295,7 +297,8 @@
     "stock": "Stock",
     "purchases": "Purchases",
     "suppliers": "Suppliers",
-    "audit": "Audit log"
+    "audit": "Audit log",
+    "team": "Team"
   },
   "Business": {
     "title": "Business profile",
@@ -399,7 +402,6 @@
           "action": "Record a purchase"
         }
       },
-      "comingSoon": "Screen coming soon",
       "stepDone": "Done"
     }
   },
@@ -1181,6 +1183,158 @@
       "broken": "The log has been tampered with. The first seal that fails is number {seq}: {problem}",
       "failed": "We could not run the check.",
       "help": "Every entry is sealed into a chain. If one is changed or removed, the check shows where."
+    }
+  },
+  "Team": {
+    "title": "Team",
+    "subtitle": "Who works in the shop, what each person may do, and which branches they can use.",
+    "loadFailed": "The team could not be loaded.",
+    "retry": "Try again",
+    "tabsLabel": "Team views",
+    "tabs": {
+      "people": "People",
+      "roles": "Roles"
+    },
+    "seats": "{used} of {max} places used",
+    "seatsFullTitle": "No places left",
+    "seatsFull": "All places on your plan are used. Switch someone off or move to a bigger plan to add more people.",
+    "errors": {
+      "title": "That did not work",
+      "network": "We could not reach the server. Check your connection and try again.",
+      "forbidden": "You do not have permission to do that.",
+      "generic": "Something went wrong on our side. Try again in a moment."
+    },
+    "people": {
+      "caption": "People in your business",
+      "invite": "Invite a person",
+      "empty": {
+        "title": "Nobody else yet",
+        "body": "Invite your first person. They get an e-mail with a link to choose a password."
+      },
+      "columns": {
+        "name": "Person",
+        "role": "Role",
+        "branches": "Branches",
+        "status": "Status",
+        "lastSignIn": "Last signed in",
+        "actions": "Actions"
+      },
+      "allBranches": "All branches",
+      "noBranches": "None assigned",
+      "neverSignedIn": "Not yet",
+      "you": "You",
+      "status": {
+        "INVITED": "Invited",
+        "ACTIVE": "Active",
+        "DISABLED": "Switched off"
+      },
+      "owner": "Owner",
+      "edit": "Edit",
+      "editLabel": "Edit {name}",
+      "switchOff": "Switch off",
+      "switchOffLabel": "Switch off {name}",
+      "switchOn": "Switch on",
+      "switchOnLabel": "Switch on {name}",
+      "resend": "Send invitation again",
+      "resendLabel": "Send invitation again to {name}",
+      "toast": {
+        "invited": "Invitation sent to {email}.",
+        "saved": "Changes saved.",
+        "off": "{name} is switched off and signed out.",
+        "on": "{name} is switched on.",
+        "resent": "A new invitation is on its way to {name}."
+      },
+      "confirmOff": {
+        "title": "Switch off {name}?",
+        "body": "They are signed out at once and cannot sign in until you switch them on again. Their history stays.",
+        "confirm": "Switch off",
+        "cancel": "Keep them on"
+      }
+    },
+    "member": {
+      "inviteTitle": "Invite a person",
+      "editTitle": "Edit {name}",
+      "description": "Pick a role, then adjust what this person can do if the role is not quite right.",
+      "name": "Full name",
+      "email": "E-mail address",
+      "emailFixed": "The e-mail address is their sign-in name and cannot be changed.",
+      "role": "Role",
+      "rolePlaceholder": "Choose a role",
+      "branches": "Branches they can use",
+      "branchesHint": "Their role works in assigned branches only. Tick the branches this person may use.",
+      "branchesNone": "No branch ticked: they will not be able to sell or see stock anywhere.",
+      "discount": "Discount limit (%)",
+      "discountHint": "The biggest discount they may give alone. Leave empty to use the role's limit ({percent}%).",
+      "permissions": "What they can do",
+      "permissionsHint": "Starts from the role. Tick or untick to give or take away single abilities for this person only.",
+      "save": "Save changes",
+      "send": "Send invitation",
+      "saving": "Saving",
+      "sending": "Sending",
+      "cancel": "Cancel",
+      "invitedTitle": "Not accepted yet",
+      "invitedNote": "They have not accepted yet. Changes apply the moment they do."
+    },
+    "roles": {
+      "caption": "Roles in your business",
+      "add": "Add a role",
+      "columns": {
+        "name": "Role",
+        "people": "People",
+        "abilities": "Abilities",
+        "discount": "Discount limit",
+        "branches": "Branches",
+        "actions": "Actions"
+      },
+      "allBranches": "All branches",
+      "assignedOnly": "Assigned only",
+      "abilityCount": "{count, plural, one {# ability} other {# abilities}}",
+      "everything": "Everything",
+      "builtIn": "Built in",
+      "edit": "Edit",
+      "editLabel": "Edit the {name} role",
+      "delete": "Delete",
+      "deleteLabel": "Delete the {name} role",
+      "ownerNote": "The Owner role always holds every ability and cannot be changed.",
+      "toast": {
+        "created": "Role added.",
+        "saved": "Role saved.",
+        "deleted": "Role deleted."
+      },
+      "confirmDelete": {
+        "title": "Delete the {name} role?",
+        "body": "This cannot be undone. A role that people still have cannot be deleted.",
+        "confirm": "Delete role",
+        "cancel": "Keep it"
+      }
+    },
+    "role": {
+      "addTitle": "Add a role",
+      "editTitle": "Edit the {name} role",
+      "description": "A role is a bundle of abilities you can give to several people at once.",
+      "name": "Role name",
+      "nameFixed": "The name of a built-in role cannot be changed.",
+      "about": "What it is for",
+      "discount": "Discount limit (%)",
+      "discountHint": "The biggest discount people in this role may give alone.",
+      "allBranches": "Works in every branch",
+      "allBranchesHint": "Otherwise each person is limited to the branches you assign to them.",
+      "permissions": "Abilities",
+      "save": "Save role",
+      "create": "Add role",
+      "saving": "Saving",
+      "cancel": "Cancel"
+    },
+    "picker": {
+      "confidential": "Shows what things cost or earn. Keep this away from the till.",
+      "fromRole": "from the role"
+    },
+    "validation": {
+      "nameRequired": "Enter a name of at least 2 letters.",
+      "emailRequired": "Enter an e-mail address.",
+      "emailShape": "That does not look like an e-mail address.",
+      "roleRequired": "Choose a role.",
+      "percent": "Enter a percentage from 0 to 100, with at most two decimals."
     }
   }
 }

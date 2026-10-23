@@ -30,6 +30,8 @@
   --color-on-danger: var(--danger-on);
   --color-focus: var(--focus-ring);
   --color-overlay: var(--overlay);
+  --color-qr-ink: var(--qr-ink);
+  --color-qr-paper: var(--qr-paper);
   --color-transparent: transparent;
   --color-current: currentColor;
 

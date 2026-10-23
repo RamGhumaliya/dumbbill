@@ -310,6 +310,31 @@ test.describe('keyboard and screen-reader behaviour', () => {
     expect(refundColour).not.toBe(normalColour);
   });
 
+  for (const theme of THEMES) {
+    test(`the QR code is dark squares on a light ground in the ${theme} theme`, async ({
+      page,
+    }) => {
+      await open(page, theme);
+      const qr = page.getByRole('img', { name: 'Example QR code' });
+      await expect(qr).toBeVisible();
+      // Real squares, not an empty picture.
+      expect((await qr.locator('path').getAttribute('d'))?.length ?? 0).toBeGreaterThan(200);
+      // Scanners need the squares darker than the ground: compare the two fills as brightness.
+      const [ground, squares] = await Promise.all(
+        ['rect', 'path'].map((tag) =>
+          qr.locator(tag).evaluate((node) => {
+            const [r = 0, g = 0, b = 0] = (getComputedStyle(node).fill.match(/[\d.]+/g) ?? []).map(
+              Number,
+            );
+            return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+          }),
+        ),
+      );
+      expect(ground).toBeGreaterThan(200);
+      expect(squares).toBeLessThan(60);
+    });
+  }
+
   test('skeletons are hidden from screen readers', async ({ page }) => {
     await open(page);
     const skeletons = page.locator('[aria-busy="true"] > div[aria-hidden="true"]');

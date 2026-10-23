@@ -34,6 +34,14 @@ These were not specified in the plan, so a default was chosen. All are editable 
 6. **Before the till:** build the web team screens and the QR code for two-step setup.
 7. **GST rate list:** keep 0, 0.25, 3, 5, 18 and 40% until the CA confirms it.
 
+## Decisions made while building P1-7 (please confirm or change)
+
+1. **The abilities of a person are edited as one list of tick boxes** that starts from the chosen role. Changing the role starts the list again from that role. The screen sends the difference to the role as "extras" and "taken away" (that is how the server stores it).
+2. **Switching someone off asks first** (it signs them out at once); switching on and sending an invitation again do not.
+3. **The owner and the signed-in person have no action buttons** in the people list, because the server refuses both. The e-mail address of an existing person cannot be changed (it is their sign-in name).
+4. **The QR code uses two fixed colours** (`qr-ink`, `qr-paper`, the same in dark and light) so phone cameras can read it. It is drawn in the browser; the setup key is still shown as text.
+5. **Switching on two-step sign-in needs the password** as well as the first code.
+
 ## Decisions made while building P1-6 (please confirm or change)
 
 1. **Demo businesses are loaded by `pnpm db:seed:shops`,** a separate command (it runs the real services, which the Prisma seed runner cannot), and the demo password is the same for everyone (`Dumbbill-demo-2026`). It refuses production and remote databases. A year of **sales** is not loaded because invoices do not exist yet.

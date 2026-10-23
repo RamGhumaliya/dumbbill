@@ -913,7 +913,7 @@ describe('two-step login with an authenticator app', () => {
       .http()
       .post('/v1/auth/totp/enable')
       .set('Authorization', `Bearer ${accessToken}`)
-      .send({ code });
+      .send({ code, currentPassword: account.password });
     expect(enable.status).toBe(200);
     return {
       account,
@@ -1032,6 +1032,28 @@ describe('two-step login with an authenticator app', () => {
     ).toBe(429);
   });
 
+  it('cannot be switched on with only a session: the password is needed too', async () => {
+    // A stolen access token must not be able to lock the owner out by adding a second step they do not hold.
+    const account = await registerVerified();
+    const { accessToken } = await signedIn(account);
+    const setup = await t
+      .http()
+      .post('/v1/auth/totp/setup')
+      .set('Authorization', `Bearer ${accessToken}`);
+    const code = totpAt(setup.body.secret, t.clock.now());
+    const enable = (body: Record<string, unknown>) =>
+      t
+        .http()
+        .post('/v1/auth/totp/enable')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send(body);
+    expect((await enable({ code })).status).toBe(400);
+    const wrong = await enable({ code, currentPassword: 'Not-the-password-1!' });
+    expect(wrong.status).toBe(401);
+    expect(wrong.body.code).toBe('INVALID_CREDENTIALS');
+    expect((await enable({ code, currentPassword: account.password })).status).toBe(200);
+  });
+
   it('cannot be switched on with a wrong first code, or without starting setup', async () => {
     const account = await registerVerified();
     const { accessToken } = await signedIn(account);
@@ -1039,14 +1061,14 @@ describe('two-step login with an authenticator app', () => {
       .http()
       .post('/v1/auth/totp/enable')
       .set('Authorization', `Bearer ${accessToken}`)
-      .send({ code: '123456' });
+      .send({ code: '123456', currentPassword: account.password });
     expect(early.status).toBe(422);
     await t.http().post('/v1/auth/totp/setup').set('Authorization', `Bearer ${accessToken}`);
     const wrong = await t
       .http()
       .post('/v1/auth/totp/enable')
       .set('Authorization', `Bearer ${accessToken}`)
-      .send({ code: '123456' });
+      .send({ code: '123456', currentPassword: account.password });
     expect(wrong.status).toBe(401);
     expect(wrong.body.code).toBe('INVALID_TOTP_CODE');
     // An unfinished setup does not affect sign-in.

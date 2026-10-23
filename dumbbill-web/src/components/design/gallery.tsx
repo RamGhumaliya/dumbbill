@@ -32,6 +32,7 @@ import {
   PopoverClose,
   PopoverContent,
   PopoverTrigger,
+  QrCode,
   Select,
   Skeleton,
   Tabs,
@@ -460,6 +461,17 @@ export function Gallery() {
               action={<Button variant="primary">Add product</Button>}
             />
           }
+        />
+      </Section>
+
+      <Section
+        id="qr"
+        title="QR code"
+        note="Always dark squares on a light ground, in both themes, so phone cameras can read it. Drawn in the browser: the text never leaves the page."
+      >
+        <QrCode
+          value="otpauth://totp/Dumbbill:ravi%40fitfuel.in?secret=JBSWY3DPEHPK3PXP&issuer=Dumbbill"
+          label="Example QR code"
         />
       </Section>
 

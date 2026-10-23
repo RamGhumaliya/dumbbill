@@ -467,7 +467,7 @@ export class AuthController {
     operationId: 'enableTotp',
     summary: 'Switch on two-step login',
     description:
-      'Confirms the first 6-digit code from the authenticator app, switches two-step login on, and returns 8 one-time recovery codes. **The recovery codes are shown only once.**\n\nPermission: any signed-in user (own account).',
+      'Needs the account password and the first 6-digit code from the authenticator app. Switches two-step login on, and returns 8 one-time recovery codes. **The recovery codes are shown only once.**\n\nPermission: any signed-in user (own account).',
   })
   @ApiOkResponse({
     type: TotpEnabledDto,
@@ -476,6 +476,7 @@ export class AuthController {
   @ApiProblemResponse('VALIDATION_FAILED', {
     errors: [{ field: 'code', message: 'must be 6 digits' }],
   })
+  @ApiProblemResponse('INVALID_CREDENTIALS', { detail: 'The password is not correct.' })
   @ApiProblemResponse('INVALID_TOTP_CODE')
   @ApiProblemResponse('CONFLICT', { detail: 'Two-step login is already switched on.' })
   @ApiProblemResponse('BUSINESS_RULE_VIOLATION', {
@@ -492,7 +493,7 @@ export class AuthController {
     @Body() dto: TotpCodeDto,
     @ClientInfo() info: RequestInfo,
   ): Promise<TotpEnabledDto> {
-    return { recoveryCodes: await this.twoFactor.enable(user.userId, dto.code, info) };
+    return { recoveryCodes: await this.twoFactor.enable(user.userId, dto, info) };
   }
 
   @Post('totp/disable')

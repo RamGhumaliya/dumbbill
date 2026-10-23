@@ -156,12 +156,18 @@ export function startTotpSetup(client: ApiClient): Promise<TotpSetup> {
   return client.request({ method: 'POST', path: '/v1/auth/totp/setup', schema: totpSetupSchema });
 }
 
-/** operationId enableTotp. Permission: any signed-in user. Returns the one-time recovery codes (shown once). */
-export function enableTotp(client: ApiClient, code: string): Promise<TotpEnabled> {
+/**
+ * operationId enableTotp. Permission: any signed-in user. Needs the account password as well as the first code, so a
+ * stolen session cannot lock the owner out. Returns the one-time recovery codes (shown once).
+ */
+export function enableTotp(
+  client: ApiClient,
+  input: { code: string; currentPassword: string },
+): Promise<TotpEnabled> {
   return client.request({
     method: 'POST',
     path: '/v1/auth/totp/enable',
-    body: { code },
+    body: input,
     schema: totpEnabledSchema,
   });
 }

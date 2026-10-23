@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
 import { z } from 'zod';
-import { Alert, Button, Field, Input, PasswordInput, useToast } from '@/components/ui';
+import { Alert, Button, Field, Input, PasswordInput, QrCode, useToast } from '@/components/ui';
 import { ApiError, authApi, getBrowserApiClient } from '@/lib/api';
 import { useApiForm } from '@/lib/forms/use-api-form';
 import { useSession } from '@/stores/session';
@@ -18,11 +18,14 @@ import { describeApiError, type AuthT } from '../auth-errors';
  *      over one-time RECOVERY CODES. Those are shown once, here, and the person must say they have saved them.
  * Switching it OFF needs the password AND a current code, so a borrowed screen cannot remove the protection.
  *
- * The setup key is shown as text to type into the app. (Scanning a QR code is a later nicety: every authenticator app
- * accepts a typed key.) The secret is only ever held in this component's memory while the card is open.
+ * The setup is offered two ways: a QR code to scan and the same key as text to type (for a person on the phone that
+ * holds the app). Both are drawn in the browser; the secret is only ever held in this component's memory while the card
+ * is open. Switching ON also asks for the account password, so a borrowed or stolen session cannot lock the owner out.
  */
 type Phase =
-  { name: 'idle' } | { name: 'setup'; secret: string } | { name: 'recovery'; codes: string[] };
+  | { name: 'idle' }
+  | { name: 'setup'; setup: { secret: string; otpAuthUri: string } }
+  | { name: 'recovery'; codes: string[] };
 
 export function TwoStepCard() {
   const t = useTranslations('Auth');
@@ -40,14 +43,14 @@ export function TwoStepCard() {
         </>
       ) : phase.name === 'setup' ? (
         <ConfirmForm
-          secret={phase.secret}
+          setup={phase.setup}
           onCancel={() => setPhase({ name: 'idle' })}
           onEnabled={(codes) => setPhase({ name: 'recovery', codes })}
         />
       ) : (
         <>
           <p className="text-small text-muted">{t('security.totp.offBody')}</p>
-          <StartButton onStarted={(secret) => setPhase({ name: 'setup', secret })} />
+          <StartButton onStarted={(setup) => setPhase({ name: 'setup', setup })} />
         </>
       )}
     </div>
@@ -55,7 +58,11 @@ export function TwoStepCard() {
 }
 
 /** Ask the server for a new secret. */
-function StartButton({ onStarted }: { onStarted: (secret: string) => void }) {
+function StartButton({
+  onStarted,
+}: {
+  onStarted: (setup: { secret: string; otpAuthUri: string }) => void;
+}) {
   const t = useTranslations('Auth');
   const { toast } = useToast();
   const [busy, setBusy] = useState(false);
@@ -68,7 +75,7 @@ function StartButton({ onStarted }: { onStarted: (secret: string) => void }) {
           setBusy(true);
           try {
             const setup = await authApi.startTotpSetup(getBrowserApiClient());
-            onStarted(setup.secret);
+            onStarted(setup);
           } catch (error) {
             const view = describeApiError(error, t);
             toast({ title: view.title, description: view.body, tone: 'danger' });
@@ -83,13 +90,13 @@ function StartButton({ onStarted }: { onStarted: (secret: string) => void }) {
   );
 }
 
-/** Show the setup key and ask for the first code. */
+/** Show the QR code and the setup key, and ask for the password and the first code. */
 function ConfirmForm({
-  secret,
+  setup,
   onCancel,
   onEnabled,
 }: {
-  secret: string;
+  setup: { secret: string; otpAuthUri: string };
   onCancel: () => void;
   onEnabled: (recoveryCodes: string[]) => void;
 }) {
@@ -97,6 +104,7 @@ function ConfirmForm({
   const schema = useMemo(
     () =>
       z.object({
+        currentPassword: z.string().min(1, t('validation.passwordRequired')),
         code: z
           .string()
           .trim()
@@ -104,7 +112,7 @@ function ConfirmForm({
       }),
     [t],
   );
-  const form = useApiForm(schema, { defaultValues: { code: '' } });
+  const form = useApiForm(schema, { defaultValues: { currentPassword: '', code: '' } });
   const {
     register,
     handleSubmit,
@@ -112,27 +120,48 @@ function ConfirmForm({
     formState: { errors, isSubmitting },
   } = form;
 
-  const onSubmit = handleSubmit(async ({ code }) => {
+  const onSubmit = handleSubmit(async (values) => {
     try {
-      const result = await authApi.enableTotp(getBrowserApiClient(), code);
+      const result = await authApi.enableTotp(getBrowserApiClient(), values);
       useSession.getState().updateUser({ totpEnabled: true });
       onEnabled(result.recoveryCodes);
     } catch (error) {
-      setError('code', { type: 'server', message: describeApiError(error, t).body });
+      // A wrong password and a wrong code are different problems; the server code says which.
+      if (error instanceof ApiError && error.code === 'INVALID_CREDENTIALS') {
+        setError('currentPassword', {
+          type: 'server',
+          message: t('security.password.wrongCurrent'),
+        });
+      } else {
+        setError('code', { type: 'server', message: describeApiError(error, t).body });
+      }
     }
   });
 
   return (
     <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
       <p className="text-small">{t('security.totp.step1')}</p>
+      <QrCode value={setup.otpAuthUri} label={t('security.totp.qrLabel')} />
       <div>
         <p className="text-caption font-medium text-muted">{t('security.totp.secretLabel')}</p>
         {/* Grouped in fours so it is easy to read aloud and type. `select-all` makes one click select the whole key. */}
         <p className="mt-1 rounded-control border border-line bg-side px-3 py-2 font-mono text-body tracking-wider break-all select-all">
-          {secret.replace(/(.{4})/g, '$1 ').trim()}
+          {setup.secret.replace(/(.{4})/g, '$1 ').trim()}
         </p>
       </div>
       <p className="text-small">{t('security.totp.step2')}</p>
+      <Field
+        label={t('security.totp.enablePassword')}
+        error={errors.currentPassword?.message}
+        required
+      >
+        <PasswordInput
+          showLabel={t('fields.showPassword')}
+          hideLabel={t('fields.hidePassword')}
+          autoComplete="current-password"
+          {...register('currentPassword')}
+        />
+      </Field>
       <Field label={t('security.totp.code')} error={errors.code?.message} required>
         <Input
           inputMode="numeric"

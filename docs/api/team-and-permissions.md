@@ -33,15 +33,15 @@ Guide to the **Team & Permissions** section of the API (the Swagger page at `/do
 
 ## Errors you will meet
 
-| Code | Status | What to do |
-|---|---|---|
-| `FORBIDDEN` | 403 | "You do not have permission". Hide the action, and refresh `/me` (the person's access may have changed). `detail` explains rule refusals, for example *You can only grant permissions you hold yourself. Missing: reports.profit.* |
-| `UNAUTHENTICATED` | 401 | Not signed in, or **switched off**. Try one token refresh, then the login screen. |
-| `PLAN_LIMIT_REACHED` | 422 | Show `detail` (all seats used) and, later, an upgrade button. |
-| `INVALID_PIN` | 422 | "That PIN is not valid". The same answer for a wrong PIN, no PIN, or a person who cannot approve. |
-| `RATE_LIMITED` | 429 | Too many wrong PIN tries or invitations. Wait `Retry-After` seconds. |
-| `CONFLICT` | 409 | Invitation: "This email address cannot be invited" (the answer never says why). Role: name already used, or the role still has people. |
-| `NOT_FOUND` | 404 | The role, person or branch does not exist, **or belongs to another business** (the two look identical on purpose). |
+| Code                 | Status | What to do                                                                                                                                                                                                                         |
+| -------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `FORBIDDEN`          | 403    | "You do not have permission". Hide the action, and refresh `/me` (the person's access may have changed). `detail` explains rule refusals, for example _You can only grant permissions you hold yourself. Missing: reports.profit._ |
+| `UNAUTHENTICATED`    | 401    | Not signed in, or **switched off**. Try one token refresh, then the login screen.                                                                                                                                                  |
+| `PLAN_LIMIT_REACHED` | 422    | Show `detail` (all seats used) and, later, an upgrade button.                                                                                                                                                                      |
+| `INVALID_PIN`        | 422    | "That PIN is not valid". The same answer for a wrong PIN, no PIN, or a person who cannot approve.                                                                                                                                  |
+| `RATE_LIMITED`       | 429    | Too many wrong PIN tries or invitations. Wait `Retry-After` seconds.                                                                                                                                                               |
+| `CONFLICT`           | 409    | Invitation: "This email address cannot be invited" (the answer never says why). Role: name already used, or the role still has people.                                                                                             |
+| `NOT_FOUND`          | 404    | The role, person or branch does not exist, **or belongs to another business** (the two look identical on purpose).                                                                                                                 |
 
 ## Managing the team (permission `team.manage`)
 
@@ -75,6 +75,10 @@ Rules the API enforces (show them as plain-English hints, do not re-implement th
 4. After accepting, the person is `ACTIVE` with a confirmed email and can sign in.
 
 Switching someone off before they accept retires their link; switching them back on returns them to `INVITED` and needs a new link.
+
+## The web screens
+
+`/team` in the web app (menu entry "Team", for people with `team.manage`) has two tabs. **People** lists everyone with role, branches and status, and offers invite, edit, switch off (with a confirmation) and on, and send the invitation again. **Roles** lists the roles and offers add, edit and delete. Both forms are fed by one `GET /v1/team/options` call. A person's abilities are shown as a single list of tick boxes that starts from the role; the screen sends the difference as `extraPermissions` and `deniedPermissions`. The server's refusal sentence (for example _Missing: reports.profit_) is shown as it is.
 
 ## Branches
 

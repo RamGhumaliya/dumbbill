@@ -9,6 +9,7 @@ export * as authApi from './endpoints/auth';
 export * as businessApi from './endpoints/business';
 export * as productsApi from './endpoints/products';
 export * as inventoryApi from './endpoints/inventory';
+export * as teamApi from './endpoints/team';
 export { readCsrfToken } from './auth';
 
 /** Renews the login with the refresh cookie. Built once; shared by the API client and the session restore. */

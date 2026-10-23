@@ -6,7 +6,7 @@
  */
 
 /** Colour names usable in classes: bg-<name>, text-<name>, border-<name> ... */
-export const COLOR_NAMES = ['base', 'surface', 'side', 'hover', 'line', 'rule', 'control', 'ink', 'muted', 'accent', 'accent-hover', 'on-accent', 'tag', 'on-tag', 'success', 'on-success', 'danger', 'danger-hover', 'on-danger', 'focus', 'overlay'] as const;
+export const COLOR_NAMES = ['base', 'surface', 'side', 'hover', 'line', 'rule', 'control', 'ink', 'muted', 'accent', 'accent-hover', 'on-accent', 'tag', 'on-tag', 'success', 'on-success', 'danger', 'danger-hover', 'on-danger', 'focus', 'overlay', 'qr-ink', 'qr-paper'] as const;
 
 /** Every colour role: its design name, Tailwind name, CSS variable and purpose. Used by the design gallery. */
 export const COLOR_ROLES = [
@@ -135,6 +135,18 @@ export const COLOR_ROLES = [
     "tailwind": "overlay",
     "cssVar": "--overlay",
     "use": "Dim layer behind dialogs."
+  },
+  {
+    "role": "qr.ink",
+    "tailwind": "qr-ink",
+    "cssVar": "--qr-ink",
+    "use": "The dark squares of a QR code. The SAME in both themes: scanners need dark squares on a light ground."
+  },
+  {
+    "role": "qr.paper",
+    "tailwind": "qr-paper",
+    "cssVar": "--qr-paper",
+    "use": "The light ground and quiet border of a QR code. The SAME in both themes."
   }
 ] as const;
 

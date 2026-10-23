@@ -8,19 +8,18 @@ import { businessApi, getBrowserApiClient } from '@/lib/api';
 import { useCan } from '@/lib/auth/use-can';
 
 /**
- * Where each first step is done. A step without a screen yet (the team screens arrive later) has no link and says so,
- * rather than sending the owner to a page that does not exist.
+ * Where each first step is done.
  */
 const STEP_LINKS: Record<
   'PROFILE' | 'BRANCH' | 'PRODUCTS' | 'SUPPLIER' | 'PURCHASE' | 'TEAM',
-  string | null
+  string
 > = {
   PROFILE: '/settings/business',
   BRANCH: '/branches',
   PRODUCTS: '/products',
   SUPPLIER: '/suppliers',
   PURCHASE: '/purchases/new',
-  TEAM: null,
+  TEAM: '/team',
 };
 
 /**
@@ -87,14 +86,11 @@ export function OnboardingChecklist() {
                 </p>
                 <p className="text-small text-muted">{t(`steps.${step.key}.body`)}</p>
               </div>
-              {!step.done &&
-                (link ? (
-                  <Button asChild variant="secondary" size="sm">
-                    <Link href={link}>{t(`steps.${step.key}.action`)}</Link>
-                  </Button>
-                ) : (
-                  <Badge variant="neutral">{t('comingSoon')}</Badge>
-                ))}
+              {!step.done && (
+                <Button asChild variant="secondary" size="sm">
+                  <Link href={link}>{t(`steps.${step.key}.action`)}</Link>
+                </Button>
+              )}
             </li>
           );
         })}
